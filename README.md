@@ -14,9 +14,55 @@ descartan o se muestran atenuados, nunca como actuales.
 
 ## Requisitos
 
-- Node 20+ (probado con 24) y npm.
-- El paquete WASM ya compilado en `../Backend/engine-wasm/pkg` (`npm --prefix ../Backend run build:wasm`).
-  Se enlaza como dependencia local: `"@bj/engine-wasm": "file:../Backend/engine-wasm/pkg"`.
+- **Node 22.18 o superior** (probado con 24) y npm. Vitest exige Node 22.12+, y
+  `npm run e2e:fixtures` ejecuta TypeScript directamente con Node (22.18+).
+- **Git.**
+- **El motor compilado a WebAssembly.** `engine-wasm/pkg` no se sube a git (está en el
+  `.gitignore` del backend), así que en cada computadora nueva hay que compilarlo. Para eso se
+  necesita:
+  - [Rust](https://rustup.rs) estable con el target WASM: `rustup target add wasm32-unknown-unknown`.
+  - En Windows, un linker para el host: Visual Studio Build Tools (toolchain MSVC, la de
+    `rustup` por defecto) o el toolchain `x86_64-pc-windows-gnu` con MinGW-w64 en el `PATH`.
+    El segundo es el que se usó en la máquina original; el detalle está en el README del backend.
+  - [wasm-pack](https://rustwasm.github.io/wasm-pack/): `cargo install wasm-pack`. En Windows
+    necesita el Visual C++ Redistributable x64. La primera compilación descarga `wasm-opt`, así
+    que hace falta internet.
+- No hacen falta PostgreSQL, `sqlx-cli` ni la API: el front solo usa el motor WASM.
+
+El front enlaza el motor como dependencia local
+(`"@bj/engine-wasm": "file:../Backend/engine-wasm/pkg"`), y el script del contrato del backend
+escribe en `../Frontend`. Por eso los dos repositorios deben estar **en la misma carpeta y con
+estos nombres exactos**:
+
+```text
+Blackjack/
+├── Backend/    ← https://github.com/Yerireyes/blackjack-backend
+└── Frontend/   ← este repositorio
+```
+
+## Instalación en una computadora nueva
+
+```sh
+mkdir Blackjack && cd Blackjack
+git clone https://github.com/Yerireyes/blackjack-backend.git Backend
+git clone https://github.com/Yerireyes/blackjack-frontend.git Frontend
+
+# 1. Compilar el motor (antes del npm install del front: sin esto, la instalación falla)
+cd Backend
+npm run build:wasm
+
+# 2. Instalar y arrancar el front
+cd ../Frontend
+npm install
+npm run dev                          # http://localhost:5180
+
+# 3. Solo para los tests E2E: descargar el navegador de Playwright (una vez)
+npx playwright install chromium
+npm run e2e
+```
+
+Si el puerto 5180 está ocupado, cámbialo en `vite.config.ts` (`server.port`). Los E2E usan su
+propio servidor de vista previa, en el 4173.
 
 ## Comandos
 
