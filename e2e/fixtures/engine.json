@@ -1,0 +1,146 @@
+{
+  "rules": {
+    "decks": 1,
+    "dealerHitsSoft17": false,
+    "doubleAfterSplit": true,
+    "doubleOn": "any",
+    "maxSplitHands": 4,
+    "resplitAces": false,
+    "hitSplitAces": false,
+    "surrender": "late",
+    "dealerPeeks": true,
+    "blackjackPays": 1.5,
+    "penetration": 0.75
+  },
+  "hard16vs10": {
+    "version": 1,
+    "actions": [
+      {
+        "action": "stand",
+        "ev": -0.5429518538245026,
+        "pWin": 0.2285240730877487,
+        "pPush": 0,
+        "pLose": 0.7714759269122513,
+        "exact": true
+      },
+      {
+        "action": "hit",
+        "ev": -0.506929242578811,
+        "pWin": 0.21497283178619486,
+        "pPush": 0.06312509384879929,
+        "pLose": 0.721902074365006,
+        "exact": true
+      },
+      {
+        "action": "double",
+        "ev": -1.013858485157622,
+        "pWin": 0.21497283178619486,
+        "pPush": 0.06312509384879929,
+        "pLose": 0.721902074365006,
+        "exact": true
+      },
+      {
+        "action": "surrender",
+        "ev": -0.5,
+        "pWin": 0,
+        "pPush": 0,
+        "pLose": 1,
+        "exact": true
+      }
+    ],
+    "best": "surrender",
+    "pBustOnHit": 0.5907407407407408,
+    "dealer": {
+      "p17": 0.1297674763878896,
+      "p18": 0.12610160604918547,
+      "p19": 0.12806162145662608,
+      "p20": 0.3484273093770473,
+      "p21": 0.03911791364150291,
+      "pBlackjack": 0,
+      "pBust": 0.2285240730877487
+    },
+    "computeMs": 1
+  },
+  "split1": {
+    "version": 1,
+    "actions": [
+      {
+        "action": "stand",
+        "ev": -0.1598668403082737,
+        "pWin": 0.42006657984586315,
+        "pPush": 0,
+        "pLose": 0.5799334201541368,
+        "exact": true
+      },
+      {
+        "action": "hit",
+        "ev": 0.34808703477278224,
+        "pWin": 0.6409681440260729,
+        "pPush": 0.06615074672063642,
+        "pLose": 0.2928811092532907,
+        "exact": true
+      },
+      {
+        "action": "double",
+        "ev": 0.6961740695455645,
+        "pWin": 0.6409681440260729,
+        "pPush": 0.06615074672063642,
+        "pLose": 0.2928811092532907,
+        "exact": true
+      }
+    ],
+    "best": "double",
+    "pBustOnHit": 0,
+    "dealer": {
+      "p17": 0.17219896432834497,
+      "p18": 0.10696649775366199,
+      "p19": 0.09680854334769246,
+      "p20": 0.10408651201444317,
+      "p21": 0.09987290270999422,
+      "pBlackjack": 0,
+      "pBust": 0.42006657984586315
+    },
+    "computeMs": 5
+  },
+  "split2": {
+    "version": 1,
+    "actions": [
+      {
+        "action": "stand",
+        "ev": -0.1413382699517678,
+        "pWin": 0.4293308650241161,
+        "pPush": 0,
+        "pLose": 0.5706691349758839,
+        "exact": true
+      },
+      {
+        "action": "hit",
+        "ev": 0.3209874152362096,
+        "pWin": 0.6242718638056326,
+        "pPush": 0.07244368762494455,
+        "pLose": 0.3032844485694229,
+        "exact": true
+      },
+      {
+        "action": "double",
+        "ev": 0.6419748304724192,
+        "pWin": 0.6242718638056326,
+        "pPush": 0.07244368762494455,
+        "pLose": 0.3032844485694229,
+        "exact": true
+      }
+    ],
+    "best": "double",
+    "pBustOnHit": 0,
+    "dealer": {
+      "p17": 0.17132865694841928,
+      "p18": 0.09409595594227477,
+      "p19": 0.0973732709657855,
+      "p20": 0.106130926117845,
+      "p21": 0.10174032500155922,
+      "pBlackjack": 0,
+      "pBust": 0.4293308650241161
+    },
+    "computeMs": 5
+  }
+}

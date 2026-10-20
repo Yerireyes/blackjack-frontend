@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Cinzel:wght@600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+      body {
+        width: 1440px;
+        height: 900px;
+        overflow: hidden;
+        background: #0a1f16;
+        color: #efe6d0;
+        font:
+          14px Geist,
+          sans-serif;
+        font-variant-numeric: tabular-nums;
+      }
+      .top {
+        height: 52px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 0 24px;
+        background: #071610;
+        border-bottom: 1px solid #1d3a2c;
+      }
+      .top b {
+        font-weight: 600;
+      }
+      .top span {
+        color: #9fb7a8;
+        font-size: 13px;
+      }
+      main {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        height: 848px;
+      }
+      .felt {
+        background: radial-gradient(130% 100% at 50% 0%, #0f6a43, #0b4d32 55%, #083a26);
+        position: relative;
+        overflow: hidden;
+      }
+      .arc {
+        position: absolute;
+        left: 50%;
+        top: -560px;
+        transform: translateX(-50%);
+        width: 1300px;
+        height: 1300px;
+        border-radius: 50%;
+        border: 2px solid #d4af37;
+      }
+      .arc2 {
+        position: absolute;
+        left: 50%;
+        top: -500px;
+        transform: translateX(-50%);
+        width: 1180px;
+        height: 1180px;
+        border-radius: 50%;
+        border: 1px solid rgba(212, 175, 55, 0.5);
+      }
+      .print {
+        position: absolute;
+        top: 650px;
+        width: 100%;
+        text-align: center;
+        font:
+          600 18px Cinzel,
+          serif;
+        letter-spacing: 0.24em;
+        color: #d4af37;
+      }
+      .print2 {
+        position: absolute;
+        top: 690px;
+        width: 100%;
+        text-align: center;
+        font:
+          600 13px Cinzel,
+          serif;
+        letter-spacing: 0.3em;
+        color: rgba(212, 175, 55, 0.75);
+      }
+      .dealer {
+        position: absolute;
+        top: 70px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+      }
+      .card {
+        width: 92px;
+        height: 130px;
+        border-radius: 8px;
+        background: #f6f0e2;
+        color: #151515;
+        font: 600 26px Geist;
+        padding: 8px;
+        margin: 0 -10px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      }
+      .red {
+        color: #b3261e;
+      }
+      .back {
+        background: #7a1a1a;
+        border: 5px solid #f6f0e2;
+      }
+      .spot {
+        position: absolute;
+        bottom: 250px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 170px;
+        height: 170px;
+        border: 2px solid #d4af37;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+      }
+      .hand {
+        position: absolute;
+        bottom: 300px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+      }
+      .chip {
+        position: absolute;
+        bottom: 200px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: #b3261e;
+        border: 6px dashed #f6f0e2;
+      }
+      aside {
+        background: #0a1f16;
+        border-left: 1px solid #1d3a2c;
+        padding: 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      h2 {
+        font:
+          600 12px Cinzel,
+          serif;
+        letter-spacing: 0.2em;
+        color: #d4af37;
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        padding: 14px;
+        border-radius: 10px;
+        background: #0f2a1e;
+        font-size: 15px;
+      }
+      .row.rec {
+        outline: 2px solid #d4af37;
+      }
+      .ev {
+        font-weight: 600;
+      }
+      .neg {
+        color: #ef9a9a;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top">
+      <b>Blackjack Guide</b><span>Jugador · Simulación</span><span>Las Vegas · 6 mazos</span>
+    </div>
+    <main>
+      <section class="felt">
+        <div class="arc"></div>
+        <div class="arc2"></div>
+        <div class="print">BLACKJACK PAGA 3 A 2</div>
+        <div class="print2">EL DEALER SE PLANTA CON TODOS LOS 17 · DOBLA DESPUÉS DE DIVIDIR</div>
+        <div class="dealer">
+          <div class="card">10</div>
+          <div class="card back"></div>
+        </div>
+        <div class="spot"></div>
+        <div class="hand">
+          <div class="card red">9♥</div>
+          <div class="card">7♣</div>
+        </div>
+        <div class="chip"></div>
+      </section>
+      <aside>
+        <h2>ANÁLISIS</h2>
+        <div class="row rec">
+          <span>Rendirse · Recomendada</span><span class="ev">−50,00 %</span>
+        </div>
+        <div class="row"><span>Pedir</span><span class="ev neg">−53,47 %</span></div>
+        <div class="row"><span>Plantarse</span><span class="ev neg">−54,10 %</span></div>
+        <div class="row"><span>Doblar</span><span class="ev neg">−106,94 %</span></div>
+        <h2>DEALER</h2>
+        <div class="row"><span>Se pasa</span><span class="ev">21,17 %</span></div>
+      </aside>
+    </main>
+  </body>
+</html>

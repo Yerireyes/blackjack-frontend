@@ -1,0 +1,10 @@
+node_modules
+dist
+*.local
+.env
+playwright-report
+test-results
+blob-report
+.vite
+*.tsbuildinfo
+.vite-dev.log

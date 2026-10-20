@@ -1,0 +1,135 @@
+{
+  "title": "Elige el mundo visual de Blackjack Guide",
+  "question": "La tirada asignó «Pip & Index». Quédatela, toma una alternativa o vuelve a tirar.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Pip & Index",
+      "kicker": "THE ROLL",
+      "lineage": "La baraja impresa: dos tintas sobre cartulina marfil, índices de esquina",
+      "thesis": "La mesa habla el idioma de la baraja: la jugada recomendada es la única carta boca arriba.",
+      "palette": ["#0f3b2a", "#14181c", "#f2ead9", "#c8102e", "#d9a441"],
+      "materials": ["cartulina marfil", "tinta roja y negra", "fieltro verde profundo"],
+      "viewport": "Barra superior con modo, reglas y zapato; mesa de fieltro al centro con cartas de dos tintas; panel derecho en tinta de dorso donde la acción de mayor EV se voltea a marfil con su índice de tecla (H, S, D, P, R).",
+      "risk": "Si la cartulina marfil se usa en más de un lugar por panel, pierde su poder de señal.",
+      "raised": [
+        {
+          "from": "challenger-saville",
+          "raise": "Solo la acción recomendada se imprime a todo color; las demás quedan en la tinta del dorso."
+        },
+        {
+          "from": "challenger-airport",
+          "raise": "Cada decisión muestra solo las acciones legales, la recomendada como una franja decisiva con su tecla."
+        },
+        {
+          "from": "challenger-atlas",
+          "raise": "Todas las probabilidades comparten una escala fija de 0 a 100 % entre paneles."
+        }
+      ],
+      "html": ".impeccable/mocks/decision/assigned.html"
+    },
+    {
+      "id": "model-pick",
+      "label": "Layout Felt",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "El paño impreso del casino: arcos en tinta dorada con las reglas de la mesa",
+      "thesis": "Las reglas activas se imprimen en vivo sobre el arco del paño, y los números viven en círculos de apuesta.",
+      "palette": ["#0b4d32", "#0a1f16", "#d4af37", "#efe6d0", "#b3261e"],
+      "materials": ["paño de fieltro", "serigrafía dorada", "fichas"],
+      "viewport": "Mesa a pantalla casi completa con el arco «BLACKJACK PAGA 3 A 2 · EL DEALER SE PLANTA CON 17» generado de las reglas; panel de análisis como bandeja oscura a la derecha.",
+      "risk": "Es también la dirección a la que llegan casi todas las apps de blackjack: verde y dorado de casino.",
+      "html": ".impeccable/mocks/decision/model-pick.html"
+    },
+    {
+      "id": "challenger-splitflap",
+      "label": "Split-flap",
+      "verdict": "competitive",
+      "lineage": "Tablero de salidas de estación con paletas que caen",
+      "thesis": "Cada recálculo del motor cae como una cascada de paletas: ves cambiar el EV cifra por cifra.",
+      "palette": ["#0d0d0d", "#f4f1ea", "#f0a020", "#9b1c1c", "#0f3b2a"],
+      "materials": ["paletas negras mate", "pintura blanca", "lámparas ámbar"],
+      "viewport": "Panel de acciones como filas de un tablero de salidas; la lámpara ámbar de fila marca «calculando».",
+      "case": "Se fusiona bien: el recálculo del motor es exactamente una actualización de tablero; pierde en identificación con el jugador.",
+      "risk": "La animación por carácter puede frenar la lectura rápida en una mesa real.",
+      "html": ".impeccable/mocks/decision/challenger-splitflap.html",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-split-flap-concourse-hero.webp"
+    },
+    {
+      "id": "challenger-saville",
+      "label": "Catálogo Factory",
+      "verdict": "declined",
+      "lineage": "Identidad de catálogo con números FAC y franjas de color codificadas",
+      "thesis": "Todo es una entrada de catálogo; solo lo activo se decodifica a color.",
+      "palette": ["#0b0b0b", "#ffffff", "#e63946", "#2a9d8f"],
+      "materials": ["negro mate", "líneas blancas finas"],
+      "viewport": "Una sola gráfica de pulso dominando el campo negro.",
+      "case": "Pierde en ambos ejes: los jugadores no se reconocen en un catálogo codificado.",
+      "risk": "Etiquetas codificadas que nadie puede leer en la mesa.",
+      "kept": "Solo el elemento activo se decodifica a todo color."
+    },
+    {
+      "id": "challenger-airport",
+      "label": "Señalética de aeropuerto",
+      "verdict": "declined",
+      "lineage": "Bandas amarillas de señalización con flechas y números de puerta",
+      "thesis": "Cada cruce muestra solo las opciones que tienes delante.",
+      "palette": ["#ffd400", "#111111", "#ffffff"],
+      "materials": ["paneles amarillos", "pictogramas"],
+      "viewport": "Una banda colgante con la siguiente decisión en tamaño monumental.",
+      "case": "Pierde en identificación; el amarillo compite con el rojo y verde del EV.",
+      "risk": "El amarillo de señal choca con el fieltro.",
+      "kept": "Una sola franja decisiva por decisión, solo con lo legal."
+    },
+    {
+      "id": "challenger-atlas",
+      "label": "Atlas estelar",
+      "verdict": "declined",
+      "lineage": "Cartas celestes con magnitudes como tamaños de punto",
+      "thesis": "La importancia se lee por el tamaño, en una rampa fija.",
+      "palette": ["#0b1530", "#f2f2f2", "#d94b3d"],
+      "materials": ["papel azul noche", "tinta tiza"],
+      "viewport": "Una lámina estelar con índice de objetos.",
+      "case": "Pierde en ambos ejes: metáfora lejana del juego.",
+      "risk": "Decorativo en una pantalla de trabajo.",
+      "kept": "Escala fija compartida para que las magnitudes se comparen sin leer."
+    },
+    {
+      "id": "challenger-japan",
+      "label": "Web japonesa densa",
+      "verdict": "declined",
+      "lineage": "Mosaicos de módulos con filetes finos y pestañas rojas",
+      "thesis": "Más información por pantalla sin inflar el espacio.",
+      "palette": ["#ffffff", "#111111", "#d7000f", "#cccccc"],
+      "materials": ["filetes finos", "pestañas"],
+      "viewport": "Mosaico denso de módulos.",
+      "case": "Gana algo de claridad en densidad, pierde identificación y contradice el tema oscuro.",
+      "risk": "Fondo blanco contra el brief oscuro.",
+      "kept": "Disciplina de filete fino en la grilla de conteos del zapato."
+    },
+    {
+      "id": "challenger-folio",
+      "label": "Folio botánico",
+      "verdict": "declined",
+      "lineage": "Láminas de una planta por estaciones a la misma escala",
+      "thesis": "Comparar estados a escala idéntica.",
+      "palette": ["#f3ead6", "#3f6b3a", "#9e1b1b"],
+      "materials": ["lámina crema", "filetes sepia"],
+      "viewport": "Cinco láminas alineadas.",
+      "case": "Pierde en ambos ejes.",
+      "risk": "Crema editorial, lejos de la mesa.",
+      "kept": "Mismas escalas entre vistas para comparar sin recalibrar."
+    }
+  ],
+  "reroll": { "registers": ["safer", "bolder"] },
+  "canon": true,
+  "canonCard": {
+    "label": "El estándar de la categoría",
+    "thesis": "Un tablero oscuro limpio: paneles pizarra, acento azul, mesa verde.",
+    "palette": ["#0f172a", "#1e293b", "#3b82f6", "#166534"],
+    "materials": ["paneles pizarra", "tarjetas redondeadas"],
+    "viewport": "Barra superior, mesa al centro, tarjetas de análisis apiladas a la derecha.",
+    "risk": "Indistinguible de cualquier panel de análisis por diseño.",
+    "html": ".impeccable/mocks/decision/canon.html"
+  },
+  "steer": true
+}

@@ -1,0 +1,241 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/bodoni-moda/opsz.css';
+
+/*
+ * Pip & Index: la mesa habla el idioma de la baraja impresa.
+ * Fieltro solo en la mesa; paneles en tinta de dorso; la cartulina marfil queda
+ * reservada para las cartas reales y para la única acción recomendada.
+ */
+@theme {
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-index: 'Bodoni Moda Variable', 'Bodoni 72', Didot, serif;
+
+  --color-felt-950: #08231a;
+  --color-felt-900: #0b2c20;
+  --color-felt-800: #0f3b2a;
+  --color-felt-700: #14533b;
+  --color-felt-line: #2a6a50;
+  --color-felt-ink: #b4cfc1;
+
+  --color-ink-950: #0e1114;
+  --color-ink-900: #14181c;
+  --color-ink-850: #191e23;
+  --color-ink-800: #20262c;
+  --color-ink-700: #2c333b;
+  --color-ink-600: #3a424b;
+
+  --color-text: #e9e4d8;
+  --color-mute: #a0a8b0;
+  --color-faint: #78818a;
+
+  --color-paper: #f2ead9;
+  --color-paper-edge: #d6cab0;
+  --color-paper-ink: #16191c;
+  --color-paper-mute: #5d5648;
+
+  --color-pip: #c8102e;
+  --color-cut: #e0263f;
+  --color-pos: #86dcab;
+  --color-neg: #f39494;
+  --color-push: #a0a8b0;
+  --color-warn: #e8b45a;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    font-variant-numeric: tabular-nums;
+  }
+  html,
+  body,
+  #root {
+    min-height: 100dvh;
+  }
+  body {
+    background: var(--color-ink-900);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  ::selection {
+    background: var(--color-paper);
+    color: var(--color-paper-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-paper);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-ink-600) transparent;
+  }
+  button {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+@layer components {
+  /* Botón de la casa: tinta de dorso, filete fino, respuesta al presionar. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+    padding: 0 0.875rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-ink-700);
+    background: var(--color-ink-950);
+    color: var(--color-text);
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition:
+      transform 140ms var(--ease-out),
+      background-color 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease;
+    user-select: none;
+  }
+  .btn:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  .btn:disabled {
+    opacity: 0.4;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .btn:hover:not(:disabled) {
+      border-color: var(--color-ink-600);
+      background: var(--color-ink-850);
+    }
+  }
+  .btn-paper {
+    background: var(--color-paper);
+    border-color: var(--color-paper);
+    color: var(--color-paper-ink);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-paper:hover:not(:disabled) {
+      background: #fff7e6;
+      border-color: #fff7e6;
+    }
+  }
+  .select {
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-ink-700);
+    background: var(--color-ink-950);
+    color: var(--color-text);
+    padding: 0 0.625rem;
+    font-size: 0.875rem;
+  }
+  .select:disabled {
+    opacity: 0.45;
+  }
+  .kbd {
+    font: 600 0.6875rem/1 var(--font-sans);
+    padding: 0.2rem 0.35rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--color-ink-600);
+    color: var(--color-mute);
+  }
+  .btn-paper .kbd {
+    border-color: var(--color-paper-edge);
+    color: var(--color-paper-mute);
+  }
+  .section-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-mute);
+  }
+  .felt {
+    background:
+      radial-gradient(120% 90% at 50% 25%, var(--color-felt-700), transparent 70%),
+      var(--color-felt-800);
+  }
+  .card-md,
+  .card-sm {
+    aspect-ratio: 5 / 7;
+    width: var(--card-w);
+    font-size: var(--card-index);
+  }
+  .card-md {
+    --card-w: 3.75rem;
+    --card-r: 0.4rem;
+    --card-index: 0.95rem;
+    --card-pip: 1.75rem;
+    --card-court: 1.9rem;
+  }
+  .card-sm {
+    --card-w: 2.6rem;
+    --card-r: 0.3rem;
+    --card-index: 0.7rem;
+    --card-pip: 1.15rem;
+    --card-court: 1.25rem;
+  }
+  @media (min-width: 640px) {
+    .card-md {
+      --card-w: 5.25rem;
+      --card-r: 0.5rem;
+      --card-index: 1.2rem;
+      --card-pip: 2.5rem;
+      --card-court: 2.6rem;
+    }
+    .card-sm {
+      --card-w: 3.25rem;
+      --card-index: 0.85rem;
+      --card-pip: 1.4rem;
+      --card-court: 1.55rem;
+    }
+  }
+  @media (min-width: 1280px) {
+    .card-md {
+      --card-w: 6rem;
+      --card-r: 0.6rem;
+      --card-index: 1.35rem;
+      --card-pip: 2.9rem;
+      --card-court: 3rem;
+    }
+  }
+  .dialog[open] {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition:
+      opacity 200ms var(--ease-out),
+      transform 200ms var(--ease-out);
+    @starting-style {
+      opacity: 0;
+      transform: translateY(8px) scale(0.98);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .dialog[open] {
+      transform: none;
+      @starting-style {
+        transform: none;
+      }
+    }
+  }
+  /* Dorso de carta: el rombo clásico en dos rojos, como una baraja de casino. */
+  .card-back {
+    background-color: #7d1020;
+    background-image:
+      linear-gradient(45deg, #921728 25%, transparent 25%, transparent 75%, #921728 75%),
+      linear-gradient(45deg, #921728 25%, transparent 25%, transparent 75%, #921728 75%);
+    background-size: 10px 10px;
+    background-position:
+      0 0,
+      5px 5px;
+  }
+}

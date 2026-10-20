@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Geist:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+      body {
+        width: 1440px;
+        height: 900px;
+        overflow: hidden;
+        background: #1a1a1a;
+        color: #f4f1ea;
+        font:
+          14px Geist,
+          sans-serif;
+      }
+      .top {
+        height: 52px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 0 24px;
+        background: #0d0d0d;
+        border-bottom: 1px solid #2b2b2b;
+      }
+      main {
+        display: grid;
+        grid-template-columns: 1fr 520px;
+        height: 848px;
+      }
+      .felt {
+        background: #0f3b2a;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 120px;
+      }
+      .cards {
+        display: flex;
+        gap: 8px;
+      }
+      .card {
+        width: 88px;
+        height: 124px;
+        background: #f4f1ea;
+        color: #111;
+        border-radius: 8px;
+        font: 600 26px Geist;
+        padding: 8px;
+      }
+      aside {
+        background: #0d0d0d;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .hd {
+        display: grid;
+        grid-template-columns: 24px 1fr 150px 110px;
+        color: #8a8a8a;
+        font: 600 13px 'Barlow Condensed';
+        letter-spacing: 0.12em;
+        padding: 0 8px 8px;
+      }
+      .r {
+        display: grid;
+        grid-template-columns: 24px 1fr 150px 110px;
+        align-items: center;
+        background: #161616;
+        padding: 8px;
+        border-radius: 4px;
+      }
+      .lamp {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #333;
+      }
+      .lamp.on {
+        background: #f0a020;
+        box-shadow: 0 0 8px #f0a020;
+      }
+      .f {
+        display: flex;
+        gap: 3px;
+      }
+      .f span {
+        width: 26px;
+        height: 38px;
+        background: #0d0d0d;
+        border-radius: 3px;
+        display: grid;
+        place-items: center;
+        font: 600 26px 'Barlow Condensed';
+        position: relative;
+      }
+      .f span:after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 50%;
+        height: 1px;
+        background: #000;
+      }
+      .name {
+        font: 600 24px 'Barlow Condensed';
+        letter-spacing: 0.06em;
+      }
+      .best {
+        color: #f0a020;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top">
+      <b>Blackjack Guide</b><span style="color: #8a8a8a">Jugador · Simulación · Las Vegas</span>
+    </div>
+    <main>
+      <section class="felt">
+        <div class="cards">
+          <div class="card">10</div>
+          <div class="card" style="background: #7a1a1a"></div>
+        </div>
+        <div class="cards">
+          <div class="card" style="color: #9b1c1c">9♥</div>
+          <div class="card">7♣</div>
+        </div>
+      </section>
+      <aside>
+        <div class="hd"><span></span><span>ACCIÓN</span><span>EV</span><span>GANAR</span></div>
+        <div class="r">
+          <span class="lamp"></span><span class="name best">RENDIRSE ◀</span
+          ><span class="f"
+            ><span>−</span><span>5</span><span>0</span><span>,</span><span>0</span></span
+          ><span class="f"><span>0</span><span>,</span><span>0</span></span>
+        </div>
+        <div class="r">
+          <span class="lamp on"></span><span class="name">PEDIR</span
+          ><span class="f"
+            ><span>−</span><span>5</span><span>3</span><span>,</span><span>5</span></span
+          ><span class="f"><span>3</span><span>0</span><span>,</span></span>
+        </div>
+        <div class="r">
+          <span class="lamp"></span><span class="name">PLANTARSE</span
+          ><span class="f"
+            ><span>−</span><span>5</span><span>4</span><span>,</span><span>1</span></span
+          ><span class="f"><span>2</span><span>3</span><span>,</span></span>
+        </div>
+        <div class="r">
+          <span class="lamp"></span><span class="name">DOBLAR</span
+          ><span class="f"
+            ><span>−</span><span>1</span><span>0</span><span>6</span><span>,</span></span
+          ><span class="f"><span>2</span><span>8</span><span>,</span></span>
+        </div>
+      </aside>
+    </main>
+  </body>
+</html>

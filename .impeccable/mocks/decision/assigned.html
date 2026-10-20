@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Bodoni+Moda:opsz,wght@6..96,600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+      body {
+        width: 1440px;
+        height: 900px;
+        overflow: hidden;
+        background: #14181c;
+        color: #e7e2d6;
+        font:
+          14px/1.4 Geist,
+          sans-serif;
+        font-variant-numeric: tabular-nums;
+      }
+      .top {
+        height: 56px;
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        padding: 0 24px;
+        border-bottom: 1px solid #262c33;
+        background: #101317;
+      }
+      .brand {
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        font-size: 15px;
+      }
+      .seg {
+        display: flex;
+        border: 1px solid #2c333b;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .seg span {
+        padding: 6px 12px;
+        color: #9aa3ab;
+      }
+      .seg .on {
+        background: #f2ead9;
+        color: #14181c;
+        font-weight: 600;
+      }
+      .rules {
+        color: #9aa3ab;
+        font-size: 13px;
+      }
+      .spacer {
+        flex: 1;
+      }
+      .shoe {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        color: #9aa3ab;
+      }
+      .gauge {
+        width: 140px;
+        height: 8px;
+        border-radius: 4px;
+        background: #262c33;
+        position: relative;
+      }
+      .gauge i {
+        position: absolute;
+        inset: 0 38% 0 0;
+        background: #9aa3ab;
+        border-radius: 4px;
+      }
+      .gauge b {
+        position: absolute;
+        left: 75%;
+        top: -4px;
+        width: 3px;
+        height: 16px;
+        background: #c8102e;
+        border-radius: 1px;
+      }
+      main {
+        display: grid;
+        grid-template-columns: 1fr 440px;
+        height: 844px;
+      }
+      .felt {
+        background: radial-gradient(120% 90% at 50% 30%, #14533b, #0f3b2a 60%, #0b2c20);
+        position: relative;
+        padding: 40px;
+      }
+      .label {
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #a8c4b5;
+      }
+      .dealer {
+        position: absolute;
+        top: 56px;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+      }
+      .player {
+        position: absolute;
+        bottom: 120px;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+      }
+      .cards {
+        display: flex;
+        gap: -20px;
+        justify-content: center;
+        margin: 12px 0;
+      }
+      .card {
+        width: 96px;
+        height: 136px;
+        border-radius: 9px;
+        background: #f2ead9;
+        box-shadow:
+          0 2px 0 #d8cdb4,
+          0 10px 24px rgba(0, 0, 0, 0.35);
+        position: relative;
+        margin: 0 -14px;
+        color: #16191c;
+      }
+      .card.red {
+        color: #c8102e;
+      }
+      .card .i {
+        position: absolute;
+        top: 8px;
+        left: 9px;
+        font:
+          600 22px/1 'Bodoni Moda',
+          serif;
+        text-align: center;
+      }
+      .card .i small {
+        display: block;
+        font-size: 16px;
+      }
+      .card .pip {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        font-size: 44px;
+      }
+      .back {
+        background: repeating-linear-gradient(45deg, #7d1020 0 6px, #8f1426 6px 12px);
+        border: 6px solid #f2ead9;
+      }
+      .total {
+        display: inline-block;
+        margin-top: 6px;
+        padding: 4px 12px;
+        border-radius: 999px;
+        background: rgba(10, 30, 22, 0.6);
+        font-weight: 600;
+        font-size: 15px;
+      }
+      .actions {
+        position: absolute;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 10px;
+      }
+      .btn {
+        padding: 10px 16px;
+        border-radius: 8px;
+        background: #101317;
+        border: 1px solid #2c333b;
+        color: #e7e2d6;
+        font-weight: 500;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .btn kbd {
+        font: 600 12px Geist;
+        color: #9aa3ab;
+        border: 1px solid #3a424b;
+        border-radius: 4px;
+        padding: 0 5px;
+      }
+      .btn.rec {
+        background: #f2ead9;
+        color: #14181c;
+        border-color: #f2ead9;
+      }
+      .btn.rec kbd {
+        color: #14181c;
+        border-color: #b8ad95;
+      }
+      aside {
+        background: #14181c;
+        border-left: 1px solid #262c33;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+      }
+      h2 {
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #9aa3ab;
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 30px 1fr 92px;
+        align-items: center;
+        padding: 12px 12px;
+        border-radius: 10px;
+        border: 1px solid #232a31;
+        margin-top: 8px;
+        gap: 10px;
+      }
+      .row .k {
+        font:
+          600 18px/1 'Bodoni Moda',
+          serif;
+        color: #9aa3ab;
+      }
+      .row .n {
+        font-weight: 500;
+      }
+      .row .ev {
+        text-align: right;
+        font-size: 18px;
+        font-weight: 600;
+      }
+      .neg {
+        color: #f08a8a;
+      }
+      .pos {
+        color: #7fd6a4;
+      }
+      .bar {
+        grid-column: 2/4;
+        height: 6px;
+        border-radius: 3px;
+        background: #232a31;
+        display: flex;
+        overflow: hidden;
+      }
+      .bar i:nth-child(1) {
+        background: #7fd6a4;
+      }
+      .bar i:nth-child(2) {
+        background: #9aa3ab;
+      }
+      .bar i:nth-child(3) {
+        background: #f08a8a;
+      }
+      .meta {
+        grid-column: 2/4;
+        font-size: 12px;
+        color: #9aa3ab;
+        display: flex;
+        gap: 14px;
+      }
+      .row.rec {
+        background: #f2ead9;
+        color: #14181c;
+        border-color: #f2ead9;
+      }
+      .row.rec .k {
+        color: #c8102e;
+      }
+      .row.rec .meta {
+        color: #5d5648;
+      }
+      .row.rec .ev {
+        color: #14181c;
+      }
+      .tag {
+        font-size: 11px;
+        font-weight: 600;
+        background: #14181c;
+        color: #f2ead9;
+        padding: 2px 8px;
+        border-radius: 999px;
+        margin-left: 8px;
+      }
+      .meter {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+      }
+      .meter b {
+        font-size: 28px;
+        font-weight: 600;
+      }
+      .dist {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 6px;
+        align-items: end;
+        height: 90px;
+        margin-top: 10px;
+      }
+      .dist div {
+        background: #2c333b;
+        border-radius: 3px 3px 0 0;
+        position: relative;
+      }
+      .dist div.b {
+        background: #c8102e;
+      }
+      .dl {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 6px;
+        font-size: 11px;
+        color: #9aa3ab;
+        text-align: center;
+        margin-top: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top">
+      <span class="brand">Blackjack Guide</span>
+      <div class="seg"><span class="on">Jugador</span><span>Dealer</span></div>
+      <div class="seg"><span class="on">Simulación</span><span>Manual</span></div>
+      <span class="rules">Las Vegas · 6 mazos · S17 · DAS · 3:2</span><span class="spacer"></span>
+      <div class="shoe">
+        218 cartas · 4,2 mazos <span class="gauge"><i></i><b></b></span> Rebarajar
+      </div>
+    </div>
+    <main>
+      <section class="felt">
+        <div class="dealer">
+          <div class="label">Dealer</div>
+          <div class="cards">
+            <div class="card">
+              <span class="i">10<small>♠</small></span
+              ><span class="pip">♠</span>
+            </div>
+            <div class="card back"></div>
+          </div>
+          <span class="total">10</span>
+        </div>
+        <div class="player">
+          <div class="label">Tu mano</div>
+          <div class="cards">
+            <div class="card red">
+              <span class="i">9<small>♥</small></span
+              ><span class="pip">♥</span>
+            </div>
+            <div class="card">
+              <span class="i">7<small>♣</small></span
+              ><span class="pip">♣</span>
+            </div>
+          </div>
+          <span class="total">16</span>
+        </div>
+        <div class="actions">
+          <span class="btn">Pedir <kbd>H</kbd></span
+          ><span class="btn">Plantarse <kbd>S</kbd></span
+          ><span class="btn">Doblar <kbd>D</kbd></span
+          ><span class="btn rec">Rendirse <kbd>R</kbd></span>
+        </div>
+      </section>
+      <aside>
+        <div>
+          <h2>Acciones <span>calculado en 2 ms</span></h2>
+          <div class="row rec">
+            <span class="k">R</span
+            ><span class="n">Rendirse <span class="tag">Recomendada</span></span
+            ><span class="ev">−50,00 %</span>
+            <div class="meta"><span>Ganar 0,00 %</span><span>Perder 100,00 %</span></div>
+          </div>
+          <div class="row">
+            <span class="k">H</span><span class="n">Pedir</span><span class="ev neg">−53,47 %</span>
+            <div class="bar">
+              <i style="width: 30.1%"></i><i style="width: 3.9%"></i><i style="width: 66%"></i>
+            </div>
+            <div class="meta">
+              <span>Ganar 30,12 %</span><span>Empate 3,91 %</span><span>Perder 65,97 %</span>
+            </div>
+          </div>
+          <div class="row">
+            <span class="k">S</span><span class="n">Plantarse</span
+            ><span class="ev neg">−54,10 %</span>
+            <div class="bar">
+              <i style="width: 23%"></i><i style="width: 0%"></i><i style="width: 77%"></i>
+            </div>
+            <div class="meta"><span>Ganar 22,95 %</span><span>Perder 77,05 %</span></div>
+          </div>
+          <div class="row">
+            <span class="k">D</span><span class="n">Doblar</span
+            ><span class="ev neg">−106,94 %</span>
+            <div class="bar">
+              <i style="width: 28%"></i><i style="width: 3%"></i><i style="width: 69%"></i>
+            </div>
+            <div class="meta"><span>Ganar 28,07 %</span><span>Perder 69,01 %</span></div>
+          </div>
+        </div>
+        <div>
+          <h2>Riesgo al pedir</h2>
+          <div class="meter">
+            <b>61,54 %</b><span style="color: #9aa3ab">de pasarte con una carta más</span>
+          </div>
+        </div>
+        <div>
+          <h2>Dealer con 10 visible</h2>
+          <div class="dist">
+            <div style="height: 30%"></div>
+            <div style="height: 30%"></div>
+            <div style="height: 30%"></div>
+            <div style="height: 90%"></div>
+            <div style="height: 10%"></div>
+            <div style="height: 2%"></div>
+            <div class="b" style="height: 60%"></div>
+          </div>
+          <div class="dl">
+            <span>17</span><span>18</span><span>19</span><span>20</span><span>21</span
+            ><span>BJ</span><span>Pasa</span>
+          </div>
+        </div>
+      </aside>
+    </main>
+  </body>
+</html>

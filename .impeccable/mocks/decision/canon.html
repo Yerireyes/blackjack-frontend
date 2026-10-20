@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+      body {
+        width: 1440px;
+        height: 900px;
+        overflow: hidden;
+        background: #0f172a;
+        color: #e2e8f0;
+        font:
+          14px Inter,
+          sans-serif;
+      }
+      .top {
+        height: 56px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 0 24px;
+        background: #0b1220;
+        border-bottom: 1px solid #1e293b;
+      }
+      .pill {
+        padding: 6px 12px;
+        border-radius: 8px;
+        background: #1e293b;
+      }
+      .pill.on {
+        background: #3b82f6;
+        color: #fff;
+      }
+      main {
+        display: grid;
+        grid-template-columns: 1fr 420px;
+        height: 844px;
+      }
+      .felt {
+        background: #166534;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 140px;
+        border-radius: 0 0 0 0;
+      }
+      .cards {
+        display: flex;
+        gap: 8px;
+      }
+      .card {
+        width: 88px;
+        height: 124px;
+        background: #fff;
+        color: #111;
+        border-radius: 8px;
+        font: 600 26px Inter;
+        padding: 8px;
+      }
+      aside {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .c {
+        background: #1e293b;
+        border-radius: 12px;
+        padding: 16px;
+      }
+      .c h3 {
+        font-size: 13px;
+        color: #94a3b8;
+        margin-bottom: 10px;
+      }
+      .r {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #334155;
+      }
+      .best {
+        color: #3b82f6;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top">
+      <b>Blackjack Guide</b><span class="pill on">Jugador</span><span class="pill">Dealer</span
+      ><span class="pill">Reglas</span>
+    </div>
+    <main>
+      <section class="felt">
+        <div class="cards">
+          <div class="card">10</div>
+          <div class="card" style="background: #1e3a8a"></div>
+        </div>
+        <div class="cards">
+          <div class="card" style="color: #dc2626">9♥</div>
+          <div class="card">7♣</div>
+        </div>
+      </section>
+      <aside>
+        <div class="c">
+          <h3>Acciones</h3>
+          <div class="r best"><span>Rendirse</span><span>−50,00 %</span></div>
+          <div class="r"><span>Pedir</span><span>−53,47 %</span></div>
+          <div class="r"><span>Plantarse</span><span>−54,10 %</span></div>
+          <div class="r"><span>Doblar</span><span>−106,94 %</span></div>
+        </div>
+        <div class="c">
+          <h3>Riesgo al pedir</h3>
+          <b style="font-size: 24px">61,54 %</b>
+        </div>
+        <div class="c">
+          <h3>Dealer</h3>
+          <div class="r"><span>Se pasa</span><span>21,17 %</span></div>
+        </div>
+      </aside>
+    </main>
+  </body>
+</html>

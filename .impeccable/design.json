@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-14T00:00:00Z",
+  "title": "Design System: Blackjack Guide",
+  "extensions": {
+    "colorMeta": {
+      "paper": { "role": "primary", "displayName": "Ivory Card Stock", "canonical": "#f2ead9", "tonalRamp": ["oklch(25% 0.02 85)", "oklch(36% 0.025 85)", "oklch(47% 0.03 85)", "oklch(58% 0.03 85)", "oklch(70% 0.03 85)", "oklch(83% 0.03 85)", "oklch(94% 0.025 85)", "oklch(98% 0.02 85)"] },
+      "paper-bright": { "role": "primary", "displayName": "Ivory Hover", "canonical": "#fff7e6" },
+      "paper-edge": { "role": "neutral", "displayName": "Card Edge", "canonical": "#d6cab0" },
+      "paper-ink": { "role": "neutral", "displayName": "Paper Black Ink", "canonical": "#16191c" },
+      "paper-mute": { "role": "neutral", "displayName": "Paper Grey Ink", "canonical": "#5d5648" },
+      "pip": { "role": "primary", "displayName": "Card Red", "canonical": "#c8102e", "tonalRamp": ["oklch(18% 0.08 22)", "oklch(28% 0.13 22)", "oklch(38% 0.17 22)", "oklch(48% 0.2 22)", "oklch(58% 0.2 22)", "oklch(70% 0.15 22)", "oklch(82% 0.09 22)", "oklch(94% 0.03 22)"] },
+      "felt-800": { "role": "secondary", "displayName": "Felt Green", "canonical": "#0f3b2a", "tonalRamp": ["#08231a", "#0b2c20", "#0f3b2a", "#14533b", "#2a6a50", "oklch(62% 0.07 160)", "#b4cfc1", "oklch(95% 0.02 160)"] },
+      "felt-950": { "role": "secondary", "displayName": "Felt Shade", "canonical": "#08231a" },
+      "felt-900": { "role": "secondary", "displayName": "Felt Deep", "canonical": "#0b2c20" },
+      "felt-700": { "role": "secondary", "displayName": "Felt Light Pool", "canonical": "#14533b" },
+      "felt-line": { "role": "secondary", "displayName": "Felt Chalk Line", "canonical": "#2a6a50" },
+      "felt-ink": { "role": "secondary", "displayName": "Felt Ink", "canonical": "#b4cfc1" },
+      "cut": { "role": "tertiary", "displayName": "Cut-Card Red", "canonical": "#e0263f" },
+      "pos": { "role": "tertiary", "displayName": "EV Mint", "canonical": "#86dcab", "tonalRamp": ["oklch(20% 0.05 155)", "oklch(32% 0.08 155)", "oklch(44% 0.1 155)", "oklch(56% 0.12 155)", "oklch(68% 0.12 155)", "oklch(82% 0.11 155)", "oklch(90% 0.07 155)", "oklch(96% 0.03 155)"] },
+      "neg": { "role": "tertiary", "displayName": "EV Rose", "canonical": "#f39494", "tonalRamp": ["oklch(20% 0.05 20)", "oklch(32% 0.09 20)", "oklch(44% 0.12 20)", "oklch(56% 0.14 20)", "oklch(68% 0.13 20)", "oklch(76% 0.12 20)", "oklch(88% 0.06 20)", "oklch(96% 0.02 20)"] },
+      "push": { "role": "tertiary", "displayName": "Push Grey", "canonical": "#a0a8b0" },
+      "warn": { "role": "tertiary", "displayName": "Amber Notice", "canonical": "#e8b45a" },
+      "ink-900": { "role": "neutral", "displayName": "Card-Back Ink", "canonical": "#14181c", "tonalRamp": ["#0e1114", "#14181c", "#191e23", "#20262c", "#2c333b", "#3a424b", "#78818a", "#a0a8b0"] },
+      "ink-950": { "role": "neutral", "displayName": "Deep Ink Well", "canonical": "#0e1114" },
+      "ink-850": { "role": "neutral", "displayName": "Ink Hover", "canonical": "#191e23" },
+      "ink-800": { "role": "neutral", "displayName": "Hairline Rule", "canonical": "#20262c" },
+      "ink-700": { "role": "neutral", "displayName": "Control Border", "canonical": "#2c333b" },
+      "ink-600": { "role": "neutral", "displayName": "Hover Border", "canonical": "#3a424b" },
+      "text": { "role": "neutral", "displayName": "Warm Text", "canonical": "#e9e4d8" },
+      "mute": { "role": "neutral", "displayName": "Muted Text", "canonical": "#a0a8b0" },
+      "faint": { "role": "neutral", "displayName": "Faint Text", "canonical": "#78818a" },
+      "card-back": { "role": "neutral", "displayName": "Card Back Red", "canonical": "#7d1020" },
+      "card-back-diamond": { "role": "neutral", "displayName": "Card Back Diamond", "canonical": "#921728" }
+    },
+    "typographyMeta": {
+      "index": { "displayName": "Index (Bodoni Moda)", "purpose": "Card corner indices, court letters, action key letters H/S/D/P/R, picker ranks, brand mark. Never headings or data." },
+      "headline": { "displayName": "Headline figure", "purpose": "The single headline figure of a meter (bust probability)." },
+      "title": { "displayName": "Title", "purpose": "EV figures in action rows and dialog titles." },
+      "body": { "displayName": "Body", "purpose": "Buttons, controls and panel copy; 13px in compact controls." },
+      "label": { "displayName": "Section label", "purpose": "Uppercase section headings of analysis panels and fieldset legends." },
+      "figure": { "displayName": "Figure", "purpose": "Win/push/lose percentages under bars; badges at 11px." }
+    },
+    "shadows": [
+      { "name": "card-stock", "value": "0 1px 0 var(--color-paper-edge), 0 8px 18px rgb(0 0 0 / 0.35)", "purpose": "Every playing card face and back." },
+      { "name": "face-up-row", "value": "0 1px 0 var(--color-paper-edge), 0 10px 24px rgb(0 0 0 / 0.3)", "purpose": "The recommended action row." },
+      { "name": "rank-key", "value": "0 1px 0 var(--color-paper-edge)", "purpose": "Ivory rank buttons in the card picker." },
+      { "name": "tray", "value": "0 12px 32px rgb(0 0 0 / 0.35)", "purpose": "Card picker floating over the felt." },
+      { "name": "popover", "value": "0 8px 24px rgb(0 0 0 / 0.45)", "purpose": "Tooltips." },
+      { "name": "notice", "value": "0 12px 32px rgb(0 0 0 / 0.5)", "purpose": "Transient notices." },
+      { "name": "modal", "value": "0 24px 64px rgb(0 0 0 / 0.55)", "purpose": "Dialogs over an ink-950 70% backdrop." },
+      { "name": "active-hand", "value": "inset 0 0 0 1px var(--color-paper)", "purpose": "Ivory inner ring around the active split hand." }
+    ],
+    "motion": [
+      { "name": "ease-out", "value": "cubic-bezier(0.23, 1, 0.32, 1)", "purpose": "Default: button press, dialog enter, card deal, hole-card flip, recommendation flip." },
+      { "name": "ease-in-out", "value": "cubic-bezier(0.77, 0, 0.175, 1)", "purpose": "On-screen movement between two states." },
+      { "name": "ease-drawer", "value": "cubic-bezier(0.32, 0.72, 0, 1)", "purpose": "Drawer and sheet movement." },
+      { "name": "press", "value": "scale(0.97) 140ms ease-out", "purpose": "Button active state." },
+      { "name": "deal", "value": "translate(36px,-28px) rotate(5deg) -> rest, 240ms ease-out", "purpose": "A card slides in from the shoe corner." },
+      { "name": "hole-flip", "value": "rotateY 180deg -> 0, 320ms ease-out", "purpose": "Hole card reveal." },
+      { "name": "face-up-flip", "value": "rotateX(-70deg) -> 0, 340ms ease-out, top hinge", "purpose": "Recommended row flips face up when the best action changes; opacity only under reduced motion." },
+      { "name": "stale-dim", "value": "opacity 0.4 + saturate(0.5), 200ms", "purpose": "Stale results dim in place while recalculating." },
+      { "name": "dialog-enter", "value": "translateY(8px) scale(0.98) -> rest, 200ms ease-out", "purpose": "Dialog open via @starting-style." }
+    ],
+    "breakpoints": [
+      { "name": "min", "value": "360px" },
+      { "name": "xs", "value": "400px" },
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Button",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "House button: ink key with hairline and key hint; presses to 0.97.",
+      "html": "<button class=\"ds-btn\">Plantarse <kbd class=\"ds-kbd\">S</kbd></button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 2.5rem; padding: 0 0.875rem; border-radius: 0.5rem; border: 1px solid var(--color-ink-700, #2c333b); background: var(--color-ink-950, #0e1114); color: var(--color-text, #e9e4d8); font: 500 0.875rem/1 'Geist Variable', ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: transform 140ms cubic-bezier(0.23,1,0.32,1), background-color 160ms ease, border-color 160ms ease; } .ds-btn:hover { border-color: var(--color-ink-600, #3a424b); background: var(--color-ink-850, #191e23); } .ds-btn:active { transform: scale(0.97); } .ds-btn:focus-visible { outline: 2px solid var(--color-paper, #f2ead9); outline-offset: 2px; } .ds-kbd { font: 600 0.6875rem/1 'Geist Variable', ui-sans-serif, sans-serif; padding: 0.2rem 0.35rem; border-radius: 0.25rem; border: 1px solid var(--color-ink-600, #3a424b); color: var(--color-mute, #a0a8b0); }"
+    },
+    {
+      "name": "Recommended Button",
+      "kind": "button",
+      "refersTo": "button-paper",
+      "description": "The max-EV legal action, turned face up in ivory. Only one per screen.",
+      "html": "<button class=\"ds-btn-paper\">Pedir <kbd class=\"ds-kbd-paper\">H</kbd></button>",
+      "css": ".ds-btn-paper { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 2.5rem; padding: 0 0.875rem; border-radius: 0.5rem; border: 1px solid var(--color-paper, #f2ead9); background: var(--color-paper, #f2ead9); color: var(--color-paper-ink, #16191c); font: 500 0.875rem/1 'Geist Variable', ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: transform 140ms cubic-bezier(0.23,1,0.32,1), background-color 160ms ease; } .ds-btn-paper:hover { background: #fff7e6; border-color: #fff7e6; } .ds-btn-paper:active { transform: scale(0.97); } .ds-btn-paper:focus-visible { outline: 2px solid var(--color-paper, #f2ead9); outline-offset: 2px; } .ds-kbd-paper { font: 600 0.6875rem/1 'Geist Variable', sans-serif; padding: 0.2rem 0.35rem; border-radius: 0.25rem; border: 1px solid var(--color-paper-edge, #d6cab0); color: var(--color-paper-mute, #5d5648); }"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "nav",
+      "refersTo": "segmented",
+      "description": "Header mode switch; the selected option is an ivory chip.",
+      "html": "<div class=\"ds-seg\" role=\"radiogroup\"><button class=\"ds-seg-opt ds-seg-on\" role=\"radio\" aria-checked=\"true\">Jugador</button><button class=\"ds-seg-opt\" role=\"radio\" aria-checked=\"false\">Dealer</button></div>",
+      "css": ".ds-seg { display: inline-flex; padding: 2px; border-radius: 0.5rem; border: 1px solid var(--color-ink-700, #2c333b); background: var(--color-ink-950, #0e1114); } .ds-seg-opt { flex: 1; padding: 6px 12px; border: 0; border-radius: 0.375rem; background: transparent; color: var(--color-mute, #a0a8b0); font: 500 13px/1.2 'Geist Variable', ui-sans-serif, sans-serif; cursor: pointer; transition: color 150ms, background-color 150ms; } .ds-seg-opt:hover { color: var(--color-text, #e9e4d8); } .ds-seg-opt:focus-visible { outline: 2px solid var(--color-paper, #f2ead9); } .ds-seg-on, .ds-seg-on:hover { background: var(--color-paper, #f2ead9); color: var(--color-paper-ink, #16191c); }"
+    },
+    {
+      "name": "Target Chip",
+      "kind": "chip",
+      "refersTo": "chip-target",
+      "description": "Card picker destination; selected becomes ivory.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip ds-chip-on\">Tu mano</button><button class=\"ds-chip\">Dealer</button><button class=\"ds-chip\">Descarte</button></div>",
+      "css": ".ds-chips { display: flex; gap: 6px; } .ds-chip { border-radius: 9999px; border: 1px solid var(--color-ink-700, #2c333b); background: transparent; color: var(--color-mute, #a0a8b0); padding: 4px 12px; font: 500 0.75rem/1.3 'Geist Variable', sans-serif; cursor: pointer; transition: color 150ms, background-color 150ms; } .ds-chip:hover { color: var(--color-text, #e9e4d8); } .ds-chip:focus-visible { outline: 2px solid var(--color-paper, #f2ead9); outline-offset: 2px; } .ds-chip-on, .ds-chip-on:hover { border-color: var(--color-paper, #f2ead9); background: var(--color-paper, #f2ead9); color: var(--color-paper-ink, #16191c); }"
+    },
+    {
+      "name": "Select",
+      "kind": "input",
+      "refersTo": "select",
+      "description": "Native select for rule options.",
+      "html": "<select class=\"ds-select\"><option>6 mazos</option><option>8 mazos</option></select>",
+      "css": ".ds-select { height: 2.5rem; border-radius: 0.5rem; border: 1px solid var(--color-ink-700, #2c333b); background: var(--color-ink-950, #0e1114); color: var(--color-text, #e9e4d8); padding: 0 0.625rem; font: 400 0.875rem 'Geist Variable', sans-serif; } .ds-select:hover { border-color: var(--color-ink-600, #3a424b); } .ds-select:focus-visible { outline: 2px solid var(--color-paper, #f2ead9); outline-offset: 2px; }"
+    },
+    {
+      "name": "Action Row",
+      "kind": "card",
+      "refersTo": "action-row-best",
+      "description": "Engine result per legal action; the max-EV row is ivory card stock with a red key index.",
+      "html": "<ol class=\"ds-rows\"><li class=\"ds-row ds-row-best\"><span class=\"ds-key ds-key-best\">S</span><span class=\"ds-name\">Plantarse <span class=\"ds-badge\">Recomendada</span></span><span class=\"ds-ev\">−15,42 %</span><div class=\"ds-bar ds-bar-paper\"><i style=\"width:42%;background:#86dcab\"></i><i style=\"width:0%\"></i><i style=\"width:58%;background:#f39494\"></i></div></li><li class=\"ds-row\"><span class=\"ds-key\">H</span><span class=\"ds-name\">Pedir</span><span class=\"ds-ev ds-neg\">−28,90 %</span><div class=\"ds-bar\"><i style=\"width:31%;background:#86dcab\"></i><i style=\"width:6%;background:rgb(160 168 176/.7)\"></i><i style=\"width:63%;background:#f39494\"></i></div></li></ol>",
+      "css": ".ds-rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-family: 'Geist Variable', sans-serif; font-variant-numeric: tabular-nums; } .ds-row { display: grid; grid-template-columns: 1.75rem 1fr auto; gap: 8px 12px; align-items: start; padding: 12px 14px; border-radius: 0.75rem; border: 1px solid var(--color-ink-800, #20262c); background: var(--color-ink-900, #14181c); color: var(--color-text, #e9e4d8); } .ds-row-best { border-color: var(--color-paper, #f2ead9); background: var(--color-paper, #f2ead9); color: var(--color-paper-ink, #16191c); box-shadow: 0 1px 0 #d6cab0, 0 10px 24px rgb(0 0 0 / 0.3); } .ds-key { font: 600 1.25rem/1 'Bodoni Moda Variable', 'Bodoni 72', Didot, serif; color: var(--color-faint, #78818a); } .ds-key-best { color: var(--color-pip, #c8102e); } .ds-name { font-weight: 500; display: flex; gap: 8px; align-items: center; } .ds-badge { border-radius: 9999px; background: #16191c; color: #f2ead9; padding: 2px 8px; font-size: 11px; font-weight: 600; } .ds-ev { text-align: right; font-size: 1.125rem; font-weight: 600; } .ds-neg { color: var(--color-neg, #f39494); } .ds-bar { grid-column: 2 / span 2; display: flex; height: 6px; border-radius: 9999px; overflow: hidden; background: var(--color-ink-800, #20262c); } .ds-bar-paper { background: rgb(214 202 176 / 0.6); }"
+    },
+    {
+      "name": "Playing Card",
+      "kind": "custom",
+      "refersTo": "playing-card-md",
+      "description": "Signature: two inks on ivory, Bodoni corner indices, card-stock shadow.",
+      "html": "<div class=\"ds-card\" role=\"img\" aria-label=\"As de corazones\"><span class=\"ds-idx\">A<br>♥</span><span class=\"ds-pip\">♥</span><span class=\"ds-idx ds-idx-flip\">A<br>♥</span></div>",
+      "css": ".ds-card { position: relative; width: 5.25rem; aspect-ratio: 5 / 7; border-radius: 0.5rem; background: var(--color-paper, #f2ead9); color: var(--color-pip, #c8102e); box-shadow: 0 1px 0 #d6cab0, 0 8px 18px rgb(0 0 0 / 0.35); display: grid; place-items: center; transition: transform 240ms cubic-bezier(0.23,1,0.32,1); } .ds-card:hover { transform: translateY(-2px); } .ds-idx { position: absolute; top: 0.35em; left: 0.3em; font: 600 1.2rem/1 'Bodoni Moda Variable', 'Bodoni 72', Didot, serif; text-align: center; } .ds-idx-flip { top: auto; left: auto; bottom: 0.35em; right: 0.3em; transform: rotate(180deg); } .ds-pip { font-size: 2.5rem; line-height: 1; }"
+    },
+    {
+      "name": "Bust Meter",
+      "kind": "custom",
+      "refersTo": "bust-meter (no frontmatter token; uses colors.cut, colors.ink-800)",
+      "description": "Headline figure over a fixed 0–100% track with cut-red fill and a 50% midline.",
+      "html": "<div class=\"ds-meter\"><p><b>38,46 %</b> <span>Pasarse si pides</span></p><div class=\"ds-track\" role=\"meter\" aria-valuenow=\"38.46\" aria-valuemin=\"0\" aria-valuemax=\"100\"><i style=\"width:38.46%\"></i><s></s></div></div>",
+      "css": ".ds-meter { display: flex; flex-direction: column; gap: 8px; font-family: 'Geist Variable', sans-serif; font-variant-numeric: tabular-nums; color: var(--color-text, #e9e4d8); } .ds-meter p { margin: 0; display: flex; align-items: baseline; gap: 8px; } .ds-meter b { font-size: 1.75rem; line-height: 1; font-weight: 600; } .ds-meter span { font-size: 0.875rem; color: var(--color-mute, #a0a8b0); } .ds-track { position: relative; height: 8px; border-radius: 9999px; overflow: hidden; background: var(--color-ink-800, #20262c); } .ds-track i { position: absolute; inset: 0 auto 0 0; border-radius: 9999px; background: var(--color-cut, #e0263f); transition: width 200ms cubic-bezier(0.23,1,0.32,1); } .ds-track s { position: absolute; inset: 0 auto 0 50%; width: 1px; background: var(--color-ink-600, #3a424b); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Pip & Index",
+    "overview": "The table speaks the language of the printed deck: two inks on ivory card stock. Everything that is chrome lives in card-back ink, a near-black slate with hairline rules; the green felt exists only where the table is; and ivory card stock is a scarce material reserved for real cards and for the single thing the engine recommends. The max-EV action is the only card turned face up. The system refuses the category default of a slate dashboard with a blue accent on every highlight: there is no blue, and no accent hue is used to mean \"selected\".\n\nDensity is operational, not decorative. One workhorse sans (Geist) with tabular figures carries every word and number, so EVs and percentages align in columns and 0,1 % differences are legible. The one display voice is Bodoni Moda, and it is confined to what a deck prints in Bodoni-like faces: card corner indices, court letters, and the action key index (H, S, D, P, R). Every probability sits on a fixed 0–100 % scale, so bars in different panels are comparable at a glance.\n\nMotion is physical and tied to the deck: a dealt card slides in from the shoe corner, the hole card flips on reveal, the recommended row flips face up when the engine's best action changes, and stale numbers dim in place rather than disappearing. All of it respects reduced motion.",
+    "keyCharacteristics": [
+      "Three materials, three jobs: felt for the table, ink for panels, ivory paper for cards and the single recommendation.",
+      "Two inks on paper: paper-ink black and pip red, as on a printed card.",
+      "Tabular Geist for all UI and data; Bodoni Moda only for indices.",
+      "Signed EV in mint/rose, always with sign and number; color is never the only signal.",
+      "One fixed probability scale across every bar and meter.",
+      "Depth only where a physical object would cast it: cards, the face-up row, floating layers."
+    ],
+    "rules": [
+      { "name": "The Face-Up Rule", "body": "Ivory paper is reserved for real cards (including the card picker's rank keys), the single recommended action (row and button), and the current selection in a segmented control or target chip group. Nothing else is filled with paper; a second ivory element on screen dilutes the recommendation.", "section": "colors" },
+      { "name": "The Felt Stays on the Table Rule", "body": "Felt green appears only on the table section. Panels, header and dialogs are ink.", "section": "colors" },
+      { "name": "The Signed Number Rule", "body": "`pos` and `neg` never appear without a signed figure beside them (\"+3,45 %\", \"−1,20 %\"); bars always carry their percentages in text below.", "section": "colors" },
+      { "name": "The Index Only Rule", "body": "Bodoni Moda is used for single characters and short indices only (card ranks, action keys). Never for headings, labels, sentences or numbers that are data.", "section": "typography" },
+      { "name": "The Tabular Rule", "body": "All figures are tabular, two decimals, Spanish decimal comma, sign on EV. Never round a probability to an integer.", "section": "typography" },
+      { "name": "The Paper Casts Shadow Rule", "body": "Only ivory objects and floating layers carry a drop shadow. Ink panels, rows and cards at rest are flat, divided by 1px rules.", "section": "elevation" }
+    ],
+    "dos": [
+      "**Do** reserve ivory (`paper`) for real cards and rank keys, the single max-EV action (row and button), and the current option of a segmented control or chip group.",
+      "**Do** set every number in Geist with tabular figures, two decimals, Spanish decimal comma, and a sign on EV.",
+      "**Do** pair every `pos`/`neg` color with its signed figure and every bar with its percentages in text.",
+      "**Do** draw all probabilities on the same fixed 0–100 % scale.",
+      "**Do** use Bodoni Moda only for card indices, court letters and action key letters.",
+      "**Do** separate ink surfaces with 1px `ink-800` / `ink-700` hairlines and tonal steps, and keep drop shadow for paper objects and floating layers.",
+      "**Do** dim stale results in place (40 % opacity, half saturation) instead of removing them.",
+      "**Do** gate hover styles behind `(hover: hover) and (pointer: fine)` and respect reduced motion on every flip and slide."
+    ],
+    "donts": [
+      "**Don't** introduce a blue or any other accent hue for selection or highlight; selection is ivory, recommendation is ivory.",
+      "**Don't** fill a second element with paper on the same screen as the recommendation unless it is a card, a rank key, or the current option of a selection group.",
+      "**Don't** use felt green outside the table section.",
+      "**Don't** use `pip`/`cut` red for anything except red suits, the brand mark, the cut card, bust, and the recommended key index.",
+      "**Don't** set headings, sentences or data figures in Bodoni Moda.",
+      "**Don't** round probabilities to integers or show EV without its sign."
+    ]
+  }
+}
