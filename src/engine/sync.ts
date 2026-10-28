@@ -4,8 +4,14 @@
 import { useAnalysisStore, type AnalysisKind } from '@/store/analysisStore';
 import { useRulesStore } from '@/store/rulesStore';
 import { useShoeStore } from '@/store/shoeStore';
-import { activeHand, useTableStore } from '@/store/tableStore';
-import { useUiStore } from '@/store/uiStore';
+import {
+  activeHand,
+  peekedBlackjack,
+  playerActions,
+  playerSpare,
+  useTableStore,
+} from '@/store/tableStore';
+import { autoPlaysPlayer, useUiStore } from '@/store/uiStore';
 import type { EngineMethod } from './api';
 import {
   CancelledError,
@@ -24,6 +30,7 @@ import {
 
 const BOT_DELAY_MS = 520;
 const DEALER_DELAY_MS = 640;
+const PEEK_DELAY_MS = 1600;
 
 let transport: EngineTransport | null = null;
 const getTransport = () => (transport ??= createWorkerTransport());
@@ -68,6 +75,7 @@ function wanted(): Record<AnalysisKind, Built<{ version: number }> | null> {
         player: t.player,
         dealer: t.dealer,
         phase: t.phase,
+        spare: playerSpare(t.player),
       }),
       dealer: null,
       round: null,
@@ -179,6 +187,49 @@ function driveBots() {
     });
 }
 
+let autoTimer: ReturnType<typeof setTimeout> | null = null;
+let autoBusy = false;
+
+function driveAutoPlayer() {
+  const t = useTableStore.getState();
+  if (!autoPlaysPlayer() || t.phase !== 'player' || autoBusy || autoTimer) return;
+  const shoe = useShoeStore.getState();
+  const rules = useRulesStore.getState().rules;
+  const built = buildHandRequest({
+    version: shoe.version,
+    rules,
+    counts: shoe.toCounts(),
+    player: t.player,
+    dealer: t.dealer,
+    phase: t.phase,
+    spare: playerSpare(t.player),
+  });
+  if (!built.ok) return;
+  autoBusy = true;
+  const handId = activeHand(t.player)?.id;
+  const version = shoe.version;
+  getTransport()
+    .call('analyzeHand', built.req)
+    .then(
+      (res) => res.best,
+      () => 'stand' as const,
+    )
+    .then((best) => {
+      autoTimer = setTimeout(() => {
+        autoTimer = null;
+        autoBusy = false;
+        const now = useTableStore.getState();
+        const same =
+          activeHand(now.player)?.id === handId && useShoeStore.getState().version === version;
+        if (autoPlaysPlayer() && now.phase === 'player' && same) {
+          // El motor solo elige entre las acciones permitidas; plantarse es la red de seguridad.
+          now.act(playerActions(now.player, rules)[best] ? best : 'stand');
+        }
+        driveAutoPlayer();
+      }, BOT_DELAY_MS);
+    });
+}
+
 let dealerTimer: ReturnType<typeof setTimeout> | null = null;
 
 function driveDealer() {
@@ -188,11 +239,16 @@ function driveDealer() {
   if (t.phase !== 'dealer' || ui.source !== 'simulation' || ui.mode !== 'player' || dealerTimer) {
     return;
   }
-  dealerTimer = setTimeout(() => {
-    dealerTimer = null;
-    const step = useTableStore.getState().dealerStep();
-    if (step !== 'settle' && step !== 'none') driveDealer();
-  }, DEALER_DELAY_MS);
+  // Blackjack del dealer por peek: pausa más larga para que se vean las cartas repartidas.
+  const peek = !t.dealer.holeRevealed && peekedBlackjack(t.dealer, useRulesStore.getState().rules);
+  dealerTimer = setTimeout(
+    () => {
+      dealerTimer = null;
+      const step = useTableStore.getState().dealerStep();
+      if (step !== 'settle' && step !== 'none') driveDealer();
+    },
+    peek ? PEEK_DELAY_MS : DEALER_DELAY_MS,
+  );
 }
 
 let started = false;
@@ -210,13 +266,16 @@ export function startEngineSync() {
       scheduled = false;
       refresh();
       driveBots();
+      driveAutoPlayer();
       driveDealer();
     });
   };
 
   useShoeStore.subscribe((s, prev) => s.version !== prev.version && schedule());
   useUiStore.subscribe(
-    (s, prev) => (s.mode !== prev.mode || s.knowHole !== prev.knowHole) && schedule(),
+    (s, prev) =>
+      (s.mode !== prev.mode || s.knowHole !== prev.knowHole || s.source !== prev.source) &&
+      schedule(),
   );
   useRulesStore.subscribe((s, prev) => s.rules !== prev.rules && schedule());
   useTableStore.subscribe((s, prev) => s.phase !== prev.phase && schedule());

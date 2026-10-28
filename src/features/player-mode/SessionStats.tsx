@@ -1,4 +1,5 @@
-import { formatPct, formatUnits } from '@/lib/format';
+import { formatChips, formatPct, formatUnits } from '@/lib/format';
+import { useChipsStore } from '@/store/chipsStore';
 import { useSessionStore } from '@/store/sessionStore';
 import { useTableStore } from '@/store/tableStore';
 import { useUiStore } from '@/store/uiStore';
@@ -9,6 +10,7 @@ export function SessionStats() {
   const { decisions, optimal, evLost } = useSessionStore();
   const net = useTableStore((s) => s.sessionNet);
   const hands = useTableStore((s) => s.handsPlayed);
+  const chips = useChipsStore((s) => s.sessionChips);
   if (source !== 'simulation' || (decisions === 0 && hands === 0)) return null;
   return (
     <section aria-labelledby="session-title" className="flex flex-col gap-3">
@@ -25,7 +27,7 @@ export function SessionStats() {
         <Stat
           label={`Resultado · ${hands} rondas`}
           value={formatUnits(net)}
-          sub="real, con varianza"
+          sub={`${formatChips(chips, true)} fichas`}
         />
       </dl>
     </section>

@@ -2,10 +2,11 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import type { Face } from '@/domain/cards';
 import { presetRules } from '@/domain/rules';
 import { sumCounts } from '@/domain/shoe';
-import { cards } from '@/tests/helpers';
+import { cards, setStack } from '@/tests/helpers';
 import { applyRules, switchSource } from './actions';
 import { useShoeStore } from './shoeStore';
-import { allowedActions, newHand, settleHand, useTableStore } from './tableStore';
+import { useChipsStore } from './chipsStore';
+import { allowedActions, newHand, playerActions, settleHand, useTableStore } from './tableStore';
 import { useUiStore } from './uiStore';
 
 const t = () => useTableStore.getState();
@@ -22,6 +23,9 @@ function stack(...faces: Face[]) {
 }
 
 function simTable(rules = presetRules('vegas')) {
+  useChipsStore.setState({ player: 1000, house: 1000, round: null });
+  setStack('player', 10);
+  setStack('house', 10);
   useUiStore.setState({ mode: 'player', botSeats: 0, knowHole: false, source: 'manual' });
   switchSource('simulation');
   applyRules(rules, 'custom');
@@ -42,11 +46,18 @@ describe('tableStore · simulación', () => {
     expect(t().phase).toBe('player');
   });
 
-  it('con peek y blackjack del dealer la ronda termina al repartir', () => {
+  it('con peek y blackjack del dealer nadie juega: se revela a la vista y se liquida', () => {
     stack('10', 'A', '7', 'K');
     t().deal();
-    expect(t().phase).toBe('settled');
-    expect(t().dealer.holeRevealed).toBe(true);
+    // No se liquida al repartir: pasa al dealer con la oculta todavía boca abajo.
+    expect(t().phase).toBe('dealer');
+    expect(t().dealer.holeRevealed).toBe(false);
+    expect(t().player.hands[0]!.outcome).toBeNull();
+    expect(sumCounts(shoe().toCounts())).toBe(312 - 3);
+    t().act('hit');
+    expect(t().player.hands[0]!.cards).toHaveLength(2);
+    expect(t().dealerStep()).toBe('reveal');
+    expect(t().dealerStep()).toBe('settle');
     expect(t().player.hands[0]!.outcome).toBe('lose');
     expect(sumCounts(shoe().toCounts())).toBe(312 - 4);
   });
@@ -89,6 +100,51 @@ describe('tableStore · simulación', () => {
     expect(t().dealerStep()).toBe('settle');
     expect(t().player.hands[0]!.outcome).toBe('lose');
     expect(t().sessionNet - net0).toBe(-1);
+  });
+
+  it('la ronda liquida tus fichas según la apuesta', () => {
+    setStack('player', 50);
+    // Jugador 10,8; dealer 6 + 10 = 16 → pide un 5 → 21: pierdes 50.
+    stack('10', '6', '8', '10', '5');
+    t().deal();
+    t().act('stand');
+    while (t().dealerStep() !== 'settle');
+    expect(useChipsStore.getState().player).toBe(950);
+    expect(useChipsStore.getState().round).toBeNull();
+  });
+
+  it('sin saldo o sin fichas en la mesa no se reparte', () => {
+    useChipsStore.setState({ player: 0 });
+    t().deal();
+    expect(t().phase).toBe('idle');
+    expect(t().notice?.tone).toBe('error');
+    useChipsStore.setState({ player: 1000 });
+    setStack('player');
+    t().deal();
+    expect(t().phase).toBe('idle');
+    expect(t().notice?.text).toMatch(/Pon fichas/);
+  });
+
+  it('no se puede doblar ni dividir si las fichas no lo cubren', () => {
+    useChipsStore.setState({ player: 100 });
+    setStack('player', 100);
+    stack('8', '6', '8', '10');
+    t().deal();
+    const rules = presetRules('vegas');
+    expect(allowedActions(t().player, rules).split).toBe(true);
+    expect(playerActions(t().player, rules)).toMatchObject({ double: false, split: false });
+    t().act('double');
+    expect(t().player.hands[0]!.doubled).toBe(false);
+    useChipsStore.setState({ player: 1000 });
+  });
+
+  it('una ronda interrumpida no cobra ni paga', () => {
+    setStack('player', 100);
+    stack('10', '9', '6', '7');
+    t().deal();
+    t().resetTable();
+    expect(useChipsStore.getState().round).toBeNull();
+    expect(useChipsStore.getState().player).toBe(1000);
   });
 
   it('blackjack del jugador paga según la regla', () => {

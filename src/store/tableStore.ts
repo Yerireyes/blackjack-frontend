@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { handValue, isPair, toRankIndex, type Card, type Face } from '@/domain/cards';
 import { canDoubleTotal, dealerChecksHole, dealerStands, type Rules } from '@/domain/rules';
 import { countsValue, MIN_ENGINE_SHOE_VALUE } from '@/domain/shoe';
+import { useChipsStore } from './chipsStore';
 import { currentRules } from './rulesStore';
 import { ShoeError, useShoeStore } from './shoeStore';
 import { useUiStore } from './uiStore';
@@ -115,7 +116,12 @@ export const activeHand = (seat: Seat): PlayerHand | undefined => seat.hands[sea
 
 const lockedSplitAces = (h: PlayerHand, rules: Rules) => h.splitAces && !rules.hitSplitAces;
 
-export function allowedActions(seat: Seat, rules: Rules): Record<PlayerAction, boolean> {
+/** `spare`: unidades de apuesta extra que se pueden cubrir; doblar y dividir necesitan una. */
+export function allowedActions(
+  seat: Seat,
+  rules: Rules,
+  spare = Infinity,
+): Record<PlayerAction, boolean> {
   const h = activeHand(seat);
   const none = { hit: false, stand: false, double: false, split: false, surrender: false };
   if (!h || h.done || h.cards.length < 2) return none;
@@ -128,12 +134,14 @@ export function allowedActions(seat: Seat, rules: Rules): Record<PlayerAction, b
     stand: true,
     double:
       two &&
+      spare >= 1 &&
       !h.doubled &&
       !lockedSplitAces(h, rules) &&
       canDoubleTotal(rules, v.total, v.soft) &&
       (!h.fromSplit || rules.doubleAfterSplit),
     split:
       two &&
+      spare >= 1 &&
       pairRank !== null &&
       seat.hands.length < rules.maxSplitHands &&
       !(pairRank === 0 && h.splitAces && !rules.resplitAces),
@@ -144,6 +152,25 @@ export function allowedActions(seat: Seat, rules: Rules): Record<PlayerAction, b
       !h.fromSplit &&
       seat.hands.length === 1,
   };
+}
+
+/** Unidades de apuesta en juego del asiento: una por mano, dos si se dobló. */
+export const stakedUnits = (seat: Seat) => seat.hands.reduce((n, h) => n + (h.doubled ? 2 : 1), 0);
+
+/** Unidades extra que tus fichas cubren (sin límite fuera de la simulación). */
+export function playerSpare(seat: Seat) {
+  if (useUiStore.getState().source !== 'simulation') return Infinity;
+  return useChipsStore.getState().spareUnits(stakedUnits(seat));
+}
+
+/** Acciones de tu asiento: las que permiten las reglas y alcanzan las fichas. */
+export const playerActions = (seat: Seat, rules: Rules) =>
+  allowedActions(seat, rules, playerSpare(seat));
+
+/** El dealer revisó la oculta (peek) y tiene blackjack: la ronda termina sin decisiones. */
+export function peekedBlackjack(d: DealerState, rules: Rules): boolean {
+  if (!d.up || !d.hole || d.hits.length > 0) return false;
+  return dealerChecksHole(rules, toRankIndex(d.up.face)) && handValue([d.up, d.hole]).blackjack;
 }
 
 export function dealerMustHit(d: DealerState, rules: Rules): boolean {
@@ -245,6 +272,7 @@ export const useTableStore = create<TableState>()((set, get) => {
   const settleNow = (d: Draft, rules: Rules) => {
     const net = finishSettle(d, rules);
     set((s) => ({ sessionNet: s.sessionNet + net, handsPlayed: s.handsPlayed + 1 }));
+    useChipsStore.getState().settle(net);
   };
 
   const afterBots = (d: Draft) => {
@@ -269,6 +297,8 @@ export const useTableStore = create<TableState>()((set, get) => {
     },
 
     resetTable() {
+      // Una ronda interrumpida no se cobra ni se paga.
+      useChipsStore.getState().cancelRound();
       set((s) => ({
         phase: isSim() ? 'idle' : 'player',
         player: newSeat('Tú', false),
@@ -285,7 +315,21 @@ export const useTableStore = create<TableState>()((set, get) => {
       const { phase } = get();
       if (!isSim() || (phase !== 'idle' && phase !== 'settled')) return;
       const rules = currentRules();
-      const bots = useUiStore.getState().botSeats;
+      const { botSeats: bots, mode } = useUiStore.getState();
+
+      const bank = mode === 'dealer' ? 'house' : 'player';
+      const start = useChipsStore.getState().startRound(bank);
+      if (start !== 'ok') {
+        get().notify(
+          start === 'empty'
+            ? 'Pon fichas sobre la mesa para apostar (mínimo 10).'
+            : bank === 'player'
+              ? 'No te alcanzan las fichas para la apuesta mínima: recarga para seguir.'
+              : 'La banca no cubre la apuesta mínima: recárgala para seguir.',
+          'error',
+        );
+        return;
+      }
 
       // Rebaraja al llegar a la penetración o si no alcanzan las cartas para la ronda.
       const seats = bots + 1;
@@ -318,12 +362,10 @@ export const useTableStore = create<TableState>()((set, get) => {
           if (handValue(h.cards).blackjack) h.done = true;
         }
 
-        // Peek: si el dealer tiene blackjack, se revela y la ronda termina.
-        const upRank = toRankIndex(d.dealer.up.face);
-        if (dealerChecksHole(rules, upRank) && handValue([d.dealer.up, d.dealer.hole]).blackjack) {
-          d.dealer.holeRevealed = true;
-          shoe().reveal(d.dealer.hole.id);
-          settleNow(d, rules);
+        // Peek: si el dealer tiene blackjack nadie juega. Pasa directo a su turno para que
+        // la oculta se revele a la vista (dealerStep) en vez de liquidar al instante.
+        if (peekedBlackjack(d.dealer, rules)) {
+          d.phase = 'dealer';
           return;
         }
         if (d.others.some((seat) => seat.hands.some((h) => !h.done))) d.phase = 'bots';
@@ -359,7 +401,7 @@ export const useTableStore = create<TableState>()((set, get) => {
       const st = get();
       if (st.phase !== 'player') return;
       const rules = currentRules();
-      if (!allowedActions(st.player, rules)[action]) return;
+      if (!playerActions(st.player, rules)[action]) return;
       const sim = isSim();
       try {
         mutate((d) => {

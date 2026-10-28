@@ -1,5 +1,7 @@
 import { MotionConfig } from 'motion/react';
+import { AccountMenu } from '@/account/AccountMenu';
 import { ModeSwitch } from '@/components/ModeSwitch';
+import { ChipBalance } from '@/features/chips/ChipBalance';
 import { DealerView } from '@/features/dealer-mode/DealerView';
 import { PlayerView } from '@/features/player-mode/PlayerView';
 import { RulesPanel } from '@/features/settings/RulesPanel';
@@ -8,6 +10,7 @@ import { Table } from '@/features/table/Table';
 import { useUiStore } from '@/store/uiStore';
 import { Announcer } from './Announcer';
 import { Notice } from './Notice';
+import { SoundToggle } from './SoundToggle';
 import { useKeyboard } from './useKeyboard';
 
 export function App() {
@@ -33,6 +36,9 @@ export function App() {
           <div className="order-2 ml-auto flex min-w-0 items-center justify-end gap-2 lg:order-3 lg:flex-1">
             <RulesPanel />
             <ShoeHud />
+            <ChipBalance />
+            <SoundToggle />
+            <AccountMenu />
           </div>
         </header>
 
