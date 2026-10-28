@@ -30,13 +30,13 @@ export function RulesPanel() {
     <>
       <button
         type="button"
-        className="btn h-9 min-h-0 max-w-full gap-2 px-3"
+        className="btn h-9 min-h-0 max-w-full min-w-0 gap-2 px-3"
         onClick={openPanel}
         data-testid="rules-button"
         aria-label={`Reglas: ${presetName}, ${rulesSummary(rules)}. Cambiar reglas`}
       >
         <SlidersHorizontal className="size-4 shrink-0 text-mute" aria-hidden />
-        <span className="hidden truncate text-[13px] sm:inline">
+        <span className="hidden min-w-0 truncate text-[13px] sm:block">
           <span className="font-semibold">{presetName}</span>
           <span className="hidden text-mute xl:inline"> · {rulesSummary(rules)}</span>
         </span>

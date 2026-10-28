@@ -28,12 +28,15 @@ export function ShoeHud() {
         data-testid="shoe-hud"
       >
         <Layers className="size-4 text-mute" aria-hidden />
-        <span className="hidden text-[13px] md:inline">
+        <span className="hidden text-[13px] whitespace-nowrap xl:inline">
           <span className="font-semibold">{unseen}</span>
           <span className="text-mute"> cartas · {dec.format(unseen / 52)} mazos</span>
         </span>
-        <span className="text-[13px] font-semibold md:hidden">{unseen}</span>
-        <span className="relative hidden h-2 w-28 rounded-full bg-ink-800 sm:block" aria-hidden>
+        <span className="text-[13px] font-semibold xl:hidden">{unseen}</span>
+        <span
+          className="relative hidden h-2 w-20 rounded-full bg-ink-800 sm:block lg:hidden xl:block 2xl:w-28"
+          aria-hidden
+        >
           <span
             className="absolute inset-y-0 left-0 rounded-full bg-mute/70"
             style={{ width: `${Math.min(1, dealt) * 100}%` }}
