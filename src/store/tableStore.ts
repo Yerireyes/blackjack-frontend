@@ -167,6 +167,12 @@ export function playerSpare(seat: Seat) {
 export const playerActions = (seat: Seat, rules: Rules) =>
   allowedActions(seat, rules, playerSpare(seat));
 
+/** El dealer revisó la oculta (peek) y tiene blackjack: la ronda termina sin decisiones. */
+export function peekedBlackjack(d: DealerState, rules: Rules): boolean {
+  if (!d.up || !d.hole || d.hits.length > 0) return false;
+  return dealerChecksHole(rules, toRankIndex(d.up.face)) && handValue([d.up, d.hole]).blackjack;
+}
+
 export function dealerMustHit(d: DealerState, rules: Rules): boolean {
   if (!d.up || !d.hole) return false;
   const v = handValue(dealerCards(d));
@@ -356,12 +362,10 @@ export const useTableStore = create<TableState>()((set, get) => {
           if (handValue(h.cards).blackjack) h.done = true;
         }
 
-        // Peek: si el dealer tiene blackjack, se revela y la ronda termina.
-        const upRank = toRankIndex(d.dealer.up.face);
-        if (dealerChecksHole(rules, upRank) && handValue([d.dealer.up, d.dealer.hole]).blackjack) {
-          d.dealer.holeRevealed = true;
-          shoe().reveal(d.dealer.hole.id);
-          settleNow(d, rules);
+        // Peek: si el dealer tiene blackjack nadie juega. Pasa directo a su turno para que
+        // la oculta se revele a la vista (dealerStep) en vez de liquidar al instante.
+        if (peekedBlackjack(d.dealer, rules)) {
+          d.phase = 'dealer';
           return;
         }
         if (d.others.some((seat) => seat.hands.some((h) => !h.done))) d.phase = 'bots';

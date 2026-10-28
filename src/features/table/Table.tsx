@@ -7,7 +7,8 @@ import { ChipTray } from '@/features/chips/ChipTray';
 import { DealerButtons } from '@/features/dealer-mode/DealerControls';
 import { CardPicker } from '@/features/manual-entry/CardPicker';
 import { MIN_BET, stackTotal, useChipsStore } from '@/store/chipsStore';
-import { dealerCards, useTableStore } from '@/store/tableStore';
+import { useRulesStore } from '@/store/rulesStore';
+import { dealerCards, peekedBlackjack, useTableStore } from '@/store/tableStore';
 import { useUiStore, type Mode } from '@/store/uiStore';
 import { ActionButtons } from './ActionBar';
 
@@ -180,6 +181,30 @@ function PhaseLine() {
   const mode = useUiStore((s) => s.mode);
   const source = useUiStore((s) => s.source);
   const sim = source === 'simulation';
+  const rules = useRulesStore((s) => s.rules);
+  const dealer = useTableStore((s) => s.dealer);
+  const peek = sim && peekedBlackjack(dealer, rules);
+  const asDealer = mode === 'dealer';
+
+  if (peek && (phase === 'dealer' || phase === 'settled')) {
+    const revealed = dealer.holeRevealed;
+    return (
+      <p
+        className="min-h-5 max-w-md text-center text-sm font-medium text-text"
+        aria-live="polite"
+        data-testid="peek-message"
+      >
+        {!revealed
+          ? asDealer
+            ? 'Revisaste tu carta oculta: tienes blackjack. Revélala para cerrar la ronda.'
+            : 'El dealer revisa su carta oculta…'
+          : asDealer
+            ? 'Blackjack de la casa: la ronda termina sin que el jugador decida. Solo un blackjack suyo empata.'
+            : 'Blackjack del dealer: lo revisó antes de que jugaras, así que no había decisión posible. Solo un blackjack tuyo empata.'}
+      </p>
+    );
+  }
+
   const text =
     phase === 'bots'
       ? 'Juegan los otros asientos con la jugada de mayor EV del motor…'

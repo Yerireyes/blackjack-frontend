@@ -46,11 +46,18 @@ describe('tableStore · simulación', () => {
     expect(t().phase).toBe('player');
   });
 
-  it('con peek y blackjack del dealer la ronda termina al repartir', () => {
+  it('con peek y blackjack del dealer nadie juega: se revela a la vista y se liquida', () => {
     stack('10', 'A', '7', 'K');
     t().deal();
-    expect(t().phase).toBe('settled');
-    expect(t().dealer.holeRevealed).toBe(true);
+    // No se liquida al repartir: pasa al dealer con la oculta todavía boca abajo.
+    expect(t().phase).toBe('dealer');
+    expect(t().dealer.holeRevealed).toBe(false);
+    expect(t().player.hands[0]!.outcome).toBeNull();
+    expect(sumCounts(shoe().toCounts())).toBe(312 - 3);
+    t().act('hit');
+    expect(t().player.hands[0]!.cards).toHaveLength(2);
+    expect(t().dealerStep()).toBe('reveal');
+    expect(t().dealerStep()).toBe('settle');
     expect(t().player.hands[0]!.outcome).toBe('lose');
     expect(sumCounts(shoe().toCounts())).toBe(312 - 4);
   });

@@ -4,7 +4,13 @@
 import { useAnalysisStore, type AnalysisKind } from '@/store/analysisStore';
 import { useRulesStore } from '@/store/rulesStore';
 import { useShoeStore } from '@/store/shoeStore';
-import { activeHand, playerActions, playerSpare, useTableStore } from '@/store/tableStore';
+import {
+  activeHand,
+  peekedBlackjack,
+  playerActions,
+  playerSpare,
+  useTableStore,
+} from '@/store/tableStore';
 import { autoPlaysPlayer, useUiStore } from '@/store/uiStore';
 import type { EngineMethod } from './api';
 import {
@@ -24,6 +30,7 @@ import {
 
 const BOT_DELAY_MS = 520;
 const DEALER_DELAY_MS = 640;
+const PEEK_DELAY_MS = 1600;
 
 let transport: EngineTransport | null = null;
 const getTransport = () => (transport ??= createWorkerTransport());
@@ -232,11 +239,16 @@ function driveDealer() {
   if (t.phase !== 'dealer' || ui.source !== 'simulation' || ui.mode !== 'player' || dealerTimer) {
     return;
   }
-  dealerTimer = setTimeout(() => {
-    dealerTimer = null;
-    const step = useTableStore.getState().dealerStep();
-    if (step !== 'settle' && step !== 'none') driveDealer();
-  }, DEALER_DELAY_MS);
+  // Blackjack del dealer por peek: pausa más larga para que se vean las cartas repartidas.
+  const peek = !t.dealer.holeRevealed && peekedBlackjack(t.dealer, useRulesStore.getState().rules);
+  dealerTimer = setTimeout(
+    () => {
+      dealerTimer = null;
+      const step = useTableStore.getState().dealerStep();
+      if (step !== 'settle' && step !== 'none') driveDealer();
+    },
+    peek ? PEEK_DELAY_MS : DEALER_DELAY_MS,
+  );
 }
 
 let started = false;
