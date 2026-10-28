@@ -3,8 +3,10 @@ import { toRankIndex, FACE_NAME } from '@/domain/cards';
 import { AnalysisFrame } from '@/features/analysis/AnalysisFrame';
 import { useAnalysis } from '@/features/analysis/useAnalysis';
 import { DealerOutcomeChart } from '@/features/dealer-mode/DealerOutcomeChart';
+import { useCasualStore } from '@/casual/casualStore';
 import { useRulesStore } from '@/store/rulesStore';
 import { useTableStore } from '@/store/tableStore';
+import { useUiStore } from '@/store/uiStore';
 import { ActionPanel } from './ActionPanel';
 import { HitBustMeter } from './HitBustMeter';
 import { SessionStats } from './SessionStats';
@@ -12,11 +14,21 @@ import { SessionStats } from './SessionStats';
 /** Panel de análisis del modo jugador: todo viene de una sola respuesta de analyzeHand. */
 export function PlayerView() {
   const { slot, result, stale } = useAnalysis('hand');
-  const up = useTableStore((s) => s.dealer.up);
-  const rules = useRulesStore((s) => s.rules);
-  const handCount = useTableStore((s) => s.player.hands.length);
-  const active = useTableStore((s) => s.player.active);
-  const peek = up ? dealerChecksHole(rules, toRankIndex(up.face)) : false;
+  // En Casual la mano, la carta del dealer y las reglas son las de la ronda del servidor.
+  const casual = useUiStore((s) => s.venue === 'casual');
+  const tableUp = useTableStore((s) => s.dealer.up?.face ?? null);
+  const casualUp = useCasualStore((s) => s.round?.dealer.up.rank ?? null);
+  const practiceRules = useRulesStore((s) => s.rules);
+  const casualRules = useCasualStore((s) => s.run?.rules ?? null);
+  const tableHands = useTableStore((s) => s.player.hands.length);
+  const tableActive = useTableStore((s) => s.player.active);
+  const casualHands = useCasualStore((s) => s.round?.player.hands.length ?? 1);
+  const casualActive = useCasualStore((s) => s.round?.player.active ?? 0);
+  const upFace = casual ? casualUp : tableUp;
+  const rules = (casual && casualRules) || practiceRules;
+  const handCount = casual ? casualHands : tableHands;
+  const active = casual ? casualActive : tableActive;
+  const peek = upFace ? dealerChecksHole(rules, toRankIndex(upFace)) : false;
 
   return (
     <div className="flex flex-col gap-6">
@@ -41,9 +53,9 @@ export function PlayerView() {
         </AnalysisFrame>
       )}
 
-      {result && up && (
+      {result && upFace && (
         <AnalysisFrame
-          title={`Dealer con ${FACE_NAME[up.face].toLowerCase()} visible`}
+          title={`Dealer con ${FACE_NAME[upFace].toLowerCase()} visible`}
           slot={slot}
           stale={stale}
           testId="dealer-frame"
@@ -57,7 +69,7 @@ export function PlayerView() {
         </AnalysisFrame>
       )}
 
-      <SessionStats />
+      {!casual && <SessionStats />}
     </div>
   );
 }

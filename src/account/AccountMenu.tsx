@@ -2,11 +2,11 @@ import { CheckCircle2, CloudOff, LogIn, LogOut, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { Dialog } from '@/components/Dialog';
 import { useAccountStore } from './accountStore';
-import { googleStartUrl } from './api';
 import { AuthDialog } from './AuthDialog';
 import { DisplayNameForm } from './DisplayNameForm';
 import { errorText } from './errors';
 import { FormError } from './fields';
+import { GoogleLinkDialog, GoogleUnlinkDialog } from './GoogleDialogs';
 
 /** Botón de cuenta de la cabecera y sus diálogos. */
 export function AccountMenu() {
@@ -56,6 +56,8 @@ export function AccountMenu() {
       <AuthDialog />
       <ProfileDialog />
       <NameDialog />
+      <GoogleLinkDialog />
+      <GoogleUnlinkDialog />
     </>
   );
 }
@@ -110,27 +112,30 @@ function ProfileDialog() {
           submitLabel="Guardar nombre"
         />
 
-        {(linked || google) && (
+        {/* Vincular y desvincular piden la contraseña: sin ella, Google es su único acceso. */}
+        {(linked || (google && me.hasPassword)) && (
           <section aria-labelledby="google-title" className="flex flex-col gap-2">
             <h3 id="google-title" className="section-title">
               Google
             </h3>
-            {linked ? (
-              <p className="flex items-center gap-2 text-sm">
-                <CheckCircle2 className="size-4 text-pos" aria-hidden /> Google vinculado
-              </p>
-            ) : (
-              <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              {linked ? (
+                <p className="flex items-center gap-2 text-sm">
+                  <CheckCircle2 className="size-4 text-pos" aria-hidden /> Google vinculado
+                </p>
+              ) : (
                 <p className="text-sm text-mute">Entra también con tu cuenta de Google.</p>
+              )}
+              {me.hasPassword && (
                 <button
                   type="button"
                   className="btn"
-                  onClick={() => window.location.assign(googleStartUrl(true))}
+                  onClick={() => openDialog(linked ? 'unlinkGoogle' : 'linkGoogle')}
                 >
-                  Vincular Google
+                  {linked ? 'Desvincular' : 'Vincular Google'}
                 </button>
-              </div>
-            )}
+              )}
+            </div>
           </section>
         )}
 

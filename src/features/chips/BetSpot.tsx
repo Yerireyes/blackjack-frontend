@@ -7,19 +7,39 @@ import { takeFlightOrigin } from './flight';
 /** Separación vertical entre fichas apiladas. */
 const CHIP_RISE = 4;
 
-/** Círculo de apuesta sobre el fieltro con la pila de fichas. Tocarlo retira la de arriba. */
+/** Pila de Práctica: la de tu banca o la del jugador automático. */
 export function BetSpot({ bank }: { bank: Bank }) {
   const stack = useChipsStore((s) => s.stacks[bank]);
   const locked = useChipsStore((s) => s.round !== null);
   const removeChip = useChipsStore((s) => s.removeChip);
+  return (
+    <BetStack
+      stack={stack}
+      locked={locked}
+      onRemove={() => removeChip(bank)}
+      testId={`bet-spot-${bank}`}
+    />
+  );
+}
+
+interface BetStackProps {
+  stack: readonly Chip[];
+  /** Ronda en juego: la apuesta no se toca. */
+  locked: boolean;
+  onRemove(): void;
+  testId?: string;
+}
+
+/** Círculo de apuesta sobre el fieltro con la pila de fichas. Tocarlo retira la de arriba. */
+export function BetStack({ stack, locked, onRemove, testId }: BetStackProps) {
   const total = stackTotal(stack);
   const top = stack.at(-1);
 
   return (
-    <div className="flex flex-col items-center gap-1" data-testid={`bet-spot-${bank}`}>
+    <div className="flex flex-col items-center gap-1" data-testid={testId}>
       <button
         type="button"
-        onClick={() => removeChip(bank)}
+        onClick={onRemove}
         disabled={locked || !top}
         aria-label={
           top

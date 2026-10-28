@@ -6,7 +6,8 @@ SPA en React que muestra, para cada mano, el EV y las probabilidades exactas de 
 [docs/Blackjack Guide — Arquitectura Frontend.md](docs/).
 
 El modo **Práctica** funciona sin cuenta y sin servidor. Las **cuentas** (registro, login,
-Google) usan la API del backend; Casual y Ranked, que también la usarán, están en desarrollo.
+Google) y el modo **Casual** (partidas de 500 fichas contra el servidor, con ranking semanal)
+usan la API del backend. Ranked está en desarrollo.
 
 ## Documentación compartida con el backend
 
@@ -117,7 +118,9 @@ copiar el paquete nuevo) y luego los tests.
 | `src/engine/` | `contract.ts` (generado), worker con Comlink, `client.ts` (debounce 50 ms, cola de un pedido, aviso a los 5 s, cancelar), `requests.ts` (mesa → pedido, funciones puras), `sync.ts` (stores → motor, bots y dealer automático). |
 | `src/store/` | Zustand: `rules`, `shoe`, `table`, `analysis`, `ui`, `session`, `chips`; `actions.ts` coordina reinicios. |
 | `src/features/` | `player-mode`, `dealer-mode`, `shoe-tracker`, `manual-entry`, `settings`, `table`, `analysis`, `chips`. |
-| `src/account/` | Cuentas: cliente HTTP de la API (aparte de `src/engine/api.ts`, que es el motor WASM), store de sesión, diálogos de login, registro y perfil, vuelta de Google. |
+| `src/api/` | Cliente HTTP de la API del backend (aparte de `src/engine/api.ts`, que es el motor WASM): URLs relativas, mismo origen, errores `{ code, message }`. |
+| `src/account/` | Cuentas: store de sesión, diálogos de login, registro y perfil, vincular y desvincular Google, vuelta de Google. |
+| `src/casual/` | Casual: el servidor reparte y liquida; el store guarda su última respuesta (`RoundView`), la pila de la próxima apuesta y la animación de liquidación. Mesa, panel de la partida, ranking semanal y récords. |
 | `src/lib/sound.ts` | Efectos de sonido sintetizados con Web Audio (sin archivos). |
 | `src/components/` | Carta, mano, barra de probabilidades, controles segmentados, diálogo. |
 | `e2e/` | Specs de Playwright y fixtures generados por el motor. |
@@ -139,11 +142,15 @@ copiar el paquete nuevo) y luego los tests.
   motor (acción de mayor EV, con división). El usuario hace de dealer con el juego guiado.
 - **Fichas (Práctica)**: dos bancas guardadas en el navegador, la tuya y la de la casa (modo
   dealer). Fichas de 10, 50, 100 y 500; hasta 10 fichas y 500 por apuesta; tope de 1.000.000
-  por banca. Doblar y dividir solo si el saldo lo cubre. En Casual y Ranked el saldo lo llevará
-  el servidor.
+  por banca. Doblar y dividir solo si el saldo lo cubre. En Casual el saldo lo lleva el
+  servidor y el front solo arma la pila con el tope que este indica.
 - **Blackjack del dealer con peek**: la ronda no se liquida al repartir; la oculta se revela a
   la vista tras una pausa y un mensaje explica por qué no hubo decisión.
-- Fuera de alcance por ahora: seguro.
+- **Casual**: el front no reparte, no liquida ni guarda el saldo. Cada respuesta del servidor
+  (`RoundView`) reemplaza el estado; las ayudas del motor usan su `shoeCounts`. Una clave de
+  idempotencia por intención, reutilizada solo para reintentar. Al entrar se retoma la ronda
+  activa.
+- Fuera de alcance por ahora: Ranked y seguro.
 
 ## Atajos de teclado
 

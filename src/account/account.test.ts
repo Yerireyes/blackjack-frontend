@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useTableStore } from '@/store/tableStore';
 import { useAccountStore } from './accountStore';
-import { accountApi, ApiRequestError } from './api';
+import { ApiRequestError } from '@/api/http';
+import { accountApi } from './api';
 import { checkDisplayName } from './displayName';
 import { oauthErrorNotice, readOAuthReturn, withoutOAuthParams } from './oauthReturn';
 import type { Me } from './types';
@@ -229,5 +230,92 @@ describe('vuelta de Google', () => {
 
   it('quita solo sus parámetros de la URL', () => {
     expect(withoutOAuthParams('http://localhost:5180/?login=ok&x=1#a')).toBe('/?x=1#a');
+  });
+});
+
+describe('vincular y desvincular Google con contraseña', () => {
+  const linkedMe: Me = { ...me, providers: ['google'] };
+  const forbidden = () =>
+    json(403, { code: 'invalid_password', message: 'La contraseña no es correcta.' });
+
+  function stubWindow(search = '') {
+    const assign = vi.fn();
+    vi.stubGlobal('window', {
+      location: { search, href: `http://localhost:5180/${search}`, assign },
+      history: { replaceState: vi.fn() },
+    });
+    return assign;
+  }
+
+  beforeEach(() => useAccountStore.setState({ status: 'signedIn', me, dialog: 'linkGoogle' }));
+
+  it('con la contraseña correcta pide la prueba y navega a Google', async () => {
+    const assign = stubWindow();
+    const fetch = stubFetch({
+      'POST /api/v1/auth/google/link-intent': () => new Response(null, { status: 204 }),
+    });
+    await acc().linkGoogle('secreto123');
+    expect(JSON.parse(fetch.mock.calls[0]![1]!.body as string)).toEqual({ password: 'secreto123' });
+    expect(assign).toHaveBeenCalledWith('/api/v1/auth/google/start?link=1');
+  });
+
+  it('una contraseña incorrecta (403) no cierra la sesión ni navega', async () => {
+    const assign = stubWindow();
+    stubFetch({ 'POST /api/v1/auth/google/link-intent': forbidden });
+    await expect(acc().linkGoogle('mal')).rejects.toMatchObject({ code: 'invalid_password' });
+    expect(acc().status).toBe('signedIn');
+    expect(assign).not.toHaveBeenCalled();
+  });
+
+  it('409 already_linked refresca el usuario y vuelve al perfil', async () => {
+    const assign = stubWindow();
+    stubFetch({
+      'POST /api/v1/auth/google/link-intent': () =>
+        json(409, { code: 'already_linked', message: 'Tu cuenta ya tiene Google vinculado.' }),
+      'GET /api/v1/auth/me': () => json(200, linkedMe),
+    });
+    await acc().linkGoogle('secreto123');
+    expect(acc().me?.providers).toEqual(['google']);
+    expect(acc().dialog).toBe('profile');
+    expect(assign).not.toHaveBeenCalled();
+    expect(useTableStore.getState().notice?.text).toMatch(/ya tiene Google/);
+  });
+
+  it('409 google_disabled oculta Google', async () => {
+    stubWindow();
+    useAccountStore.setState({ providers: { google: true } });
+    stubFetch({
+      'POST /api/v1/auth/google/link-intent': () =>
+        json(409, { code: 'google_disabled', message: 'Google no está disponible.' }),
+    });
+    await acc().linkGoogle('secreto123');
+    expect(acc().providers.google).toBe(false);
+  });
+
+  it('desvincular guarda el usuario sin Google y avisa de las otras sesiones', async () => {
+    useAccountStore.setState({ me: linkedMe, dialog: 'unlinkGoogle' });
+    stubFetch({ 'POST /api/v1/auth/google/unlink': () => json(200, me) });
+    await acc().unlinkGoogle('secreto123');
+    expect(acc().me?.providers).toEqual([]);
+    expect(acc().dialog).toBe('profile');
+    expect(useTableStore.getState().notice?.text).toMatch(/otros dispositivos/);
+  });
+
+  it('desvincular con contraseña incorrecta mantiene todo igual', async () => {
+    useAccountStore.setState({ me: linkedMe, dialog: 'unlinkGoogle' });
+    stubFetch({ 'POST /api/v1/auth/google/unlink': forbidden });
+    await expect(acc().unlinkGoogle('mal')).rejects.toMatchObject({ status: 403 });
+    expect(acc()).toMatchObject({ status: 'signedIn', me: linkedMe, dialog: 'unlinkGoogle' });
+  });
+
+  it('volver con reauth_required reabre el diálogo de contraseña', async () => {
+    stubWindow('?link=error&code=reauth_required');
+    stubFetch({
+      'GET /api/v1/auth/providers': () => json(200, { google: true }),
+      'GET /api/v1/auth/me': () => json(200, me),
+    });
+    await acc().init();
+    expect(acc().dialog).toBe('linkGoogle');
+    expect(useTableStore.getState().notice?.text).toMatch(/Confirma tu contraseña/);
   });
 });

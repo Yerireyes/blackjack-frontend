@@ -1,4 +1,4 @@
-import { ApiRequestError } from './api';
+import { ApiRequestError } from '@/api/http';
 
 /** Mensaje para mostrar de un error de la API (ya viene en español desde el servidor). */
 export function errorText(e: unknown): string {

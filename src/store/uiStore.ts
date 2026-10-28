@@ -3,8 +3,11 @@ import { useShoeStore } from './shoeStore';
 
 export type Mode = 'player' | 'dealer';
 export type Source = 'simulation' | 'manual';
+/** Práctica: en el navegador y sin cuenta. Casual: contra el servidor, con cuenta. */
+export type Venue = 'practice' | 'casual';
 
 export interface UiState {
+  venue: Venue;
   mode: Mode;
   source: Source;
   /** Modo dealer: "Conozco mi carta oculta". */
@@ -13,6 +16,7 @@ export interface UiState {
   botSeats: number;
   /** Efectos de sonido activados (se recuerda en este navegador). */
   sound: boolean;
+  setVenue(venue: Venue): void;
   setMode(mode: Mode): void;
   setSource(source: Source): void;
   setKnowHole(on: boolean): void;
@@ -23,7 +27,7 @@ export interface UiState {
 /** En modo dealer con simulación tu asiento lo juega el motor: el usuario es el repartidor. */
 export const autoPlaysPlayer = () => {
   const ui = useUiStore.getState();
-  return ui.mode === 'dealer' && ui.source === 'simulation';
+  return ui.venue === 'practice' && ui.mode === 'dealer' && ui.source === 'simulation';
 };
 
 const SOUND_KEY = 'bj.sound';
@@ -37,12 +41,15 @@ function readSound(): boolean {
 }
 
 export const useUiStore = create<UiState>()((set) => ({
+  venue: 'practice',
   mode: 'player',
   source: 'simulation',
   knowHole: false,
   botSeats: 0,
   sound: readSound(),
 
+  // Cambiar de lugar no toca la mesa de Práctica: queda como estaba al volver.
+  setVenue: (venue) => set({ venue }),
   // Cambiar de modo NO toca el zapato ni la mesa: solo cambia qué se le pregunta al motor.
   setMode: (mode) => set({ mode }),
   setSource: (source) => set({ source }),
