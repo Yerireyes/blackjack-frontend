@@ -2,7 +2,7 @@ import { TriangleAlert } from 'lucide-react';
 import { useState } from 'react';
 import { Dialog } from '@/components/Dialog';
 import { useAccountStore } from './accountStore';
-import { ApiRequestError } from './api';
+import { ApiRequestError } from '@/api/http';
 import { errorText } from './errors';
 import { FormError, TextField } from './fields';
 

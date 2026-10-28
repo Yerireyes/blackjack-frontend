@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useTableStore } from '@/store/tableStore';
 import { useAccountStore } from './accountStore';
-import { accountApi, ApiRequestError } from './api';
+import { ApiRequestError } from '@/api/http';
+import { accountApi } from './api';
 import { checkDisplayName } from './displayName';
 import { oauthErrorNotice, readOAuthReturn, withoutOAuthParams } from './oauthReturn';
 import type { Me } from './types';

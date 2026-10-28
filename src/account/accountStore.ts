@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { useTableStore } from '@/store/tableStore';
-import { accountApi, ApiRequestError, googleStartUrl } from './api';
+import { ApiRequestError } from '@/api/http';
+import { accountApi, googleStartUrl } from './api';
 import { oauthErrorNotice, readOAuthReturn, withoutOAuthParams } from './oauthReturn';
 import type { Me, Providers, RegisterInput } from './types';
 

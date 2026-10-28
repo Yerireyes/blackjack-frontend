@@ -20,11 +20,6 @@ export interface Providers {
   google: boolean;
 }
 
-export interface ApiErrorBody {
-  code: string;
-  message: string;
-}
-
 export interface RegisterInput {
   email: string;
   password: string;
