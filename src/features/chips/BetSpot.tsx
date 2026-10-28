@@ -1,4 +1,4 @@
-import { animate, AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { animate, AnimatePresence, motion, useReducedMotionConfig } from 'motion/react';
 import { useLayoutEffect, useRef } from 'react';
 import { formatChips } from '@/lib/format';
 import { stackTotal, useChipsStore, type Bank, type Chip } from '@/store/chipsStore';
@@ -65,7 +65,7 @@ export function BetStack({ stack, locked, onRemove, testId }: BetStackProps) {
 /** Una ficha de la pila. Si viene de la bandeja, viaja en arco hasta su lugar. */
 function StackChip({ chip, index }: { chip: Chip; index: number }) {
   const ref = useRef<HTMLDivElement>(null);
-  const reduce = useReducedMotion();
+  const reduce = useReducedMotionConfig();
 
   useLayoutEffect(() => {
     const from = takeFlightOrigin(chip.id);

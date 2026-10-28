@@ -50,7 +50,8 @@ export function AccountMenu() {
           data-testid="login-button"
         >
           <LogIn className="size-4 text-mute" aria-hidden />
-          Entrar
+          {/* En móvil solo el icono: la cabecera de la mesa no tiene sitio para el texto. */}
+          <span className="sr-only sm:not-sr-only">Entrar</span>
         </button>
       )}
       <AuthDialog />

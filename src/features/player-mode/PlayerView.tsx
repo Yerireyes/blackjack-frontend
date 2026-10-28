@@ -15,7 +15,7 @@ import { SessionStats } from './SessionStats';
 export function PlayerView() {
   const { slot, result, stale } = useAnalysis('hand');
   // En Casual la mano, la carta del dealer y las reglas son las de la ronda del servidor.
-  const casual = useUiStore((s) => s.venue === 'casual');
+  const casual = useUiStore((s) => s.screen === 'casual');
   const tableUp = useTableStore((s) => s.dealer.up?.face ?? null);
   const casualUp = useCasualStore((s) => s.round?.dealer.up.rank ?? null);
   const practiceRules = useRulesStore((s) => s.rules);

@@ -68,7 +68,8 @@ function wanted(): Record<AnalysisKind, Built<{ version: number }> | null> {
   const { rules } = useRulesStore.getState();
   const t = useTableStore.getState();
   const ui = useUiStore.getState();
-  if (ui.venue === 'casual') {
+  if (ui.screen === 'home') return { hand: null, dealer: null, round: null };
+  if (ui.screen === 'casual') {
     // Casual: la mano y el zapato salen de la última respuesta del servidor.
     const c = useCasualStore.getState();
     return {
@@ -165,7 +166,7 @@ let botTimer: ReturnType<typeof setTimeout> | null = null;
 let botBusy = false;
 
 /** Los bots, el jugador automático y el dealer automático son solo de Práctica. */
-const inPractice = () => useUiStore.getState().venue === 'practice';
+const inPractice = () => useUiStore.getState().screen === 'practice';
 
 function driveBots() {
   if (!inPractice()) return;
@@ -294,7 +295,7 @@ export function startEngineSync() {
   useShoeStore.subscribe((s, prev) => s.version !== prev.version && schedule());
   useUiStore.subscribe(
     (s, prev) =>
-      (s.venue !== prev.venue ||
+      (s.screen !== prev.screen ||
         s.mode !== prev.mode ||
         s.knowHole !== prev.knowHole ||
         s.source !== prev.source) &&

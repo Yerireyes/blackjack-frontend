@@ -4,7 +4,10 @@ import { formatEv } from '../src/lib/format.ts';
 export async function open(page: Page) {
   page.on('dialog', (d) => d.accept());
   await page.goto('/');
+  // Se entra por la pantalla de inicio, como un usuario.
   await expect(page.getByRole('heading', { name: 'Blackjack Guide' })).toBeVisible();
+  await page.getByTestId('home-practice').click();
+  await expect(page.getByRole('heading', { name: 'Práctica' })).toBeVisible();
 }
 
 export async function useOneDeckManual(page: Page) {
