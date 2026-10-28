@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { casualLocked, useCasualStore } from '@/casual/casualStore';
 import { performAction } from '@/features/table/performAction';
 import { useTableStore, type PlayerAction } from '@/store/tableStore';
 import { useUiStore } from '@/store/uiStore';
@@ -20,6 +21,10 @@ export function useKeyboard() {
       if (isTypingTarget(e.target)) return;
       const el = e.target as HTMLElement;
       const action = KEYS[e.key.toLowerCase()];
+      if (useUiStore.getState().venue === 'casual') {
+        onCasualKey(e, action, el);
+        return;
+      }
       if (action) {
         e.preventDefault();
         performAction(action);
@@ -38,4 +43,19 @@ export function useKeyboard() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
+}
+
+/** Casual: las mismas teclas, pero las intenciones van al servidor. */
+function onCasualKey(e: KeyboardEvent, action: PlayerAction | undefined, el: HTMLElement) {
+  const c = useCasualStore.getState();
+  if (action) {
+    e.preventDefault();
+    void c.act(action);
+    return;
+  }
+  if (e.key !== 'Enter' || el.closest('button, a')) return;
+  if (c.status === 'playing' && !casualLocked(c)) {
+    e.preventDefault();
+    void c.deal();
+  }
 }

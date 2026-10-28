@@ -1,6 +1,7 @@
 // Mantiene el análisis al día: cada cambio de versión arma los pedidos que
 // correspondan al modo actual y los manda al motor. También mueve a los bots
 // (que juegan la acción de mayor EV del motor) y el autojuego del dealer.
+import { useCasualStore } from '@/casual/casualStore';
 import { useAnalysisStore, type AnalysisKind } from '@/store/analysisStore';
 import { useRulesStore } from '@/store/rulesStore';
 import { useShoeStore } from '@/store/shoeStore';
@@ -22,6 +23,7 @@ import {
 } from './client';
 import {
   buildBotRequest,
+  buildCasualHandRequest,
   buildDealerRequest,
   buildHandRequest,
   buildRoundRequest,
@@ -66,6 +68,18 @@ function wanted(): Record<AnalysisKind, Built<{ version: number }> | null> {
   const { rules } = useRulesStore.getState();
   const t = useTableStore.getState();
   const ui = useUiStore.getState();
+  if (ui.venue === 'casual') {
+    // Casual: la mano y el zapato salen de la última respuesta del servidor.
+    const c = useCasualStore.getState();
+    return {
+      hand:
+        c.run && c.round && !c.revealing
+          ? buildCasualHandRequest(version, c.run.rules, c.round)
+          : { ok: false, reason: 'Reparte una mano para ver el EV de cada acción.' },
+      dealer: null,
+      round: null,
+    };
+  }
   if (ui.mode === 'player') {
     return {
       hand: buildHandRequest({
@@ -150,7 +164,11 @@ export function retryAnalysis() {
 let botTimer: ReturnType<typeof setTimeout> | null = null;
 let botBusy = false;
 
+/** Los bots, el jugador automático y el dealer automático son solo de Práctica. */
+const inPractice = () => useUiStore.getState().venue === 'practice';
+
 function driveBots() {
+  if (!inPractice()) return;
   const t = useTableStore.getState();
   if (t.phase !== 'bots' || botBusy || botTimer) return;
   const seatIndex = t.others.findIndex((s) => s.hands.some((h) => !h.done));
@@ -191,6 +209,7 @@ let autoTimer: ReturnType<typeof setTimeout> | null = null;
 let autoBusy = false;
 
 function driveAutoPlayer() {
+  if (!inPractice()) return;
   const t = useTableStore.getState();
   if (!autoPlaysPlayer() || t.phase !== 'player' || autoBusy || autoTimer) return;
   const shoe = useShoeStore.getState();
@@ -233,6 +252,7 @@ function driveAutoPlayer() {
 let dealerTimer: ReturnType<typeof setTimeout> | null = null;
 
 function driveDealer() {
+  if (!inPractice()) return;
   const t = useTableStore.getState();
   const ui = useUiStore.getState();
   // En modo dealer el juego es guiado: el usuario pide cada carta.
@@ -274,10 +294,15 @@ export function startEngineSync() {
   useShoeStore.subscribe((s, prev) => s.version !== prev.version && schedule());
   useUiStore.subscribe(
     (s, prev) =>
-      (s.mode !== prev.mode || s.knowHole !== prev.knowHole || s.source !== prev.source) &&
+      (s.venue !== prev.venue ||
+        s.mode !== prev.mode ||
+        s.knowHole !== prev.knowHole ||
+        s.source !== prev.source) &&
       schedule(),
   );
   useRulesStore.subscribe((s, prev) => s.rules !== prev.rules && schedule());
   useTableStore.subscribe((s, prev) => s.phase !== prev.phase && schedule());
+  // Al terminar la animación de liquidación cambia lo que se puede pedir.
+  useCasualStore.subscribe((s, prev) => s.revealing !== prev.revealing && schedule());
   schedule();
 }

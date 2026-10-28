@@ -41,6 +41,8 @@ export interface AccountState {
   unlinkGoogle(password: string): Promise<void>;
   openDialog(dialog: AccountDialog): void;
   deferName(): void;
+  /** Un 401 en una llamada con sesión (de cualquier módulo): pasa a anónimo y avisa. */
+  sessionLost(): void;
 }
 
 const notify = (text: string, tone: 'info' | 'error' = 'info') =>
@@ -55,18 +57,17 @@ export const useAccountStore = create<AccountState>()((set, get) => {
 
   const signOut = () => set({ status: 'anonymous', me: null, dialog: null });
 
+  const sessionLost = () => {
+    signOut();
+    notify('Tu sesión se cerró (venció o se cerró en otro dispositivo). Vuelve a entrar.', 'error');
+  };
+
   /** Llamada con sesión: un 401 = la sesión venció (7 días) o se cerró en otro dispositivo. */
   const authed = async <T>(call: () => Promise<T>): Promise<T> => {
     try {
       return await call();
     } catch (e) {
-      if (e instanceof ApiRequestError && e.status === 401) {
-        signOut();
-        notify(
-          'Tu sesión se cerró (venció o se cerró en otro dispositivo). Vuelve a entrar.',
-          'error',
-        );
-      }
+      if (e instanceof ApiRequestError && e.status === 401) sessionLost();
       throw e;
     }
   };
@@ -174,5 +175,6 @@ export const useAccountStore = create<AccountState>()((set, get) => {
 
     openDialog: (dialog) => set({ dialog }),
     deferName: () => set({ nameDeferred: true, dialog: null }),
+    sessionLost,
   };
 });

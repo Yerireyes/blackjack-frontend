@@ -1,6 +1,9 @@
 import { MotionConfig } from 'motion/react';
 import { AccountMenu } from '@/account/AccountMenu';
+import { CasualPanel } from '@/casual/CasualPanel';
+import { CasualTable } from '@/casual/CasualTable';
 import { ModeSwitch } from '@/components/ModeSwitch';
+import { VenueSwitch } from '@/components/VenueSwitch';
 import { ChipBalance } from '@/features/chips/ChipBalance';
 import { DealerView } from '@/features/dealer-mode/DealerView';
 import { PlayerView } from '@/features/player-mode/PlayerView';
@@ -16,6 +19,7 @@ import { useKeyboard } from './useKeyboard';
 export function App() {
   useKeyboard();
   const mode = useUiStore((s) => s.mode);
+  const practice = useUiStore((s) => s.venue === 'practice');
 
   return (
     <MotionConfig reducedMotion="user">
@@ -30,12 +34,18 @@ export function App() {
             </span>
             Blackjack Guide
           </h1>
-          <div className="order-3 w-full lg:order-2 lg:w-auto">
-            <ModeSwitch />
+          <div className="order-3 flex w-full flex-col gap-2 lg:order-2 lg:w-auto lg:flex-row lg:items-center">
+            <VenueSwitch />
+            {/* Jugador/Dealer y Simulación/Manual son de Práctica; Casual tiene su propia mesa. */}
+            {practice && <ModeSwitch />}
           </div>
           <div className="order-2 ml-auto flex min-w-0 items-center justify-end gap-2 lg:order-3 lg:flex-1">
-            <RulesPanel />
-            <ShoeHud />
+            {practice && (
+              <>
+                <RulesPanel />
+                <ShoeHud />
+              </>
+            )}
             <ChipBalance />
             <SoundToggle />
             <AccountMenu />
@@ -43,12 +53,27 @@ export function App() {
         </header>
 
         <main className="grid flex-1 lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_27.5rem]">
-          <Table />
+          {practice ? <Table /> : <CasualTable />}
           <aside
-            aria-label={mode === 'player' ? 'Análisis del jugador' : 'Análisis del dealer'}
+            aria-label={
+              !practice
+                ? 'Análisis y partida Casual'
+                : mode === 'player'
+                  ? 'Análisis del jugador'
+                  : 'Análisis del dealer'
+            }
             className="border-t border-ink-800 bg-ink-900 px-4 py-6 sm:px-6 lg:overflow-y-auto lg:border-t-0 lg:border-l"
           >
-            {mode === 'player' ? <PlayerView /> : <DealerView />}
+            {!practice ? (
+              <div className="flex flex-col gap-7">
+                <PlayerView />
+                <CasualPanel />
+              </div>
+            ) : mode === 'player' ? (
+              <PlayerView />
+            ) : (
+              <DealerView />
+            )}
           </aside>
         </main>
       </div>

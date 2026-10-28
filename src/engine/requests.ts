@@ -10,11 +10,17 @@ import {
   type Phase,
   type Seat,
 } from '@/store/tableStore';
-import type { AnalyzeDealerRequest, AnalyzeHandRequest, AnalyzeRoundRequest } from './contract';
+import type {
+  AnalyzeDealerRequest,
+  AnalyzeHandRequest,
+  AnalyzeRoundRequest,
+  RoundView,
+} from './contract';
 
 export type Built<T> = { ok: true; req: T } | { ok: false; reason: string };
 
-const ranks = (cards: readonly Card[]): RankIndex[] => cards.map((c) => toRankIndex(c.face));
+const ranks = (cards: readonly Pick<Card, 'face'>[]): RankIndex[] =>
+  cards.map((c) => toRankIndex(c.face));
 
 export interface HandInput {
   version: number;
@@ -154,5 +160,39 @@ export function buildBotRequest(
     splitHandsSoFar: 0,
     isSplitAces: false,
     allowed: { double: allowed.double, split: false, surrender: allowed.surrender },
+  };
+}
+
+/**
+ * Pedido de análisis para una ronda de Casual. Todo sale de la respuesta del servidor:
+ * `shoeCounts` (sin ver, con la oculta contada como no vista) es el zapato del motor, y las
+ * acciones permitidas son su `allowed`, que ya tiene en cuenta el saldo.
+ */
+export function buildCasualHandRequest(
+  version: number,
+  rules: Rules,
+  round: RoundView,
+): Built<AnalyzeHandRequest> {
+  if (round.phase !== 'player') return { ok: false, reason: 'La ronda terminó.' };
+  if (!round.shoeCounts) {
+    return { ok: false, reason: 'El servidor no envió la composición del zapato.' };
+  }
+  const h = round.player.hands[round.player.active];
+  if (!h || h.cards.length < 2) return { ok: false, reason: 'Esperando las cartas de tu mano.' };
+  const faces = h.cards.map((c) => ({ face: c.rank }));
+  if (handValue(faces, h.fromSplit).bust) return { ok: false, reason: 'Tu mano se pasó.' };
+  const { allowed } = round;
+  return {
+    ok: true,
+    req: {
+      version,
+      rules,
+      shoe: [...round.shoeCounts],
+      hand: ranks(faces),
+      dealerUp: toRankIndex(round.dealer.up.rank),
+      splitHandsSoFar: round.player.hands.length - 1,
+      isSplitAces: h.fromSplit && h.cards[0]?.rank === 'A',
+      allowed: { double: allowed.double, split: allowed.split, surrender: allowed.surrender },
+    },
   };
 }
