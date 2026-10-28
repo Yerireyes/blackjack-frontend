@@ -2,6 +2,7 @@ import type { Card, Face, Suit } from '@/domain/cards';
 import { presetRules } from '@/domain/rules';
 import { applyRules, switchSource } from '@/store/actions';
 import { useAnalysisStore } from '@/store/analysisStore';
+import { useChipsStore, type Bank, type ChipValue } from '@/store/chipsStore';
 import { useTableStore } from '@/store/tableStore';
 import { useUiStore } from '@/store/uiStore';
 
@@ -22,4 +23,11 @@ export function manualTable(decks = 1) {
     hand: { ...useAnalysisStore.getState().hand, result: null, status: 'idle' },
   });
   return useTableStore.getState();
+}
+
+/** Deja la pila de apuesta de la banca con estas fichas. */
+export function setStack(bank: Bank, ...values: ChipValue[]) {
+  useChipsStore.setState((s) => ({
+    stacks: { ...s.stacks, [bank]: values.map((value, i) => ({ id: -1 - i, value })) },
+  }));
 }

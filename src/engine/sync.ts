@@ -4,7 +4,7 @@
 import { useAnalysisStore, type AnalysisKind } from '@/store/analysisStore';
 import { useRulesStore } from '@/store/rulesStore';
 import { useShoeStore } from '@/store/shoeStore';
-import { activeHand, allowedActions, useTableStore } from '@/store/tableStore';
+import { activeHand, playerActions, playerSpare, useTableStore } from '@/store/tableStore';
 import { autoPlaysPlayer, useUiStore } from '@/store/uiStore';
 import type { EngineMethod } from './api';
 import {
@@ -68,6 +68,7 @@ function wanted(): Record<AnalysisKind, Built<{ version: number }> | null> {
         player: t.player,
         dealer: t.dealer,
         phase: t.phase,
+        spare: playerSpare(t.player),
       }),
       dealer: null,
       round: null,
@@ -194,6 +195,7 @@ function driveAutoPlayer() {
     player: t.player,
     dealer: t.dealer,
     phase: t.phase,
+    spare: playerSpare(t.player),
   });
   if (!built.ok) return;
   autoBusy = true;
@@ -214,7 +216,7 @@ function driveAutoPlayer() {
           activeHand(now.player)?.id === handId && useShoeStore.getState().version === version;
         if (autoPlaysPlayer() && now.phase === 'player' && same) {
           // El motor solo elige entre las acciones permitidas; plantarse es la red de seguridad.
-          now.act(allowedActions(now.player, rules)[best] ? best : 'stand');
+          now.act(playerActions(now.player, rules)[best] ? best : 'stand');
         }
         driveAutoPlayer();
       }, BOT_DELAY_MS);

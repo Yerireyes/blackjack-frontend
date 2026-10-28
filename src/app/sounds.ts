@@ -1,4 +1,5 @@
 import { playSound, type Sound } from '@/lib/sound';
+import { useChipsStore } from '@/store/chipsStore';
 import { dealerCards, useTableStore, type TableState } from '@/store/tableStore';
 import { useUiStore } from '@/store/uiStore';
 
@@ -22,8 +23,20 @@ function outcomeSound(s: TableState): Sound | null {
   return net > 0 ? 'win' : net < 0 ? 'lose' : 'push';
 }
 
-/** Escucha la mesa y reproduce los efectos: cartas, carta oculta revelada y resultado. */
+/** Lo que tarda una ficha en viajar de la bandeja a la mesa: suena al caer. */
+const CHIP_FLIGHT = 0.36;
+
+/** Escucha la mesa y las fichas y reproduce los efectos: cartas, oculta, apuesta y resultado. */
 export function startSoundSync() {
+  useChipsStore.subscribe((s, prev) => {
+    if (!useUiStore.getState().sound || s.stacks === prev.stacks) return;
+    for (const bank of ['player', 'house'] as const) {
+      const diff = s.stacks[bank].length - prev.stacks[bank].length;
+      if (diff > 0) playSound('chip', CHIP_FLIGHT);
+      else if (diff < 0) playSound('chipOff');
+    }
+  });
+
   return useTableStore.subscribe((s, prev) => {
     if (!useUiStore.getState().sound) return;
     let at = 0;

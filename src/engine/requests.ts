@@ -24,6 +24,8 @@ export interface HandInput {
   player: Seat;
   dealer: DealerState;
   phase: Phase;
+  /** Unidades extra que cubren las fichas (playerSpare); sin límite si se omite. */
+  spare?: number;
 }
 
 export function buildHandRequest(s: HandInput): Built<AnalyzeHandRequest> {
@@ -41,7 +43,7 @@ export function buildHandRequest(s: HandInput): Built<AnalyzeHandRequest> {
   if (s.dealer.holeRevealed) {
     return { ok: false, reason: 'La carta oculta ya se reveló: el turno del jugador terminó.' };
   }
-  const allowed = allowedActions(s.player, s.rules);
+  const allowed = allowedActions(s.player, s.rules, s.spare);
   return {
     ok: true,
     req: {

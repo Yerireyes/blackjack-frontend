@@ -34,6 +34,15 @@ export function formatUnits(u: number): string {
   return `${u > 0 ? '+' : MINUS}${two.format(Math.abs(u))}${NBSP}u`;
 }
 
+/** Fichas enteras con punto de miles → "1.000"; con `signed`, "+15" / "−40". */
+export function formatChips(n: number, signed = false): string {
+  const body = Math.abs(Math.round(n))
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  if (!signed || n === 0) return n < 0 ? `${MINUS}${body}` : body;
+  return `${n > 0 ? '+' : MINUS}${body}`;
+}
+
 export const evTone = (ev: number) => (ev > 0.00005 ? 'pos' : ev < -0.00005 ? 'neg' : 'zero');
 
 export function formatMs(ms: number): string {

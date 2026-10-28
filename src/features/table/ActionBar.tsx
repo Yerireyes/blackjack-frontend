@@ -1,7 +1,8 @@
 import { isCurrent, useAnalysisStore } from '@/store/analysisStore';
 import { useRulesStore } from '@/store/rulesStore';
 import { useShoeStore } from '@/store/shoeStore';
-import { allowedActions, useTableStore } from '@/store/tableStore';
+import { allowedActions, playerActions, useTableStore } from '@/store/tableStore';
+import { useChipsStore } from '@/store/chipsStore';
 import { performAction } from './performAction';
 import { useUiStore } from '@/store/uiStore';
 import { ACTION_KEY, ACTION_LABEL, ACTION_ORDER } from '@/features/player-mode/actions';
@@ -15,7 +16,10 @@ export function ActionButtons() {
   const mode = useUiStore((s) => s.mode);
   const slot = useAnalysisStore((s) => s.hand);
   const version = useShoeStore((s) => s.version);
-  const allowed = allowedActions(player, rules);
+  // Se suscribe a la banca para recalcular qué alcanza a cubrir.
+  useChipsStore((s) => s.player);
+  const byRules = allowedActions(player, rules);
+  const allowed = playerActions(player, rules);
   const best =
     mode === 'player' && slot.result && isCurrent(slot, version) ? slot.result.best : null;
   const active = phase === 'player';
@@ -30,6 +34,7 @@ export function ActionButtons() {
         const enabled = active && allowed[a];
         const rec = enabled && best === a;
         const manualHit = source === 'manual' && a === 'hit';
+        const noFunds = active && byRules[a] && !allowed[a];
         return (
           <button
             key={a}
@@ -38,8 +43,14 @@ export function ActionButtons() {
             disabled={!enabled}
             onClick={() => performAction(a)}
             aria-keyshortcuts={ACTION_KEY[a]}
-            aria-label={`${ACTION_LABEL[a]}${rec ? ' (recomendada)' : ''}`}
-            title={manualHit ? 'En modo manual, agrega la carta con el selector' : undefined}
+            aria-label={`${ACTION_LABEL[a]}${rec ? ' (recomendada)' : ''}${noFunds ? ' (fichas insuficientes)' : ''}`}
+            title={
+              manualHit
+                ? 'En modo manual, agrega la carta con el selector'
+                : noFunds
+                  ? `Fichas insuficientes para ${ACTION_LABEL[a].toLowerCase()}`
+                  : undefined
+            }
           >
             {ACTION_LABEL[a]}
             <kbd className="kbd hidden sm:inline">{ACTION_KEY[a]}</kbd>

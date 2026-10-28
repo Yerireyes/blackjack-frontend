@@ -2,8 +2,11 @@ import { Play, Users } from 'lucide-react';
 import { motion, useAnimate, useReducedMotion } from 'motion/react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Hand } from '@/components/Hand';
+import { BetSpot } from '@/features/chips/BetSpot';
+import { ChipTray } from '@/features/chips/ChipTray';
 import { DealerButtons } from '@/features/dealer-mode/DealerControls';
 import { CardPicker } from '@/features/manual-entry/CardPicker';
+import { MIN_BET, stackTotal, useChipsStore } from '@/store/chipsStore';
 import { dealerCards, useTableStore } from '@/store/tableStore';
 import { useUiStore, type Mode } from '@/store/uiStore';
 import { ActionButtons } from './ActionBar';
@@ -61,30 +64,36 @@ export function Table() {
       </div>
     ) : null;
 
+  // La apuesta va entre el jugador y el dealer: arriba de la mano en tu vista, abajo en la del repartidor.
   const playerHands = (
     <div
       key="player"
-      className="flex max-w-full flex-wrap items-end justify-center gap-x-3 gap-y-2"
-      aria-label={asDealer ? 'Manos del jugador' : 'Tus manos'}
+      className={`flex max-w-full items-center gap-2 ${asDealer ? 'flex-col-reverse' : 'flex-col'}`}
     >
-      {t.player.hands.map((h, i) => (
-        <Hand
-          key={h.id}
-          label={t.player.hands.length > 1 ? `Mano ${i + 1}` : asDealer ? 'Jugador' : 'Tu mano'}
-          cards={h.cards}
-          fromSplit={h.fromSplit}
-          active={t.player.hands.length > 1 && i === t.player.active && t.phase === 'player'}
-          outcome={h.outcome}
-          net={h.net}
-          doubled={h.doubled}
-          testId={`player-hand-${i}`}
-          slots={
-            (!sim || t.phase === 'idle') && i === 0 && !h.fromSplit
-              ? [asDealer ? 'Carta' : 'Tu carta', asDealer ? 'Carta' : 'Tu carta']
-              : []
-          }
-        />
-      ))}
+      {sim && <BetSpot bank={asDealer ? 'house' : 'player'} />}
+      <div
+        className="flex max-w-full flex-wrap items-end justify-center gap-x-3 gap-y-2"
+        aria-label={asDealer ? 'Manos del jugador' : 'Tus manos'}
+      >
+        {t.player.hands.map((h, i) => (
+          <Hand
+            key={h.id}
+            label={t.player.hands.length > 1 ? `Mano ${i + 1}` : asDealer ? 'Jugador' : 'Tu mano'}
+            cards={h.cards}
+            fromSplit={h.fromSplit}
+            active={t.player.hands.length > 1 && i === t.player.active && t.phase === 'player'}
+            outcome={h.outcome}
+            net={h.net}
+            doubled={h.doubled}
+            testId={`player-hand-${i}`}
+            slots={
+              (!sim || t.phase === 'idle') && i === 0 && !h.fromSplit
+                ? [asDealer ? 'Carta' : 'Tu carta', asDealer ? 'Carta' : 'Tu carta']
+                : []
+            }
+          />
+        ))}
+      </div>
     </div>
   );
 
@@ -195,6 +204,8 @@ function SimControls() {
   const bots = useUiStore((s) => s.botSeats);
   const setBots = useUiStore((s) => s.setBotSeats);
   const canDeal = phase === 'idle' || phase === 'settled';
+  const bank = mode === 'dealer' ? 'house' : 'player';
+  const bet = useChipsStore((s) => stackTotal(s.stacks[bank]));
 
   if (!canDeal) {
     return mode === 'dealer' ? (
@@ -206,33 +217,38 @@ function SimControls() {
     );
   }
   return (
-    <div className="flex flex-wrap items-center justify-center gap-2">
-      <button
-        type="button"
-        className="btn btn-paper h-11 px-5 text-base"
-        onClick={deal}
-        aria-keyshortcuts="Enter"
-      >
-        <Play className="size-4" aria-hidden />
-        {phase === 'settled' ? 'Siguiente ronda' : 'Repartir'}
-        <kbd className="kbd hidden sm:inline">Enter</kbd>
-      </button>
-      <label className="btn h-11 gap-2 text-sm">
-        <Users className="size-4 text-mute" aria-hidden />
-        <span className="text-mute">Otros asientos</span>
-        <select
-          value={bots}
-          onChange={(e) => setBots(Number(e.target.value))}
-          className="rounded bg-transparent font-semibold text-text outline-none"
-          aria-label="Otros asientos en la mesa"
+    <div className="flex flex-col items-center gap-3">
+      <ChipTray bank={bank} />
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        <button
+          type="button"
+          className="btn btn-paper h-11 px-5 text-base"
+          onClick={deal}
+          disabled={bet < MIN_BET}
+          title={bet < MIN_BET ? 'Pon fichas sobre la mesa para apostar' : undefined}
+          aria-keyshortcuts="Enter"
         >
-          {[0, 1, 2, 3, 4, 5, 6].map((n) => (
-            <option key={n} value={n} className="bg-ink-900">
-              {n}
-            </option>
-          ))}
-        </select>
-      </label>
+          <Play className="size-4" aria-hidden />
+          {phase === 'settled' ? 'Siguiente ronda' : 'Repartir'}
+          <kbd className="kbd hidden sm:inline">Enter</kbd>
+        </button>
+        <label className="btn h-11 gap-2 text-sm">
+          <Users className="size-4 text-mute" aria-hidden />
+          <span className="text-mute">Otros asientos</span>
+          <select
+            value={bots}
+            onChange={(e) => setBots(Number(e.target.value))}
+            className="rounded bg-transparent font-semibold text-text outline-none"
+            aria-label="Otros asientos en la mesa"
+          >
+            {[0, 1, 2, 3, 4, 5, 6].map((n) => (
+              <option key={n} value={n} className="bg-ink-900">
+                {n}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
     </div>
   );
 }

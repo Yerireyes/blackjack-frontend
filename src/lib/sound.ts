@@ -2,7 +2,7 @@
 // El AudioContext se crea en el primer sonido, que siempre sigue a un gesto del usuario
 // (repartir, pedir…), así que la política de autoplay del navegador no lo bloquea.
 
-export type Sound = 'card' | 'flip' | 'win' | 'blackjack' | 'push' | 'lose';
+export type Sound = 'card' | 'flip' | 'chip' | 'chipOff' | 'win' | 'blackjack' | 'push' | 'lose';
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
@@ -72,6 +72,13 @@ const SOUNDS: Record<Sound, (t: number) => void> = {
     swish(t, 1800, 0.05, 0.45);
     swish(t + 0.06, 3200, 0.06, 0.5);
   },
+  // Ficha de arcilla cayendo sobre la pila: dos golpes secos y agudos casi juntos.
+  chip: (t) => {
+    swish(t, 5200, 0.025, 0.7);
+    tone(t, 3400 + Math.random() * 300, 0.05, 0.05, 'sine');
+    swish(t + 0.035, 6000, 0.02, 0.35);
+  },
+  chipOff: (t) => swish(t, 4200, 0.03, 0.35),
   win: (t) => notes(t, [523.25, 659.25, 783.99], 0.09, 0.35, 0.18, 'triangle'),
   blackjack: (t) => {
     notes(t, [523.25, 659.25, 783.99, 1046.5], 0.08, 0.5, 0.18, 'triangle');
