@@ -8,6 +8,7 @@ import { Table } from '@/features/table/Table';
 import { useUiStore } from '@/store/uiStore';
 import { Announcer } from './Announcer';
 import { Notice } from './Notice';
+import { SoundToggle } from './SoundToggle';
 import { useKeyboard } from './useKeyboard';
 
 export function App() {
@@ -33,6 +34,7 @@ export function App() {
           <div className="order-2 ml-auto flex min-w-0 items-center justify-end gap-2 lg:order-3 lg:flex-1">
             <RulesPanel />
             <ShoeHud />
+            <SoundToggle />
           </div>
         </header>
 
