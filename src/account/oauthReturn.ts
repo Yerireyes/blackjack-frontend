@@ -16,6 +16,7 @@ const MESSAGES: Record<string, string> = {
   identity_in_use: 'Esa cuenta de Google ya está vinculada a otro usuario.',
   already_linked: 'Tu cuenta ya tiene otra cuenta de Google vinculada.',
   unauthorized: 'Inicia sesión para vincular Google.',
+  reauth_required: 'Confirma tu contraseña para vincular Google.',
   google_disabled: 'El acceso con Google no está disponible.',
 };
 const GENERIC = 'No se pudo completar el acceso con Google. Inténtalo de nuevo.';

@@ -3,6 +3,17 @@
 Cambios relevantes del front. Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/);
 versiones según [SemVer](https://semver.org/lang/es/) (en 0.x, una versión menor puede romper compatibilidad).
 
+## [Sin publicar]
+
+### Agregado
+
+- **Vincular Google pide la contraseña:** primero se confirma en un diálogo
+  (`POST /auth/google/link-intent`) y después se navega a Google. Si la prueba falta, venció o
+  ya se gastó, la vuelta (`reauth_required`) reabre el diálogo.
+- **Desvincular Google** desde el perfil, con confirmación y contraseña. Cierra la sesión en los
+  demás dispositivos y lo avisa. Vincular y desvincular solo se muestran si la cuenta tiene
+  contraseña.
+
 ## [0.2.0] - 2026-10-28
 
 ### Agregado

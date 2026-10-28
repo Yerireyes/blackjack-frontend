@@ -64,6 +64,14 @@ export const accountApi = {
   /** Revoca todas las sesiones del usuario, también la actual. */
   logoutAll: () => request<void>('POST', '/auth/logout-all'),
   updateMe: (displayName: string) => request<Me>('PATCH', '/me', { displayName }),
+  /**
+   * Paso previo a vincular Google: con la contraseña correcta el servidor guarda en esta
+   * sesión una prueba de un solo uso (5 min) que gasta la navegación a start?link=1.
+   */
+  googleLinkIntent: (password: string) =>
+    request<void>('POST', '/auth/google/link-intent', { password }),
+  /** Quita Google de la cuenta y cierra las demás sesiones (no la actual). */
+  googleUnlink: (password: string) => request<Me>('POST', '/auth/google/unlink', { password }),
 };
 
 /**
