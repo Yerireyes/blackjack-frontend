@@ -11,6 +11,8 @@ import { PlayerView } from '@/features/player-mode/PlayerView';
 import { RulesPanel } from '@/features/settings/RulesPanel';
 import { ShoeHud } from '@/features/shoe-tracker/ShoeHud';
 import { Table } from '@/features/table/Table';
+import { RankedPanel } from '@/ranked/RankedPanel';
+import { RankedTable } from '@/ranked/RankedTable';
 import { useUiStore } from '@/store/uiStore';
 import { Announcer } from './Announcer';
 import { Home } from './Home';
@@ -55,10 +57,13 @@ export function App() {
   );
 }
 
-/** La mesa de Práctica o de Casual, con su cabecera y su panel de análisis. */
+const TITLE = { home: '', practice: 'Práctica', casual: 'Casual', ranked: 'Ranked' } as const;
+
+/** La mesa de Práctica, Casual o Ranked, con su cabecera y su panel de análisis. */
 function TableScreen() {
   const mode = useUiStore((s) => s.mode);
-  const practice = useUiStore((s) => s.screen === 'practice');
+  const screen = useUiStore((s) => s.screen);
+  const practice = screen === 'practice';
   const setScreen = useUiStore((s) => s.setScreen);
   const title = useRef<HTMLHeadingElement>(null);
   // Se llega desde el inicio con un clic: el botón que tenía el foco ya no existe.
@@ -91,7 +96,7 @@ function TableScreen() {
             tabIndex={-1}
             className="text-[15px] font-semibold tracking-[-0.01em] outline-none"
           >
-            {practice ? 'Práctica' : 'Jugar'}
+            {TITLE[screen]}
           </h1>
         </div>
         {/* Jugador/Dealer y Simulación/Manual son de Práctica; Casual tiene su propia mesa. */}
@@ -117,18 +122,23 @@ function TableScreen() {
       </header>
 
       <main className="grid flex-1 lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_27.5rem]">
-        {practice ? <Table /> : <CasualTable />}
+        {practice ? <Table /> : screen === 'ranked' ? <RankedTable /> : <CasualTable />}
         <aside
           aria-label={
-            !practice
+            screen === 'casual'
               ? 'Análisis y partida Casual'
-              : mode === 'player'
-                ? 'Análisis del jugador'
-                : 'Análisis del dealer'
+              : screen === 'ranked'
+                ? 'Temporada Ranked'
+                : mode === 'player'
+                  ? 'Análisis del jugador'
+                  : 'Análisis del dealer'
           }
           className="border-t border-ink-800 bg-ink-900 px-4 py-6 sm:px-6 lg:overflow-y-auto lg:border-t-0 lg:border-l"
         >
-          {!practice ? (
+          {screen === 'ranked' ? (
+            // Sin ayudas: ni EV ni recomendaciones, solo la temporada y la revisión.
+            <RankedPanel />
+          ) : !practice ? (
             <div className="flex flex-col gap-7">
               <PlayerView />
               <CasualPanel />

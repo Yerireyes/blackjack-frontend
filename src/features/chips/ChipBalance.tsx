@@ -1,14 +1,17 @@
 import { Coins, Landmark } from 'lucide-react';
 import { formatChips } from '@/lib/format';
 import { useCasualStore } from '@/casual/casualStore';
-import { fullyShown } from '@/casual/view';
+import { useRankedStore } from '@/ranked/rankedStore';
+import { fullyShown } from '@/play/view';
 import { useChipsStore, type Bank } from '@/store/chipsStore';
 import { useUiStore } from '@/store/uiStore';
 
 /** Saldo de la banca del modo actual y el resultado de su última ronda. */
 export function ChipBalance() {
-  const casual = useUiStore((s) => s.screen === 'casual');
-  return casual ? <CasualBalance /> : <PracticeBalance />;
+  const screen = useUiStore((s) => s.screen);
+  if (screen === 'casual') return <CasualBalance />;
+  if (screen === 'ranked') return <RankedBalance />;
+  return <PracticeBalance />;
 }
 
 /** Casual: el saldo es de la partida y lo trae cada respuesta del servidor. */
@@ -19,6 +22,16 @@ function CasualBalance() {
   );
   if (balance === null) return null;
   return <BalanceChip icon={Coins} name="Saldo de la partida" balance={balance} last={last} />;
+}
+
+/** Ranked: el saldo es de la cuenta de la temporada. */
+function RankedBalance() {
+  const balance = useRankedStore((s) => s.wallet?.balance ?? null);
+  const last = useRankedStore((s) =>
+    s.round?.result && fullyShown(s.round, s.shown) ? s.round.result.net : null,
+  );
+  if (balance === null) return null;
+  return <BalanceChip icon={Coins} name="Saldo de la temporada" balance={balance} last={last} />;
 }
 
 function PracticeBalance() {

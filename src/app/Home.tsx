@@ -1,10 +1,12 @@
-import { ArrowRight, GraduationCap, Settings, Trophy, type LucideIcon } from 'lucide-react';
+import { ArrowRight, GraduationCap, Settings, Spade, Trophy, type LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { AccountMenu } from '@/account/AccountMenu';
 import { useAccountStore } from '@/account/accountStore';
 import { useCasualStore } from '@/casual/casualStore';
 import { PlayingCard } from '@/components/PlayingCard';
+import { endsIn, seasonName } from '@/ranked/format';
+import { useRankedStore } from '@/ranked/rankedStore';
 import { formatChips } from '@/lib/format';
 import { useChipsStore } from '@/store/chipsStore';
 import { useUiStore } from '@/store/uiStore';
@@ -64,17 +66,20 @@ export function Home() {
 
         <nav
           aria-label="Qué quieres hacer"
-          className="mt-9 grid w-full max-w-3xl gap-3 sm:mt-11 sm:grid-cols-2 sm:gap-4"
+          className="mt-9 grid w-full max-w-5xl gap-3 sm:mt-11 md:grid-cols-3 md:gap-4"
         >
           <motion.div {...rise(2)} className="flex">
-            <PlayChoice />
+            <CasualChoice />
           </motion.div>
           <motion.div {...rise(3)} className="flex">
+            <RankedChoice />
+          </motion.div>
+          <motion.div {...rise(4)} className="flex">
             <PracticeChoice />
           </motion.div>
         </nav>
 
-        <motion.div {...rise(4)} className="mt-5 flex flex-col items-center gap-6">
+        <motion.div {...rise(5)} className="mt-5 flex flex-col items-center gap-6">
           <button
             type="button"
             className="btn h-11 gap-2 border-transparent bg-transparent text-felt-ink"
@@ -91,8 +96,8 @@ export function Home() {
   );
 }
 
-/** Jugar (Casual): lo que diga depende de la cuenta y de si hay una partida en curso. */
-function PlayChoice() {
+/** Casual: lo que diga depende de la cuenta y de si hay una partida en curso. */
+function CasualChoice() {
   const account = useAccountStore((s) => s.status);
   const openDialog = useAccountStore((s) => s.openDialog);
   const status = useCasualStore((s) => s.status);
@@ -102,8 +107,9 @@ function PlayChoice() {
   const setScreen = useUiStore((s) => s.setScreen);
 
   let badge: ReactNode = null;
-  let detail: ReactNode = 'Empiezas con 500 fichas. Tu mejor pico de la semana entra al ranking.';
-  let cta = 'Jugar';
+  let detail: ReactNode =
+    'Empiezas con 500 fichas y eliges las reglas. Tu mejor pico entra al ranking semanal.';
+  let cta = 'Jugar Casual';
   let go = () => setScreen('casual');
 
   if (
@@ -137,17 +143,79 @@ function PlayChoice() {
 
   return (
     <Choice
-      icon={Trophy}
-      title="Jugar"
-      lead="Contra el servidor: baraja, reparte y liquida cada mano."
+      icon={Spade}
+      title="Casual"
+      lead="Contra el servidor, con las ayudas del motor a la vista."
       detail={detail}
       badge={badge}
       cta={cta}
       primary
       onClick={go}
-      testId="home-play"
+      testId="home-casual"
     />
   );
+}
+
+/** Ranked: la temporada solo se conoce al entrar al modo (pedirla la crea). */
+function RankedChoice() {
+  const account = useAccountStore((s) => s.status);
+  const openDialog = useAccountStore((s) => s.openDialog);
+  const status = useRankedStore((s) => s.status);
+  const season = useRankedStore((s) => s.account);
+  const midHand = useCasualStore((s) => s.elsewhere === 'ranked');
+  const setScreen = useUiStore((s) => s.setScreen);
+
+  let badge: ReactNode = <Badge>Sin ayudas</Badge>;
+  let detail: ReactNode = `Temporada de ${seasonName(currentSeason())}. Con 200 manos entras al ranking y compites por medalla.`;
+  let cta = 'Jugar Ranked';
+  let go = () => setScreen('ranked');
+
+  if (account === 'unavailable' || status === 'unavailable') {
+    badge = <Badge tone="warn">Sin conexión</Badge>;
+    detail = 'El servidor no responde ahora. Práctica sigue disponible sin conexión.';
+    cta = 'Ver estado';
+  } else if (account === 'anonymous') {
+    badge = <Badge>Con cuenta</Badge>;
+    cta = 'Entrar y jugar';
+    go = () => {
+      setScreen('ranked');
+      openDialog('auth');
+    };
+  } else if (midHand) {
+    badge = <Badge tone="live">Mano a medias</Badge>;
+    cta = 'Continuar mano';
+  } else if (season) {
+    detail = (
+      <>
+        Neto{' '}
+        <strong
+          className={`font-semibold ${season.net > 0 ? 'text-pos' : season.net < 0 ? 'text-neg' : 'text-text'}`}
+        >
+          {formatChips(season.net, true)}
+        </strong>{' '}
+        · {season.hands} / {season.minHands} manos · {endsIn(season.seasonEndsAt).toLowerCase()}
+      </>
+    );
+  }
+
+  return (
+    <Choice
+      icon={Trophy}
+      title="Ranked"
+      lead="Temporada mensual con reglas fijas. Al terminar cada mano, la revisión."
+      detail={detail}
+      badge={badge}
+      cta={cta}
+      onClick={go}
+      testId="home-ranked"
+    />
+  );
+}
+
+/** Temporada en curso (`AAAA-MM`, UTC) para nombrarla antes de pedir la cuenta. */
+function currentSeason() {
+  const d = new Date();
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
 }
 
 function PracticeChoice() {
@@ -264,7 +332,7 @@ function WeeklyTop() {
   return (
     <section aria-labelledby="home-weekly" className="flex flex-col items-center gap-2">
       <h2 id="home-weekly" className="section-title flex items-center gap-1.5 text-felt-ink">
-        <Trophy className="size-3.5" aria-hidden /> Top de la semana
+        <Trophy className="size-3.5" aria-hidden /> Top Casual de la semana
       </h2>
       <ol className="flex flex-wrap justify-center gap-2">
         {top.map((r) => (

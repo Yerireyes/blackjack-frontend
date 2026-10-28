@@ -1,6 +1,8 @@
 import { playSound, type Sound } from '@/lib/sound';
 import { useCasualStore } from '@/casual/casualStore';
-import { cardsOnTable, fullyShown, revealSteps } from '@/casual/view';
+import type { RoundStore } from '@/play/round';
+import { useRankedStore } from '@/ranked/rankedStore';
+import { cardsOnTable, fullyShown, revealSteps } from '@/play/view';
 import { useChipsStore } from '@/store/chipsStore';
 import { dealerCards, useTableStore, type TableState } from '@/store/tableStore';
 import { useUiStore } from '@/store/uiStore';
@@ -25,12 +27,12 @@ function outcomeSound(s: TableState): Sound | null {
   return net > 0 ? 'win' : net < 0 ? 'lose' : 'push';
 }
 
-/** Casual: lo que se ve de la ronda del servidor (con la revelación paso a paso). */
-function startCasualSounds() {
-  useCasualStore.subscribe((s, prev) => {
+/** Casual y Ranked: lo que se ve de la ronda del servidor (con la revelación paso a paso). */
+function startRoundSounds(store: RoundStore, screen: 'casual' | 'ranked') {
+  store.subscribe((s, prev) => {
     // Desde el inicio también se carga la partida (para ofrecer continuarla): sin sonidos.
     const ui = useUiStore.getState();
-    if (!ui.sound || ui.screen !== 'casual') return;
+    if (!ui.sound || ui.screen !== screen) return;
     const diff = s.stack.length - prev.stack.length;
     if (diff > 0) playSound('chip', CHIP_FLIGHT);
     else if (diff < 0) playSound('chipOff');
@@ -70,7 +72,8 @@ const CHIP_FLIGHT = 0.36;
 
 /** Escucha la mesa y las fichas y reproduce los efectos: cartas, oculta, apuesta y resultado. */
 export function startSoundSync() {
-  startCasualSounds();
+  startRoundSounds(useCasualStore as unknown as RoundStore, 'casual');
+  startRoundSounds(useRankedStore as unknown as RoundStore, 'ranked');
   useChipsStore.subscribe((s, prev) => {
     if (!useUiStore.getState().sound || s.stacks === prev.stacks) return;
     for (const bank of ['player', 'house'] as const) {

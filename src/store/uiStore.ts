@@ -5,10 +5,10 @@ import { useShoeStore } from './shoeStore';
 export type Mode = 'player' | 'dealer';
 export type Source = 'simulation' | 'manual';
 /**
- * Inicio: elegir qué hacer. Práctica: en el navegador y sin cuenta. Casual: contra el
- * servidor, con cuenta.
+ * Inicio: elegir qué hacer. Práctica: en el navegador y sin cuenta. Casual y Ranked: contra
+ * el servidor, con cuenta (Ranked, sin ayudas y por temporadas).
  */
-export type Screen = 'home' | 'practice' | 'casual';
+export type Screen = 'home' | 'practice' | 'casual' | 'ranked';
 /** Animaciones: las del sistema operativo o siempre reducidas. */
 export type Motion = 'system' | 'reduced';
 
