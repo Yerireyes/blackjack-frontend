@@ -63,7 +63,8 @@ export function canAddChip(stack: readonly Chip[], value: number, balance: numbe
 const clampChips = (n: number) => Math.max(0, Math.min(MAX_CHIPS, Math.round(n)));
 
 let chipId = 0;
-const newChip = (value: ChipValue): Chip => ({ id: ++chipId, value });
+/** Ficha con id único: también la usa la pila de Casual (el vuelo se indexa por id). */
+export const newChip = (value: ChipValue): Chip => ({ id: ++chipId, value });
 
 const isChips = (n: unknown): n is number =>
   typeof n === 'number' && Number.isInteger(n) && n >= 0 && n <= MAX_CHIPS;
