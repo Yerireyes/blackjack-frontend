@@ -1,4 +1,4 @@
-import { Eye, Hand as HandIcon, Scale } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { handValue } from '@/domain/cards';
 import { roundHands } from '@/engine/requests';
 import { AnalysisFrame } from '@/features/analysis/AnalysisFrame';
@@ -7,6 +7,7 @@ import { HitBustMeter } from '@/features/player-mode/HitBustMeter';
 import { useRulesStore } from '@/store/rulesStore';
 import { dealerCards, dealerMustHit, useTableStore } from '@/store/tableStore';
 import { useUiStore } from '@/store/uiStore';
+import { DealerButtons } from './DealerControls';
 import { DealerOutcomeChart } from './DealerOutcomeChart';
 import { HouseEdgePanel } from './HouseEdgePanel';
 
@@ -94,8 +95,6 @@ function GuidedPlay() {
   const d = useTableStore((s) => s.dealer);
   const source = useUiStore((s) => s.source);
   const rules = useRulesStore((s) => s.rules);
-  const step = useTableStore((s) => s.dealerStep);
-  const reveal = useTableStore((s) => s.revealHole);
 
   if (!d.up) return null;
   const v = d.hole ? handValue(dealerCards(d)) : null;
@@ -124,26 +123,7 @@ function GuidedPlay() {
         {instruction}
       </p>
       <div className="flex flex-wrap gap-2">
-        {d.hole && !d.holeRevealed && (
-          <button
-            type="button"
-            className="btn"
-            onClick={() => (sim ? step() : reveal())}
-            disabled={sim && !canAct}
-          >
-            <Eye className="size-4" aria-hidden /> Revelar carta oculta
-          </button>
-        )}
-        {sim && d.holeRevealed && must && (
-          <button type="button" className="btn btn-paper" onClick={() => step()} disabled={!canAct}>
-            <HandIcon className="size-4" aria-hidden /> Siguiente carta del dealer
-          </button>
-        )}
-        {sim && d.holeRevealed && !must && phase === 'dealer' && (
-          <button type="button" className="btn btn-paper" onClick={() => step()}>
-            <Scale className="size-4" aria-hidden /> Liquidar la ronda
-          </button>
-        )}
+        <DealerButtons />
         {!sim && d.holeRevealed && must && (
           <p className="text-xs text-mute">Agrega la carta que sacó el dealer con el selector.</p>
         )}

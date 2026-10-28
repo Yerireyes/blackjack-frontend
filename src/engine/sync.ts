@@ -4,8 +4,8 @@
 import { useAnalysisStore, type AnalysisKind } from '@/store/analysisStore';
 import { useRulesStore } from '@/store/rulesStore';
 import { useShoeStore } from '@/store/shoeStore';
-import { activeHand, useTableStore } from '@/store/tableStore';
-import { useUiStore } from '@/store/uiStore';
+import { activeHand, allowedActions, useTableStore } from '@/store/tableStore';
+import { autoPlaysPlayer, useUiStore } from '@/store/uiStore';
 import type { EngineMethod } from './api';
 import {
   CancelledError,
@@ -179,6 +179,48 @@ function driveBots() {
     });
 }
 
+let autoTimer: ReturnType<typeof setTimeout> | null = null;
+let autoBusy = false;
+
+function driveAutoPlayer() {
+  const t = useTableStore.getState();
+  if (!autoPlaysPlayer() || t.phase !== 'player' || autoBusy || autoTimer) return;
+  const shoe = useShoeStore.getState();
+  const rules = useRulesStore.getState().rules;
+  const built = buildHandRequest({
+    version: shoe.version,
+    rules,
+    counts: shoe.toCounts(),
+    player: t.player,
+    dealer: t.dealer,
+    phase: t.phase,
+  });
+  if (!built.ok) return;
+  autoBusy = true;
+  const handId = activeHand(t.player)?.id;
+  const version = shoe.version;
+  getTransport()
+    .call('analyzeHand', built.req)
+    .then(
+      (res) => res.best,
+      () => 'stand' as const,
+    )
+    .then((best) => {
+      autoTimer = setTimeout(() => {
+        autoTimer = null;
+        autoBusy = false;
+        const now = useTableStore.getState();
+        const same =
+          activeHand(now.player)?.id === handId && useShoeStore.getState().version === version;
+        if (autoPlaysPlayer() && now.phase === 'player' && same) {
+          // El motor solo elige entre las acciones permitidas; plantarse es la red de seguridad.
+          now.act(allowedActions(now.player, rules)[best] ? best : 'stand');
+        }
+        driveAutoPlayer();
+      }, BOT_DELAY_MS);
+    });
+}
+
 let dealerTimer: ReturnType<typeof setTimeout> | null = null;
 
 function driveDealer() {
@@ -210,13 +252,16 @@ export function startEngineSync() {
       scheduled = false;
       refresh();
       driveBots();
+      driveAutoPlayer();
       driveDealer();
     });
   };
 
   useShoeStore.subscribe((s, prev) => s.version !== prev.version && schedule());
   useUiStore.subscribe(
-    (s, prev) => (s.mode !== prev.mode || s.knowHole !== prev.knowHole) && schedule(),
+    (s, prev) =>
+      (s.mode !== prev.mode || s.knowHole !== prev.knowHole || s.source !== prev.source) &&
+      schedule(),
   );
   useRulesStore.subscribe((s, prev) => s.rules !== prev.rules && schedule());
   useTableStore.subscribe((s, prev) => s.phase !== prev.phase && schedule());

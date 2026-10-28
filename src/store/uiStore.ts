@@ -20,6 +20,12 @@ export interface UiState {
   setSound(on: boolean): void;
 }
 
+/** En modo dealer con simulación tu asiento lo juega el motor: el usuario es el repartidor. */
+export const autoPlaysPlayer = () => {
+  const ui = useUiStore.getState();
+  return ui.mode === 'dealer' && ui.source === 'simulation';
+};
+
 const SOUND_KEY = 'bj.sound';
 
 function readSound(): boolean {
