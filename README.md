@@ -5,6 +5,18 @@ SPA en React que muestra, para cada mano, el EV y las probabilidades exactas de 
 `../Backend` compilado a WebAssembly y ejecutado en un Web Worker. Diseño completo en
 [docs/Blackjack Guide — Arquitectura Frontend.md](docs/).
 
+El modo **Práctica** funciona sin cuenta y sin servidor. Las **cuentas** (registro, login,
+Google) usan la API del backend; Casual y Ranked, que también la usarán, están en desarrollo.
+
+## Documentación compartida con el backend
+
+La especificación de cuentas, Casual y Ranked, y lo que le toca hacer al front en cada fase,
+viven **solo** en el backend. El front no guarda copias:
+
+- [Especificación — Cuentas, Casual y Ranked](../Backend/docs/Especificación%20—%20Cuentas,%20Casual%20y%20Ranked.md)
+- `../Backend/docs/Front — Fase N …`: qué implementar en el front en cada fase. Cada una empieza
+  con su fecha y la lista de cambios respecto de la versión anterior.
+
 ## Regla de oro
 
 El front **nunca** calcula ni escribe a mano una probabilidad o un EV. Toda carta visible se
@@ -27,7 +39,9 @@ descartan o se muestran atenuados, nunca como actuales.
   - [wasm-pack](https://rustwasm.github.io/wasm-pack/): `cargo install wasm-pack`. En Windows
     necesita el Visual C++ Redistributable x64. La primera compilación descarga `wasm-opt`, así
     que hace falta internet.
-- No hacen falta PostgreSQL, `sqlx-cli` ni la API: el front solo usa el motor WASM.
+- **Solo para las cuentas:** PostgreSQL y la API del backend corriendo (ver su README). Sin
+  ellas la app funciona igual en modo Práctica, y el botón de cuenta muestra que el servidor no
+  está disponible.
 
 El front enlaza el motor como dependencia local
 (`"@bj/engine-wasm": "file:../Backend/engine-wasm/pkg"`), y el script del contrato del backend
@@ -56,13 +70,27 @@ cd ../Frontend
 npm install
 npm run dev                          # http://localhost:5180
 
-# 3. Solo para los tests E2E: descargar el navegador de Playwright (una vez)
+# 3. Opcional, para las cuentas: base de datos y API (en otra terminal)
+cd ../Backend
+npm run db:start
+npm run api                          # http://127.0.0.1:8080
+
+# 4. Solo para los tests E2E: descargar el navegador de Playwright (una vez)
+cd ../Frontend
 npx playwright install chromium
 npm run e2e
 ```
 
 Si el puerto 5180 está ocupado, cámbialo en `vite.config.ts` (`server.port`). Los E2E usan su
 propio servidor de vista previa, en el 4173.
+
+### Cómo llega el front a la API
+
+Siempre con URLs relativas (`/api/v1/...`) y `credentials: 'same-origin'`: front y API
+comparten origen, y la sesión es una cookie httpOnly que el front nunca lee. En desarrollo y en
+vista previa lo resuelve el proxy de `vite.config.ts` (`/api` → `127.0.0.1:8080`); en
+producción, el reverse proxy que sirve `dist/` y reenvía `/api` (ejemplos en el README del
+backend).
 
 ## Comandos
 
@@ -87,8 +115,10 @@ copiar el paquete nuevo) y luego los tests.
 | --- | --- |
 | `src/domain/` | Cartas, totales de mano, zapato, reglas y presets, barajado Fisher-Yates con `crypto`. Sin probabilidades. |
 | `src/engine/` | `contract.ts` (generado), worker con Comlink, `client.ts` (debounce 50 ms, cola de un pedido, aviso a los 5 s, cancelar), `requests.ts` (mesa → pedido, funciones puras), `sync.ts` (stores → motor, bots y dealer automático). |
-| `src/store/` | Zustand: `rules`, `shoe`, `table`, `analysis`, `ui`, `session`; `actions.ts` coordina reinicios. |
-| `src/features/` | `player-mode`, `dealer-mode`, `shoe-tracker`, `manual-entry`, `settings`, `table`, `analysis`. |
+| `src/store/` | Zustand: `rules`, `shoe`, `table`, `analysis`, `ui`, `session`, `chips`; `actions.ts` coordina reinicios. |
+| `src/features/` | `player-mode`, `dealer-mode`, `shoe-tracker`, `manual-entry`, `settings`, `table`, `analysis`, `chips`. |
+| `src/account/` | Cuentas: cliente HTTP de la API (aparte de `src/engine/api.ts`, que es el motor WASM), store de sesión, diálogos de login, registro y perfil, vuelta de Google. |
+| `src/lib/sound.ts` | Efectos de sonido sintetizados con Web Audio (sin archivos). |
 | `src/components/` | Carta, mano, barra de probabilidades, controles segmentados, diálogo. |
 | `e2e/` | Specs de Playwright y fixtures generados por el motor. |
 
@@ -105,9 +135,18 @@ copiar el paquete nuevo) y luego los tests.
   (no dividen, para simplificar la mesa).
 - **Ventaja de la casa**: `analyzeRound` se pide mientras juegan los jugadores, con las manos
   vivas actuales.
-- Fuera de alcance: modo remoto contra la API, cuentas y sesiones guardadas, seguro.
+- **Modo dealer en simulación**: la cámara pasa detrás del repartidor y tu asiento lo juega el
+  motor (acción de mayor EV, con división). El usuario hace de dealer con el juego guiado.
+- **Fichas (Práctica)**: dos bancas guardadas en el navegador, la tuya y la de la casa (modo
+  dealer). Fichas de 10, 50, 100 y 500; hasta 10 fichas y 500 por apuesta; tope de 1.000.000
+  por banca. Doblar y dividir solo si el saldo lo cubre. En Casual y Ranked el saldo lo llevará
+  el servidor.
+- **Blackjack del dealer con peek**: la ronda no se liquida al repartir; la oculta se revela a
+  la vista tras una pausa y un mensaje explica por qué no hubo decisión.
+- Fuera de alcance por ahora: seguro.
 
 ## Atajos de teclado
 
 H pedir · S plantarse · D doblar · P dividir · R rendirse · Enter repartir.
+En modo dealer con simulación, H/S/D/P/R no hacen nada: la mano del jugador la juega el motor.
 En modo manual: A, 2–9, 0 (= 10), J, Q, K agregan la carta al destino elegido; Retroceso deshace.
