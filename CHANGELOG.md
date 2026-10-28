@@ -7,12 +7,22 @@ versiones según [SemVer](https://semver.org/lang/es/) (en 0.x, una versión men
 
 ### Agregado
 
+- **Modo Casual (fase 3):** selector Práctica | Casual. Partidas de 500 fichas contra el
+  servidor, que reparte, valida y liquida; se retoma la ronda activa al volver; liquidación
+  animada; ayudas del motor con la composición que manda el servidor; retirarse; ranking semanal
+  y récords. Pide nombre elegido antes de jugar.
 - **Vincular Google pide la contraseña:** primero se confirma en un diálogo
   (`POST /auth/google/link-intent`) y después se navega a Google. Si la prueba falta, venció o
   ya se gastó, la vuelta (`reauth_required`) reabre el diálogo.
 - **Desvincular Google** desde el perfil, con confirmación y contraseña. Cierra la sesión en los
   demás dispositivos y lo avisa. Vincular y desvincular solo se muestran si la cuenta tiene
   contraseña.
+
+### Cambiado
+
+- Cliente HTTP compartido (`src/api/http.ts`) para cuentas y Casual.
+- Pila y bandeja de fichas presentacionales, reutilizadas por Práctica y Casual. La ayuda de la
+  bandeja muestra el tope real de la apuesta.
 
 ## [0.2.0] - 2026-10-28
 
