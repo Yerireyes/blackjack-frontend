@@ -141,6 +141,23 @@
   .select:disabled {
     opacity: 0.45;
   }
+  .input {
+    height: 2.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-ink-700);
+    background: var(--color-ink-950);
+    color: var(--color-text);
+    padding: 0 0.75rem;
+    font-size: 1rem; /* 16 px: evita el zoom automático de iOS al enfocar */
+    transition: border-color 160ms ease;
+  }
+  .input:focus-visible {
+    outline: 2px solid var(--color-paper);
+    outline-offset: 1px;
+  }
+  .input[aria-invalid='true'] {
+    border-color: var(--color-neg);
+  }
   .kbd {
     font: 600 0.6875rem/1 var(--font-sans);
     padding: 0.2rem 0.35rem;

@@ -1,4 +1,5 @@
 import { MotionConfig } from 'motion/react';
+import { AccountMenu } from '@/account/AccountMenu';
 import { ModeSwitch } from '@/components/ModeSwitch';
 import { ChipBalance } from '@/features/chips/ChipBalance';
 import { DealerView } from '@/features/dealer-mode/DealerView';
@@ -37,6 +38,7 @@ export function App() {
             <ShoeHud />
             <ChipBalance />
             <SoundToggle />
+            <AccountMenu />
           </div>
         </header>
 
