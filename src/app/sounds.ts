@@ -28,7 +28,9 @@ function outcomeSound(s: TableState): Sound | null {
 /** Casual: lo que se ve de la ronda del servidor (con la revelación paso a paso). */
 function startCasualSounds() {
   useCasualStore.subscribe((s, prev) => {
-    if (!useUiStore.getState().sound) return;
+    // Desde el inicio también se carga la partida (para ofrecer continuarla): sin sonidos.
+    const ui = useUiStore.getState();
+    if (!ui.sound || ui.screen !== 'casual') return;
     const diff = s.stack.length - prev.stack.length;
     if (diff > 0) playSound('chip', CHIP_FLIGHT);
     else if (diff < 0) playSound('chipOff');

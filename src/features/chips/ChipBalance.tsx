@@ -7,8 +7,8 @@ import { useUiStore } from '@/store/uiStore';
 
 /** Saldo de la banca del modo actual y el resultado de su última ronda. */
 export function ChipBalance() {
-  const venue = useUiStore((s) => s.venue);
-  return venue === 'casual' ? <CasualBalance /> : <PracticeBalance />;
+  const casual = useUiStore((s) => s.screen === 'casual');
+  return casual ? <CasualBalance /> : <PracticeBalance />;
 }
 
 /** Casual: el saldo es de la partida y lo trae cada respuesta del servidor. */

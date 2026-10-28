@@ -21,7 +21,9 @@ export function useKeyboard() {
       if (isTypingTarget(e.target)) return;
       const el = e.target as HTMLElement;
       const action = KEYS[e.key.toLowerCase()];
-      if (useUiStore.getState().venue === 'casual') {
+      const { screen } = useUiStore.getState();
+      if (screen === 'home') return;
+      if (screen === 'casual') {
         onCasualKey(e, action, el);
         return;
       }

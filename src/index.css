@@ -234,6 +234,16 @@
       radial-gradient(120% 90% at 50% 25%, var(--color-felt-700), transparent 70%),
       var(--color-felt-800);
   }
+  /* Inicio: el foco de luz sobre el paño y los bordes en penumbra, como una sala. */
+  .home-felt {
+    background:
+      radial-gradient(
+        60% 45% at 50% 28%,
+        color-mix(in oklab, var(--color-felt-700) 85%, transparent),
+        transparent 75%
+      ),
+      radial-gradient(140% 110% at 50% 10%, var(--color-felt-800), var(--color-felt-950) 75%);
+  }
   .card-md,
   .card-sm {
     aspect-ratio: 5 / 7;
@@ -295,6 +305,13 @@
       @starting-style {
         transform: none;
       }
+    }
+  }
+  /* Ajustes → Animaciones: Reducidas, aunque el sistema no lo pida. */
+  :root[data-motion='reduce'] .dialog[open] {
+    transform: none;
+    @starting-style {
+      transform: none;
     }
   }
   /* Dorso de carta: el rombo clásico en dos rojos, como una baraja de casino. */

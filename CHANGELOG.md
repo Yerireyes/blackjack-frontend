@@ -7,7 +7,13 @@ versiones según [SemVer](https://semver.org/lang/es/) (en 0.x, una versión men
 
 ### Agregado
 
-- **Modo Casual (fase 3):** selector Práctica | Casual. Partidas de 500 fichas contra el
+- **Pantalla de inicio:** elegir entre Jugar (Casual), Practicar y Ajustes. Jugar muestra si
+  hay una partida en curso con su saldo y la continúa; sin cuenta, abre el login. Debajo, el
+  top 3 de la semana. Cada pantalla tiene su dirección (`#/jugar`, `#/practicar`): recargar
+  deja al usuario donde estaba y Atrás vuelve al inicio.
+- **Ajustes:** efectos de sonido, volumen (con una ficha de muestra), animaciones reducidas
+  aunque el sistema no lo pida, y la lista de atajos de teclado. Se guardan en el navegador.
+- **Modo Casual (fase 3):** se entra desde el inicio. Partidas de 500 fichas contra el
   servidor, que reparte, valida y liquida; se retoma la ronda activa al volver; liquidación
   animada; ayudas del motor con la composición que manda el servidor; retirarse; ranking semanal
   y récords. Pide nombre elegido antes de jugar.
@@ -20,6 +26,11 @@ versiones según [SemVer](https://semver.org/lang/es/) (en 0.x, una versión men
 
 ### Cambiado
 
+- La cabecera de la mesa vuelve al inicio con el botón de la izquierda y muestra dónde estás
+  (Práctica o Jugar). El selector Práctica | Casual desaparece: se elige en el inicio.
+- Cabecera en móvil y en escritorio estrecho: las herramientas van en su propia fila y las
+  reglas se recortan en vez de montarse sobre los selectores. En móvil, «Entrar» es solo el
+  icono y el silencio rápido está en Ajustes.
 - Cliente HTTP compartido (`src/api/http.ts`) para cuentas y Casual.
 - Pila y bandeja de fichas presentacionales, reutilizadas por Práctica y Casual. La ayuda de la
   bandeja muestra el tope real de la apuesta.

@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'motion/react';
+import { motion, useReducedMotionConfig } from 'motion/react';
 import type { ActionResult, AnalyzeHandResponse } from '@/engine/contract';
 import { ProbBar } from '@/components/ProbBar';
 import { evTone, formatEv } from '@/lib/format';
@@ -44,7 +44,7 @@ function ActionRow({
   best: boolean;
   flipKey: string;
 }) {
-  const reduce = useReducedMotion();
+  const reduce = useReducedMotionConfig();
   const tone = evTone(result.ev);
   const split = result.action === 'split';
   const content = (

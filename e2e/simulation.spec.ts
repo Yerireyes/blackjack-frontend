@@ -4,11 +4,13 @@ import { open, waitCurrent } from './helpers';
 test('simulación: repartir, ver la recomendada del motor y jugar la ronda', async ({ page }) => {
   await open(page);
   await page.keyboard.press('Enter');
-  // Si el dealer o el jugador tienen blackjack la ronda termina sola: repartimos de nuevo.
+  // Si el dealer o el jugador tienen blackjack la ronda termina sola (tras revelar la oculta
+  // con pausa): se espera a saber cuál de los dos casos es y, si terminó, se reparte de nuevo.
+  const next = page.getByRole('button', { name: /Siguiente ronda/ });
   for (let i = 0; i < 5; i++) {
-    const done = await page.getByRole('button', { name: /Siguiente ronda/ }).isVisible();
-    if (!done) break;
-    await page.getByRole('button', { name: /Siguiente ronda/ }).click();
+    await expect(next.or(page.getByTestId('action-best'))).toBeVisible({ timeout: 15_000 });
+    if (!(await next.isVisible())) break;
+    await next.click();
   }
   await waitCurrent(page);
   const best = await page.getByTestId('action-best').getAttribute('data-action');

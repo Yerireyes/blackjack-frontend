@@ -3,24 +3,26 @@ import { useUiStore } from '@/store/uiStore';
 import { useCasualStore } from './casualStore';
 
 /**
- * Entra a Casual cuando el usuario está en ese modo y con sesión: pide la partida y la
- * ronda activas (para retomarlas). Al perder la sesión limpia lo que quedó del servidor.
+ * Carga Casual cuando el usuario está en el inicio o en Casual y tiene sesión: pide la
+ * partida y la ronda activas (el inicio ofrece continuarlas; Casual las retoma). Al perder
+ * la sesión limpia lo que quedó del servidor.
  */
 export function startCasualSync() {
-  let playing = false;
+  let loaded = false;
   const check = () => {
-    const casual = useUiStore.getState().venue === 'casual';
+    const screen = useUiStore.getState().screen;
+    const wanted = screen !== 'practice';
     const signedIn = useAccountStore.getState().status === 'signedIn';
-    const next = casual && signedIn;
-    if (next && !playing) void useCasualStore.getState().enter();
+    const next = wanted && signedIn;
+    if (next && !loaded) void useCasualStore.getState().enter();
     if (!signedIn && useCasualStore.getState().status !== 'idle') useCasualStore.getState().reset();
     // El ranking semanal es público: se muestra aunque no haya sesión.
-    if (casual && !signedIn && !useCasualStore.getState().board) {
+    if (wanted && !signedIn && !useCasualStore.getState().board) {
       void useCasualStore.getState().loadBoards();
     }
-    playing = next;
+    loaded = next;
   };
-  useUiStore.subscribe((s, prev) => s.venue !== prev.venue && check());
+  useUiStore.subscribe((s, prev) => s.screen !== prev.screen && check());
   useAccountStore.subscribe((s, prev) => s.status !== prev.status && check());
   check();
 }

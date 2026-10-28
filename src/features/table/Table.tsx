@@ -1,5 +1,5 @@
 import { Play, Users } from 'lucide-react';
-import { motion, useAnimate, useReducedMotion } from 'motion/react';
+import { motion, useAnimate, useReducedMotionConfig } from 'motion/react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Hand } from '@/components/Hand';
 import { BetSpot } from '@/features/chips/BetSpot';
@@ -143,7 +143,7 @@ export function Table() {
  */
 function useCamera(mode: Mode) {
   const [scope, animate] = useAnimate<HTMLDivElement>();
-  const reduce = useReducedMotion();
+  const reduce = useReducedMotionConfig();
   const [shown, setShown] = useState(mode);
   const current = reduce ? mode : shown;
 

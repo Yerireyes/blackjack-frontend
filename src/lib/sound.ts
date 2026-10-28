@@ -7,6 +7,14 @@ export type Sound = 'card' | 'flip' | 'chip' | 'chipOff' | 'win' | 'blackjack' |
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let noise: AudioBuffer | null = null;
+/** Ganancia general: el volumen al cuadrado, que se oye más parejo a lo largo del control. */
+let gain = 0.49;
+
+/** Volumen de 0 a 1. Se aplica también a los sonidos que ya están sonando. */
+export function setVolume(volume: number) {
+  gain = volume * volume;
+  master?.gain.setTargetAtTime(gain, ctx!.currentTime, 0.02);
+}
 
 function audio(): AudioContext | null {
   if (ctx) return ctx;
@@ -14,7 +22,7 @@ function audio(): AudioContext | null {
   if (!Ctor) return null; // jsdom, navegadores sin Web Audio
   ctx = new Ctor();
   master = ctx.createGain();
-  master.gain.value = 0.5;
+  master.gain.value = gain;
   master.connect(ctx.destination);
   // Medio segundo de ruido blanco, reutilizado por los sonidos de carta.
   noise = ctx.createBuffer(1, ctx.sampleRate / 2, ctx.sampleRate);
