@@ -4,6 +4,7 @@ import { AnalysisFrame } from '@/features/analysis/AnalysisFrame';
 import { useAnalysis } from '@/features/analysis/useAnalysis';
 import { DealerOutcomeChart } from '@/features/dealer-mode/DealerOutcomeChart';
 import { useCasualStore } from '@/casual/casualStore';
+import { mySeatOf, useRoomsStore } from '@/rooms/roomsStore';
 import { useRulesStore } from '@/store/rulesStore';
 import { useTableStore } from '@/store/tableStore';
 import { useUiStore } from '@/store/uiStore';
@@ -24,10 +25,18 @@ export function PlayerView() {
   const tableActive = useTableStore((s) => s.player.active);
   const casualHands = useCasualStore((s) => s.round?.player.hands.length ?? 1);
   const casualActive = useCasualStore((s) => s.round?.player.active ?? 0);
-  const upFace = casual ? casualUp : tableUp;
-  const rules = (casual && casualRules) || practiceRules;
-  const handCount = casual ? casualHands : tableHands;
-  const active = casual ? casualActive : tableActive;
+  // En Salas, las de mi asiento en la ronda de la mesa.
+  const rooms = useUiStore((s) => s.screen === 'rooms');
+  const roomUp = useRoomsStore((s) => s.room?.round?.dealer.up.rank ?? null);
+  const roomRules = useRoomsStore((s) => s.room?.info.rules ?? null);
+  const roomSeat = useRoomsStore((s) => {
+    const mine = mySeatOf(s);
+    return mine ? (s.room?.round?.seats.find((x) => x.seat === mine.seat) ?? null) : null;
+  });
+  const upFace = rooms ? roomUp : casual ? casualUp : tableUp;
+  const rules = (rooms && roomRules) || (casual && casualRules) || practiceRules;
+  const handCount = rooms ? (roomSeat?.hands.length ?? 1) : casual ? casualHands : tableHands;
+  const active = rooms ? (roomSeat?.active ?? 0) : casual ? casualActive : tableActive;
   const peek = upFace ? dealerChecksHole(rules, toRankIndex(upFace)) : false;
 
   return (
@@ -69,7 +78,7 @@ export function PlayerView() {
         </AnalysisFrame>
       )}
 
-      {!casual && <SessionStats />}
+      {!casual && !rooms && <SessionStats />}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { roundLocked } from '@/play/round';
 import type { RoundStore } from '@/play/round';
 import { useDailyStore } from '@/daily/dailyStore';
 import { useRankedStore } from '@/ranked/rankedStore';
+import { mySeatOf, myTurnOf, useRoomsStore } from '@/rooms/roomsStore';
 import { performAction } from '@/features/table/performAction';
 import { useTableStore, type PlayerAction } from '@/store/tableStore';
 import { useUiStore } from '@/store/uiStore';
@@ -27,6 +28,10 @@ export function useKeyboard() {
       const action = KEYS[e.key.toLowerCase()];
       const { screen } = useUiStore.getState();
       if (screen === 'home' || screen === 'progress') return;
+      if (screen === 'rooms') {
+        onRoomKey(e, action, el);
+        return;
+      }
       if (screen === 'casual' || screen === 'ranked' || screen === 'daily') {
         const store = { casual: useCasualStore, ranked: useRankedStore, daily: useDailyStore }[
           screen
@@ -55,6 +60,23 @@ export function useKeyboard() {
 }
 
 /** Casual, Ranked y el reto: las mismas teclas, pero las intenciones van al servidor. */
+/** Salas: las acciones solo en mi turno; Enter apuesta mientras están abiertas las apuestas. */
+function onRoomKey(e: KeyboardEvent, action: PlayerAction | undefined, el: HTMLElement) {
+  const s = useRoomsStore.getState();
+  if (action) {
+    if (!myTurnOf(s)) return;
+    e.preventDefault();
+    s.act(action);
+    return;
+  }
+  if (e.key !== 'Enter' || el.closest('button, a, input')) return;
+  const seat = mySeatOf(s);
+  if (s.room?.phase === 'betting' && seat && !seat.bet) {
+    e.preventDefault();
+    s.bet();
+  }
+}
+
 function onServerKey(
   store: RoundStore,
   e: KeyboardEvent,

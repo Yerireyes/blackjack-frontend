@@ -16,6 +16,9 @@ import { Table } from '@/features/table/Table';
 import { AchievementToasts } from '@/progress/AchievementToasts';
 import { ProgressScreen } from '@/progress/ProgressScreen';
 import { RankedPanel } from '@/ranked/RankedPanel';
+import { RoomPanel } from '@/rooms/RoomPanel';
+import { RoomsLobby } from '@/rooms/RoomsLobby';
+import { RoomTable } from '@/rooms/RoomTable';
 import { RankedTable } from '@/ranked/RankedTable';
 import { useUiStore } from '@/store/uiStore';
 import { Announcer } from './Announcer';
@@ -73,6 +76,7 @@ const TITLE = {
   ranked: 'Ranked',
   daily: 'Reto diario',
   progress: 'Logros',
+  rooms: 'Salas',
 } as const;
 
 /** La mesa de Práctica, Casual o Ranked, con su cabecera y su panel de análisis. */
@@ -80,6 +84,7 @@ function TableScreen() {
   const mode = useUiStore((s) => s.mode);
   const screen = useUiStore((s) => s.screen);
   const practice = screen === 'practice';
+  const roomCode = useUiStore((s) => s.roomCode);
   const setScreen = useUiStore((s) => s.setScreen);
   const title = useRef<HTMLHeadingElement>(null);
   // Se llega desde el inicio con un clic: el botón que tenía el foco ya no existe.
@@ -142,6 +147,12 @@ function TableScreen() {
           <Table />
         ) : screen === 'ranked' ? (
           <RankedTable />
+        ) : screen === 'rooms' ? (
+          roomCode ? (
+            <RoomTable />
+          ) : (
+            <RoomsLobby />
+          )
         ) : screen === 'daily' ? (
           <DailyTable />
         ) : (
@@ -155,13 +166,18 @@ function TableScreen() {
                 ? 'Temporada Ranked'
                 : screen === 'daily'
                   ? 'Reto diario'
-                  : mode === 'player'
-                    ? 'Análisis del jugador'
-                    : 'Análisis del dealer'
+                  : screen === 'rooms'
+                    ? 'Sala'
+                    : mode === 'player'
+                      ? 'Análisis del jugador'
+                      : 'Análisis del dealer'
           }
           className="border-t border-ink-800 bg-ink-900 px-4 py-6 sm:px-6 lg:overflow-y-auto lg:border-t-0 lg:border-l"
         >
-          {screen === 'daily' ? (
+          {screen === 'rooms' ? (
+            // Con ayudas, el análisis de mi mano en mi turno; sin ayudas, nada del motor.
+            <RoomPanel />
+          ) : screen === 'daily' ? (
             // Sin ayudas, como Ranked: el intento, la revisión y el ranking del día.
             <DailyPanel />
           ) : screen === 'ranked' ? (

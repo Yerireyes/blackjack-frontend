@@ -6,8 +6,9 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 // En desarrollo y en vista previa la API va por el mismo origen que el front. En producción
-// lo resuelve el reverse proxy: front y API se sirven bajo el mismo dominio.
-const apiProxy = { '/api': 'http://127.0.0.1:8080' };
+// lo resuelve el reverse proxy: front y API se sirven bajo el mismo dominio. `ws` deja pasar
+// el WebSocket de las salas (/api/v1/rooms/{code}/ws).
+const apiProxy = { '/api': { target: 'http://127.0.0.1:8080', ws: true } };
 
 // El motor WASM se enlaza con file: desde el backend, fuera de esta carpeta. Sin permitir su
 // ruta real, el servidor de desarrollo responde 403 al .wasm y no hay análisis.

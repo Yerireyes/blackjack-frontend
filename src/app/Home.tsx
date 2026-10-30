@@ -6,6 +6,7 @@ import {
   Settings,
   Spade,
   Trophy,
+  Users,
   type LucideIcon,
 } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -80,7 +81,7 @@ export function Home() {
 
         <nav
           aria-label="Qué quieres hacer"
-          className="mt-9 grid w-full max-w-6xl gap-3 sm:mt-11 sm:grid-cols-2 md:gap-4 xl:grid-cols-4"
+          className="mt-9 grid w-full max-w-6xl gap-3 sm:mt-11 sm:grid-cols-2 md:gap-4 lg:grid-cols-3"
         >
           <motion.div {...rise(2)} className="flex">
             <CasualChoice />
@@ -92,11 +93,14 @@ export function Home() {
             <DailyChoice />
           </motion.div>
           <motion.div {...rise(5)} className="flex">
+            <RoomsChoice />
+          </motion.div>
+          <motion.div {...rise(6)} className="flex">
             <PracticeChoice />
           </motion.div>
         </nav>
 
-        <motion.div {...rise(6)} className="mt-5 flex flex-col items-center gap-6">
+        <motion.div {...rise(7)} className="mt-5 flex flex-col items-center gap-6">
           <div className="flex flex-wrap justify-center gap-x-2">
             <ProgressLink />
             <button
@@ -323,6 +327,24 @@ function DailyChoice() {
       cta={cta}
       onClick={go}
       testId="home-daily"
+    />
+  );
+}
+
+/** Salas: multijugador en tiempo real; sin cuenta se puede ver el lobby. */
+function RoomsChoice() {
+  const account = useAccountStore((s) => s.status);
+  const setScreen = useUiStore((s) => s.setScreen);
+  return (
+    <Choice
+      icon={Users}
+      title="Salas"
+      lead="Mesas de 5 a 7 jugadores en tiempo real contra el dealer."
+      detail="Crea una sala e invita con un enlace, o entra a una pública. Pila propia de 500 fichas y reacciones."
+      badge={<Badge>{account === 'signedIn' ? 'Multijugador' : 'Con cuenta'}</Badge>}
+      cta="Ver salas"
+      onClick={() => setScreen('rooms')}
+      testId="home-rooms"
     />
   );
 }
