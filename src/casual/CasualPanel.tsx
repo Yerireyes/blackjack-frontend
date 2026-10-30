@@ -2,7 +2,9 @@ import { Flag, Trophy } from 'lucide-react';
 import { useState } from 'react';
 import { PRESETS } from '@/domain/rules';
 import { rulesSummary } from '@/features/settings/rulesSummary';
+import type { CosmeticId } from '@/engine/contract';
 import { formatChips, formatPct } from '@/lib/format';
+import { PlayerTitle } from '@/progress/PlayerTitle';
 import { useAccountStore } from '@/account/accountStore';
 import { casualLocked, useCasualStore } from './casualStore';
 
@@ -139,11 +141,13 @@ function WeeklyBoard() {
 function BoardRow({
   rank,
   displayName,
+  title,
   value,
   isMe,
 }: {
   rank: number;
   displayName: string;
+  title?: CosmeticId;
   value: number;
   isMe: boolean;
 }) {
@@ -155,6 +159,7 @@ function BoardRow({
       <span className="w-6 text-right text-mute tabular-nums">{rank}</span>
       <span className="min-w-0 flex-1 truncate">
         {displayName}
+        <PlayerTitle id={title} />
         {isMe && <span className="text-mute"> (tú)</span>}
       </span>
       <span className="tabular-nums">{formatChips(value)}</span>

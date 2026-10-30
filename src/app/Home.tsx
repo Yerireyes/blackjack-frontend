@@ -17,6 +17,7 @@ import { PlayingCard } from '@/components/PlayingCard';
 import { useDailyStore } from '@/daily/dailyStore';
 import { nextDayIn } from '@/daily/format';
 import { ACHIEVEMENT_IDS, isKnownAchievement } from '@/progress/catalog';
+import { PlayerTitle } from '@/progress/PlayerTitle';
 import { useProgressStore } from '@/progress/progressStore';
 import { endsIn, seasonName } from '@/ranked/format';
 import { useRankedStore } from '@/ranked/rankedStore';
@@ -449,8 +450,9 @@ function WeeklyTop() {
             className={`flex items-center gap-2 rounded-full border px-3 py-1 text-sm ${r.isMe ? 'border-paper/50 bg-paper/10' : 'border-ink-700/80 bg-ink-950/50'}`}
           >
             <span className="text-faint tabular-nums">{r.rank}</span>
-            <span className="max-w-32 truncate font-medium">
+            <span className="max-w-48 truncate font-medium">
               {r.displayName}
+              <PlayerTitle id={r.title} />
               {r.isMe && <span className="text-mute"> (tú)</span>}
             </span>
             <span className="text-mute tabular-nums">{formatChips(r.value)}</span>
