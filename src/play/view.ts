@@ -14,7 +14,7 @@ export const fullyShown = (r: RoundView, shown: number) => shown >= revealSteps(
 
 const toCard = (c: CardView, id: string): Card => ({ id, face: c.rank, suit: c.suit });
 
-export interface CasualHand {
+export interface TableHand {
   id: string;
   cards: Card[];
   fromSplit: boolean;
@@ -23,11 +23,11 @@ export interface CasualHand {
   net: number | null;
 }
 
-export interface CasualTableModel {
+export interface TableModel {
   /** Visible, oculta (boca abajo o volteada) y las pedidas que ya se mostraron. */
   dealer: Card[];
   holeHidden: boolean;
-  hands: CasualHand[];
+  hands: TableHand[];
   /** Resultados visibles: la revelación terminó. */
   resultShown: boolean;
 }
@@ -36,7 +36,7 @@ export interface CasualTableModel {
  * Lo que se dibuja con `shown` pasos de revelación. Los ids son estables por ronda y
  * posición, así la oculta se voltea en su lugar y las cartas nuevas entran animadas.
  */
-export function tableModel(r: RoundView, shown: number): CasualTableModel {
+export function tableModel(r: RoundView, shown: number): TableModel {
   const settled = r.phase === 'settled';
   const hole = r.dealer.hole;
   const holeShown = hole !== null && (!settled || shown >= 1);

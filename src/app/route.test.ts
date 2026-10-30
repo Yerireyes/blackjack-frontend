@@ -9,13 +9,16 @@ describe('pantallas', () => {
   it('lee la pantalla de la dirección', () => {
     expect(screenFromHash('')).toBe('home');
     expect(screenFromHash('#/practicar')).toBe('practice');
+    expect(screenFromHash('#/casual')).toBe('casual');
+    expect(screenFromHash('#/ranked')).toBe('ranked');
+    // La dirección anterior de Casual sigue funcionando.
     expect(screenFromHash('#/jugar')).toBe('casual');
     // Una dirección desconocida lleva al inicio, no a una pantalla en blanco.
     expect(screenFromHash('#/otra')).toBe('home');
   });
 
   it('cada pantalla deja su entrada en el historial y Atrás vuelve', () => {
-    history.replaceState(null, '', '/#/jugar');
+    history.replaceState(null, '', '/#/casual');
     startRouteSync();
     expect(useUiStore.getState().screen).toBe('casual');
 

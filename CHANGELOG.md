@@ -7,10 +7,19 @@ versiones según [SemVer](https://semver.org/lang/es/) (en 0.x, una versión men
 
 ### Agregado
 
-- **Pantalla de inicio:** elegir entre Jugar (Casual), Practicar y Ajustes. Jugar muestra si
-  hay una partida en curso con su saldo y la continúa; sin cuenta, abre el login. Debajo, el
-  top 3 de la semana. Cada pantalla tiene su dirección (`#/jugar`, `#/practicar`): recargar
-  deja al usuario donde estaba y Atrás vuelve al inicio.
+- **Ranked (fase 4):** temporadas mensuales con reglas fijas de Las Vegas y sin ayudas durante
+  la mano (ni EV ni recomendada; no se le pide nada al motor). Al terminar, la revisión de
+  cada decisión contra la óptima con el EV perdido, y el acumulado de la sesión. Saldo y neto de
+  la temporada, manos para clasificar (200), recarga a 100 con la hora en que estará
+  disponible (la mesa se actualiza sola), ranking de la temporada actual y la anterior con
+  medallas, y tus temporadas cerradas.
+- **Una mano a la vez:** si la mano en juego es del otro modo, la mesa lo avisa y lleva a
+  terminarla allí.
+- **Pantalla de inicio:** elegir entre Casual, Ranked, Practicar y Ajustes. Casual muestra si
+  hay una partida en curso con su saldo y la continúa; Ranked, tu neto y tus manos de la
+  temporada; sin cuenta, abren el login. Debajo, el top 3 de Casual de la semana. Cada pantalla
+  tiene su dirección (`#/casual`, `#/ranked`, `#/practicar`): recargar deja al usuario donde
+  estaba y Atrás vuelve al inicio.
 - **Ajustes:** efectos de sonido, volumen (con una ficha de muestra), animaciones reducidas
   aunque el sistema no lo pida, y la lista de atajos de teclado. Se guardan en el navegador.
 - **Modo Casual (fase 3):** se entra desde el inicio. Partidas de 500 fichas contra el
@@ -26,14 +35,21 @@ versiones según [SemVer](https://semver.org/lang/es/) (en 0.x, una versión men
 
 ### Cambiado
 
+- La mecánica de la ronda contra el servidor (repartir, actuar, revelar, fichas) vive en
+  `src/play/` y la comparten Casual y Ranked.
 - La cabecera de la mesa vuelve al inicio con el botón de la izquierda y muestra dónde estás
-  (Práctica o Jugar). El selector Práctica | Casual desaparece: se elige en el inicio.
+  (Práctica, Casual o Ranked). El selector Práctica | Casual desaparece: se elige en el inicio.
 - Cabecera en móvil y en escritorio estrecho: las herramientas van en su propia fila y las
   reglas se recortan en vez de montarse sobre los selectores. En móvil, «Entrar» es solo el
   icono y el silencio rápido está en Ajustes.
 - Cliente HTTP compartido (`src/api/http.ts`) para cuentas y Casual.
 - Pila y bandeja de fichas presentacionales, reutilizadas por Práctica y Casual. La ayuda de la
   bandeja muestra el tope real de la apuesta.
+
+### Corregido
+
+- `npm run dev` no servía el WASM del motor (403: el paquete se enlaza desde el backend, fuera
+  de la carpeta del front) y no había análisis en Práctica ni en Casual.
 
 ## [0.2.0] - 2026-10-28
 

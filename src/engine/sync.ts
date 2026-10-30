@@ -68,7 +68,9 @@ function wanted(): Record<AnalysisKind, Built<{ version: number }> | null> {
   const { rules } = useRulesStore.getState();
   const t = useTableStore.getState();
   const ui = useUiStore.getState();
-  if (ui.screen === 'home') return { hand: null, dealer: null, round: null };
+  // Inicio: nada que analizar. Ranked: sin ayudas, nunca se le pide nada al motor.
+  if (ui.screen === 'home' || ui.screen === 'ranked')
+    return { hand: null, dealer: null, round: null };
   if (ui.screen === 'casual') {
     // Casual: la mano y el zapato salen de la última respuesta del servidor.
     const c = useCasualStore.getState();

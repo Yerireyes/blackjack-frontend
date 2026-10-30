@@ -6,6 +6,7 @@ import type { CardView, CasualRunView, RoundView } from '@/engine/contract';
 import { buildCasualHandRequest } from '@/engine/requests';
 import { useShoeStore } from '@/store/shoeStore';
 import { useTableStore } from '@/store/tableStore';
+import { json, notFound, stubFetch } from '@/tests/server';
 import {
   REVEAL_FIRST_MS,
   REVEAL_PEEK_MS,
@@ -13,7 +14,7 @@ import {
   casualLocked,
   useCasualStore,
 } from './casualStore';
-import { revealSteps, tableModel } from './view';
+import { revealSteps, tableModel } from '@/play/view';
 
 // ---------- datos ----------
 
@@ -90,26 +91,6 @@ const me: Me = {
 };
 
 // ---------- servidor simulado ----------
-
-const json = (status: number, body: unknown) =>
-  new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
-const notFound = (code: string) => () => json(404, { code, message: 'No existe.' });
-
-type Handler = (body: unknown) => Response | Promise<Response>;
-function stubFetch(routes: Record<string, Handler | Handler[]>) {
-  const calls: { key: string; body: unknown }[] = [];
-  const fn = vi.fn(async (url: string, init?: RequestInit) => {
-    const key = `${init?.method ?? 'GET'} ${url.replace('/api/v1', '')}`;
-    const body: unknown = init?.body ? JSON.parse(init.body as string) : undefined;
-    calls.push({ key, body });
-    const route = routes[key];
-    const handler = Array.isArray(route) ? route.shift() : route;
-    if (!handler) throw new TypeError(`sin ruta: ${key}`);
-    return handler(body);
-  });
-  vi.stubGlobal('fetch', fn);
-  return calls;
-}
 
 const cs = () => useCasualStore.getState();
 const board = { weekStart: '2026-10-26T00:00:00Z', top: [] };
@@ -211,6 +192,18 @@ describe('casualStore', () => {
     expect(cs().status).toBe('playing');
     expect(cs().round?.id).toBe('round-1');
     expect(casualLocked(cs())).toBe(true);
+  });
+
+  it('si la mano en juego es de Ranked no la dibuja ni deja repartir aquí', async () => {
+    const calls = stubFetch({
+      'GET /casual/runs/active': () => json(200, run()),
+      'GET /play/active': () => json(200, inPlay({ kind: 'ranked', contextId: 'season-1' })),
+      ...boards,
+    });
+    await cs().enter();
+    expect(cs()).toMatchObject({ status: 'playing', elsewhere: 'ranked', round: null });
+    await cs().deal();
+    expect(calls.some((c) => c.key === 'POST /play/rounds')).toBe(false);
   });
 
   it('sin partida ofrece crear una', async () => {

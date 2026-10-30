@@ -1,5 +1,8 @@
 import { useEffect } from 'react';
-import { casualLocked, useCasualStore } from '@/casual/casualStore';
+import { useCasualStore } from '@/casual/casualStore';
+import { roundLocked } from '@/play/round';
+import type { RoundStore } from '@/play/round';
+import { useRankedStore } from '@/ranked/rankedStore';
 import { performAction } from '@/features/table/performAction';
 import { useTableStore, type PlayerAction } from '@/store/tableStore';
 import { useUiStore } from '@/store/uiStore';
@@ -23,8 +26,9 @@ export function useKeyboard() {
       const action = KEYS[e.key.toLowerCase()];
       const { screen } = useUiStore.getState();
       if (screen === 'home') return;
-      if (screen === 'casual') {
-        onCasualKey(e, action, el);
+      if (screen === 'casual' || screen === 'ranked') {
+        const store = screen === 'casual' ? useCasualStore : useRankedStore;
+        onServerKey(store as unknown as RoundStore, e, action, el);
         return;
       }
       if (action) {
@@ -47,16 +51,21 @@ export function useKeyboard() {
   }, []);
 }
 
-/** Casual: las mismas teclas, pero las intenciones van al servidor. */
-function onCasualKey(e: KeyboardEvent, action: PlayerAction | undefined, el: HTMLElement) {
-  const c = useCasualStore.getState();
+/** Casual y Ranked: las mismas teclas, pero las intenciones van al servidor. */
+function onServerKey(
+  store: RoundStore,
+  e: KeyboardEvent,
+  action: PlayerAction | undefined,
+  el: HTMLElement,
+) {
+  const c = store.getState();
   if (action) {
     e.preventDefault();
     void c.act(action);
     return;
   }
   if (e.key !== 'Enter' || el.closest('button, a')) return;
-  if (c.status === 'playing' && !casualLocked(c)) {
+  if (!roundLocked(c)) {
     e.preventDefault();
     void c.deal();
   }

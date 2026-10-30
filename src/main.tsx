@@ -6,6 +6,7 @@ import { startRouteSync } from '@/app/route';
 import { startSoundSync } from '@/app/sounds';
 import { startCasualSync } from '@/casual/casualSync';
 import { startEngineSync } from '@/engine/sync';
+import { startRankedSync } from '@/ranked/rankedSync';
 import './index.css';
 
 // Primero la pantalla (de la dirección): de ella dependen la sincronización y Casual.
@@ -14,6 +15,7 @@ startEngineSync();
 startSoundSync();
 void useAccountStore.getState().init();
 startCasualSync();
+startRankedSync();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
