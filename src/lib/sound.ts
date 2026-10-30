@@ -2,7 +2,8 @@
 // El AudioContext se crea en el primer sonido, que siempre sigue a un gesto del usuario
 // (repartir, pedir…), así que la política de autoplay del navegador no lo bloquea.
 
-export type Sound = 'card' | 'flip' | 'chip' | 'chipOff' | 'win' | 'blackjack' | 'push' | 'lose';
+export type Sound =
+  'card' | 'flip' | 'chip' | 'chipOff' | 'win' | 'blackjack' | 'push' | 'lose' | 'achievement';
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
@@ -94,6 +95,11 @@ const SOUNDS: Record<Sound, (t: number) => void> = {
   },
   push: (t) => notes(t, [587.33, 587.33], 0.16, 0.22, 0.13, 'sine'),
   lose: (t) => notes(t, [392, 311.13, 261.63], 0.14, 0.4, 0.14, 'triangle'),
+  // Logro: una campanilla que sube, más suave que el blackjack.
+  achievement: (t) => {
+    notes(t, [783.99, 1174.66, 1567.98], 0.07, 0.7, 0.09, 'sine');
+    notes(t + 0.05, [1567.98, 2349.32], 0.07, 0.5, 0.03, 'sine');
+  },
 };
 
 /** Reproduce un sonido dentro de `delay` segundos. No hace nada si no hay Web Audio. */

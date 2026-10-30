@@ -192,6 +192,7 @@
       0 2px 0 rgb(0 0 0 / 0.35);
     outline: 2px dashed color-mix(in oklab, var(--chip-ink) 45%, transparent);
     outline-offset: -4px;
+    text-shadow: var(--chip-glow);
     transition: transform 140ms var(--ease-out);
     user-select: none;
   }
@@ -213,21 +214,22 @@
       inset 0 0 0 4px color-mix(in oklab, var(--chip-ink) 55%, transparent),
       0 2px 0 rgb(0 0 0 / 0.45);
   }
+  /* Los colores de cada valor vienen del juego de fichas puesto (Cosméticos, al final). */
   .chip-10 {
-    --chip-bg: var(--color-paper);
-    --chip-ink: var(--color-paper-ink);
+    --chip-bg: var(--chip-10-bg);
+    --chip-ink: var(--chip-10-ink);
   }
   .chip-50 {
-    --chip-bg: var(--color-pip);
-    --chip-ink: #fff;
+    --chip-bg: var(--chip-50-bg);
+    --chip-ink: var(--chip-50-ink);
   }
   .chip-100 {
-    --chip-bg: var(--color-ink-950);
-    --chip-ink: var(--color-text);
+    --chip-bg: var(--chip-100-bg);
+    --chip-ink: var(--chip-100-ink);
   }
   .chip-500 {
-    --chip-bg: var(--color-warn);
-    --chip-ink: var(--color-paper-ink);
+    --chip-bg: var(--chip-500-bg);
+    --chip-ink: var(--chip-500-ink);
   }
   .felt {
     background:
@@ -314,15 +316,120 @@
       transform: none;
     }
   }
-  /* Dorso de carta: el rombo clásico en dos rojos, como una baraja de casino. */
+  /* Dorso de carta: el dibujo viene del dorso puesto (Cosméticos, al final). */
   .card-back {
-    background-color: #7d1020;
-    background-image:
+    background-color: var(--back-base);
+    background-image: var(--back-image);
+    background-size: var(--back-size);
+    background-position: var(--back-position);
+  }
+}
+
+/*
+ * Cosméticos (Logros → Tu mesa): solo apariencia. progressSync pone en <html> lo que el
+ * usuario tiene puesto (`data-felt`, `data-back`, `data-chips`) y aquí cambian los colores.
+ * Son variables heredadas: una muestra con su propio atributo se ve con ese cosmético
+ * aunque la página lleve otro. Sin atributo, lo de serie.
+ */
+@layer base {
+  :root,
+  [data-felt='green'] {
+    --color-felt-950: #08231a;
+    --color-felt-900: #0b2c20;
+    --color-felt-800: #0f3b2a;
+    --color-felt-700: #14533b;
+    --color-felt-line: #2a6a50;
+    --color-felt-ink: #b4cfc1;
+  }
+  [data-felt='blue'] {
+    --color-felt-950: #081a2b;
+    --color-felt-900: #0b2238;
+    --color-felt-800: #0f2d4a;
+    --color-felt-700: #164266;
+    --color-felt-line: #2e5d87;
+    --color-felt-ink: #b5c8da;
+  }
+  [data-felt='red'] {
+    --color-felt-950: #230a0f;
+    --color-felt-900: #2d0d14;
+    --color-felt-800: #3c111b;
+    --color-felt-700: #561a27;
+    --color-felt-line: #7c3443;
+    --color-felt-ink: #dcbcc1;
+  }
+  [data-felt='black'] {
+    --color-felt-950: #090a0b;
+    --color-felt-900: #0f1113;
+    --color-felt-800: #15181b;
+    --color-felt-700: #23282d;
+    --color-felt-line: #3b4249;
+    --color-felt-ink: #b9bfc5;
+  }
+
+  /* Clásico: el rombo en dos rojos, como una baraja de casino. */
+  :root,
+  [data-back='classic'] {
+    --back-base: #7d1020;
+    --back-image:
       linear-gradient(45deg, #921728 25%, transparent 25%, transparent 75%, #921728 75%),
       linear-gradient(45deg, #921728 25%, transparent 25%, transparent 75%, #921728 75%);
-    background-size: 10px 10px;
-    background-position:
-      0 0,
-      5px 5px;
+    --back-size: 10px 10px;
+    --back-position: 0 0, 5px 5px;
+  }
+  [data-back='gold'] {
+    --back-base: #9a7329;
+    --back-image:
+      linear-gradient(45deg, #c49a43 25%, transparent 25%, transparent 75%, #c49a43 75%),
+      linear-gradient(45deg, #c49a43 25%, transparent 25%, transparent 75%, #c49a43 75%);
+    --back-size: 10px 10px;
+    --back-position: 0 0, 5px 5px;
+  }
+  /* Medianoche: azul profundo con un punto dorado en cada rombo. */
+  [data-back='midnight'] {
+    --back-base: #111f3f;
+    --back-image:
+      radial-gradient(circle, #c9b37a 0.8px, transparent 1.3px),
+      linear-gradient(45deg, #1a2d57 25%, transparent 25%, transparent 75%, #1a2d57 75%),
+      linear-gradient(45deg, #1a2d57 25%, transparent 25%, transparent 75%, #1a2d57 75%);
+    --back-size: 10px 10px;
+    --back-position: 0 0, 0 0, 5px 5px;
+  }
+
+  /* Clásicas: marfil, rojo, tinta y ámbar. */
+  :root,
+  [data-chips='classic'] {
+    --chip-10-bg: var(--color-paper);
+    --chip-10-ink: var(--color-paper-ink);
+    --chip-50-bg: var(--color-pip);
+    --chip-50-ink: #fff;
+    --chip-100-bg: var(--color-ink-950);
+    --chip-100-ink: var(--color-text);
+    --chip-500-bg: var(--color-warn);
+    --chip-500-ink: var(--color-paper-ink);
+    --chip-glow: none;
+  }
+  /* Neón: discos oscuros con el canto y la cifra encendidos. */
+  [data-chips='neon'] {
+    --chip-10-bg: #101317;
+    --chip-10-ink: #4fe3ff;
+    --chip-50-bg: #101317;
+    --chip-50-ink: #ff4fae;
+    --chip-100-bg: #101317;
+    --chip-100-ink: #b4ff4f;
+    --chip-500-bg: #101317;
+    --chip-500-ink: #ffd34f;
+    --chip-glow: 0 0 6px currentColor;
+  }
+  /* Doradas: del oro claro al bronce, cada valor distinguible por el tono. */
+  [data-chips='gold'] {
+    --chip-10-bg: #f0d48a;
+    --chip-10-ink: #3a2906;
+    --chip-50-bg: #c99630;
+    --chip-50-ink: #fff4d6;
+    --chip-100-bg: #7d5a14;
+    --chip-100-ink: #fde8ad;
+    --chip-500-bg: #2e2105;
+    --chip-500-ink: #f2c65a;
+    --chip-glow: none;
   }
 }

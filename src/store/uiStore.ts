@@ -6,9 +6,10 @@ export type Mode = 'player' | 'dealer';
 export type Source = 'simulation' | 'manual';
 /**
  * Inicio: elegir qué hacer. Práctica: en el navegador y sin cuenta. Casual, Ranked y el reto
- * diario: contra el servidor, con cuenta (Ranked y el reto, sin ayudas).
+ * diario: contra el servidor, con cuenta (Ranked y el reto, sin ayudas). Logros: los logros y
+ * los cosméticos de la mesa.
  */
-export type Screen = 'home' | 'practice' | 'casual' | 'ranked' | 'daily';
+export type Screen = 'home' | 'practice' | 'casual' | 'ranked' | 'daily' | 'progress';
 /** Animaciones: las del sistema operativo o siempre reducidas. */
 export type Motion = 'system' | 'reduced';
 

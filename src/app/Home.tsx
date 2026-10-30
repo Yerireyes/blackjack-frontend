@@ -1,5 +1,6 @@
 import {
   ArrowRight,
+  Award,
   CalendarDays,
   GraduationCap,
   Settings,
@@ -15,6 +16,8 @@ import { useCasualStore } from '@/casual/casualStore';
 import { PlayingCard } from '@/components/PlayingCard';
 import { useDailyStore } from '@/daily/dailyStore';
 import { nextDayIn } from '@/daily/format';
+import { ACHIEVEMENT_IDS, isKnownAchievement } from '@/progress/catalog';
+import { useProgressStore } from '@/progress/progressStore';
 import { endsIn, seasonName } from '@/ranked/format';
 import { useRankedStore } from '@/ranked/rankedStore';
 import { formatChips } from '@/lib/format';
@@ -93,19 +96,45 @@ export function Home() {
         </nav>
 
         <motion.div {...rise(6)} className="mt-5 flex flex-col items-center gap-6">
-          <button
-            type="button"
-            className="btn h-11 gap-2 border-transparent bg-transparent text-felt-ink"
-            onClick={() => openSettings(true)}
-          >
-            <Settings className="size-4" aria-hidden />
-            Ajustes
-            <span className="text-felt-ink/70">· sonido, volumen y animaciones</span>
-          </button>
+          <div className="flex flex-wrap justify-center gap-x-2">
+            <ProgressLink />
+            <button
+              type="button"
+              className="btn h-11 gap-2 border-transparent bg-transparent text-felt-ink"
+              onClick={() => openSettings(true)}
+            >
+              <Settings className="size-4" aria-hidden />
+              Ajustes
+              <span className="hidden text-felt-ink/70 sm:inline">
+                · sonido, volumen y animaciones
+              </span>
+            </button>
+          </div>
           <WeeklyTop />
         </motion.div>
       </main>
     </div>
+  );
+}
+
+/** Logros y la apariencia de la mesa; con sesión, cuántos logros lleva. */
+function ProgressLink() {
+  const unlocked = useProgressStore((s) => s.achievements?.unlocked ?? null);
+  const setScreen = useUiStore((s) => s.setScreen);
+  const got = unlocked?.filter((u) => isKnownAchievement(u.id)).length ?? null;
+  return (
+    <button
+      type="button"
+      className="btn h-11 gap-2 border-transparent bg-transparent text-felt-ink"
+      onClick={() => setScreen('progress')}
+      data-testid="home-progress"
+    >
+      <Award className="size-4" aria-hidden />
+      Logros
+      <span className="text-felt-ink/70">
+        · {got === null ? 'personaliza tu mesa' : `${got} de ${ACHIEVEMENT_IDS.length}`}
+      </span>
+    </button>
   );
 }
 

@@ -13,6 +13,7 @@ import {
   type Chip,
   type ChipValue,
 } from '@/store/chipsStore';
+import { useProgressStore } from '@/progress/progressStore';
 import { useShoeStore } from '@/store/shoeStore';
 import { useTableStore } from '@/store/tableStore';
 import { playApi } from './api';
@@ -110,7 +111,11 @@ export function createRound(
     // Cambiaron las cartas: el análisis viejo deja de ser actual.
     useShoeStore.getState().bump();
     if (round.phase !== 'settled') return;
-    const done = () => void cfg.afterSettle(round);
+    const done = () => {
+      // Los logros se anuncian cuando ya se vio el resultado, no antes.
+      useProgressStore.getState().settled(round);
+      void cfg.afterSettle(round);
+    };
     if (!animate || steps === 0) {
       done();
       return;
