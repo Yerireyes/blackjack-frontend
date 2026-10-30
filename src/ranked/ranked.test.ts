@@ -13,7 +13,7 @@ import { useTableStore } from '@/store/tableStore';
 import { json, notFound, stubFetch } from '@/tests/server';
 import { endsIn, previousSeason, seasonName } from './format';
 import { useRankedStore } from './rankedStore';
-import { reviewSummary } from './review';
+import { reviewSummary } from '@/play/review';
 
 // ---------- datos ----------
 

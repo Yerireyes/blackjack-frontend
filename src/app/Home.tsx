@@ -1,10 +1,20 @@
-import { ArrowRight, GraduationCap, Settings, Spade, Trophy, type LucideIcon } from 'lucide-react';
+import {
+  ArrowRight,
+  CalendarDays,
+  GraduationCap,
+  Settings,
+  Spade,
+  Trophy,
+  type LucideIcon,
+} from 'lucide-react';
 import { motion } from 'motion/react';
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { AccountMenu } from '@/account/AccountMenu';
 import { useAccountStore } from '@/account/accountStore';
 import { useCasualStore } from '@/casual/casualStore';
 import { PlayingCard } from '@/components/PlayingCard';
+import { useDailyStore } from '@/daily/dailyStore';
+import { nextDayIn } from '@/daily/format';
 import { endsIn, seasonName } from '@/ranked/format';
 import { useRankedStore } from '@/ranked/rankedStore';
 import { formatChips } from '@/lib/format';
@@ -66,7 +76,7 @@ export function Home() {
 
         <nav
           aria-label="Qué quieres hacer"
-          className="mt-9 grid w-full max-w-5xl gap-3 sm:mt-11 md:grid-cols-3 md:gap-4"
+          className="mt-9 grid w-full max-w-6xl gap-3 sm:mt-11 sm:grid-cols-2 md:gap-4 xl:grid-cols-4"
         >
           <motion.div {...rise(2)} className="flex">
             <CasualChoice />
@@ -75,11 +85,14 @@ export function Home() {
             <RankedChoice />
           </motion.div>
           <motion.div {...rise(4)} className="flex">
+            <DailyChoice />
+          </motion.div>
+          <motion.div {...rise(5)} className="flex">
             <PracticeChoice />
           </motion.div>
         </nav>
 
-        <motion.div {...rise(5)} className="mt-5 flex flex-col items-center gap-6">
+        <motion.div {...rise(6)} className="mt-5 flex flex-col items-center gap-6">
           <button
             type="button"
             className="btn h-11 gap-2 border-transparent bg-transparent text-felt-ink"
@@ -216,6 +229,72 @@ function RankedChoice() {
 function currentSeason() {
   const d = new Date();
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+}
+
+/** Reto diario: por empezar, en juego (mano N de 30) o terminado (saldo final y posición). */
+function DailyChoice() {
+  const account = useAccountStore((s) => s.status);
+  const openDialog = useAccountStore((s) => s.openDialog);
+  const status = useDailyStore((s) => s.status);
+  const attempt = useDailyStore((s) => s.attempt);
+  const rank = useDailyStore((s) => (s.boardDay === null ? (s.board?.me?.rank ?? null) : null));
+  const midHand = useCasualStore((s) => s.elsewhere === 'daily');
+  const setScreen = useUiStore((s) => s.setScreen);
+
+  let badge: ReactNode = <Badge>Sin ayudas</Badge>;
+  let detail: ReactNode = 'Las mismas cartas para todos hoy: 30 manos y un solo intento.';
+  let cta = 'Jugar el reto';
+  let go = () => setScreen('daily');
+
+  if (
+    account === 'loading' ||
+    (account === 'signedIn' && (status === 'idle' || status === 'loading'))
+  ) {
+    badge = <Badge>Cargando…</Badge>;
+  } else if (account === 'unavailable' || status === 'unavailable') {
+    badge = <Badge tone="warn">Sin conexión</Badge>;
+    detail = 'El servidor no responde ahora. Práctica sigue disponible sin conexión.';
+    cta = 'Ver estado';
+  } else if (account === 'anonymous') {
+    badge = <Badge>Con cuenta</Badge>;
+    cta = 'Entrar y jugar';
+    go = () => {
+      setScreen('daily');
+      openDialog('auth');
+    };
+  } else if (status === 'finished' && attempt) {
+    badge = <Badge tone="live">Hecho</Badge>;
+    detail = (
+      <>
+        Saldo final{' '}
+        <strong className="font-semibold text-text">{formatChips(attempt.balance)}</strong>
+        {rank !== null && <> · posición {rank}</>}. {nextDayIn()}.
+      </>
+    );
+    cta = 'Ver resultado';
+  } else if (status === 'active' && attempt) {
+    badge = <Badge tone="live">{midHand ? 'Mano a medias' : 'En curso'}</Badge>;
+    detail = (
+      <>
+        Mano {Math.min(attempt.hands + 1, attempt.handsTotal)} de {attempt.handsTotal} · saldo{' '}
+        <strong className="font-semibold text-text">{formatChips(attempt.balance)}</strong>
+      </>
+    );
+    cta = 'Continuar el reto';
+  }
+
+  return (
+    <Choice
+      icon={CalendarDays}
+      title="Reto diario"
+      lead="Todos juegan el mismo zapato del día. Gana el saldo final."
+      detail={detail}
+      badge={badge}
+      cta={cta}
+      onClick={go}
+      testId="home-daily"
+    />
+  );
 }
 
 function PracticeChoice() {

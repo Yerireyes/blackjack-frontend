@@ -11,6 +11,7 @@ describe('pantallas', () => {
     expect(screenFromHash('#/practicar')).toBe('practice');
     expect(screenFromHash('#/casual')).toBe('casual');
     expect(screenFromHash('#/ranked')).toBe('ranked');
+    expect(screenFromHash('#/reto')).toBe('daily');
     // La dirección anterior de Casual sigue funcionando.
     expect(screenFromHash('#/jugar')).toBe('casual');
     // Una dirección desconocida lleva al inicio, no a una pantalla en blanco.

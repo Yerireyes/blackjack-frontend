@@ -120,10 +120,11 @@ copiar el paquete nuevo) y luego los tests.
 | `src/features/` | `player-mode`, `dealer-mode`, `shoe-tracker`, `manual-entry`, `settings`, `table`, `analysis`, `chips`. |
 | `src/api/` | Cliente HTTP de la API del backend (aparte de `src/engine/api.ts`, que es el motor WASM): URLs relativas, mismo origen, errores `{ code, message }`. |
 | `src/account/` | Cuentas: store de sesión, diálogos de login, registro y perfil, vincular y desvincular Google, vuelta de Google. |
-| `src/play/` | Lo común a Casual y Ranked: rutas `/play/*`, la ronda tal como la manda el servidor (`RoundView`), la revelación animada, las claves de idempotencia, la pila de la próxima apuesta y las piezas de la mesa. |
+| `src/play/` | Lo común a Casual, Ranked y el reto diario: rutas `/play/*`, la ronda tal como la manda el servidor (`RoundView`), la revelación animada, las claves de idempotencia, la pila de la próxima apuesta, las piezas de la mesa y la revisión de decisiones. |
 | `src/casual/` | Casual: la partida (crear, retirarse), la mesa con las ayudas del motor, el ranking semanal y los récords. |
 | `src/ranked/` | Ranked: la cuenta de la temporada, la mesa sin ayudas, la revisión de cada decisión al terminar la mano, la recarga a 100, el ranking por temporada con medallas y tus temporadas. |
-| `src/app/` | Raíz de la interfaz: pantalla de inicio (Casual, Ranked, Practicar, Ajustes), mesa con su cabecera, ajustes del navegador (sonido, volumen, animaciones) y la dirección de cada pantalla (`#/casual`, `#/ranked`, `#/practicar`). |
+| `src/daily/` | Reto diario: el intento de hoy (un solo intento, 30 manos, el mismo zapato para todos), la mesa sin ayudas con el contador de manos y la revisión, el resultado al terminar y el ranking del día. |
+| `src/app/` | Raíz de la interfaz: pantalla de inicio (Casual, Ranked, Reto diario, Practicar, Ajustes), mesa con su cabecera, ajustes del navegador (sonido, volumen, animaciones) y la dirección de cada pantalla (`#/casual`, `#/ranked`, `#/reto`, `#/practicar`). |
 | `src/lib/sound.ts` | Efectos de sonido sintetizados con Web Audio (sin archivos). |
 | `src/components/` | Carta, mano, barra de probabilidades, controles segmentados, diálogo. |
 | `e2e/` | Specs de Playwright y fixtures generados por el motor. |

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useCasualStore } from '@/casual/casualStore';
 import { roundLocked } from '@/play/round';
 import type { RoundStore } from '@/play/round';
+import { useDailyStore } from '@/daily/dailyStore';
 import { useRankedStore } from '@/ranked/rankedStore';
 import { performAction } from '@/features/table/performAction';
 import { useTableStore, type PlayerAction } from '@/store/tableStore';
@@ -26,8 +27,10 @@ export function useKeyboard() {
       const action = KEYS[e.key.toLowerCase()];
       const { screen } = useUiStore.getState();
       if (screen === 'home') return;
-      if (screen === 'casual' || screen === 'ranked') {
-        const store = screen === 'casual' ? useCasualStore : useRankedStore;
+      if (screen === 'casual' || screen === 'ranked' || screen === 'daily') {
+        const store = { casual: useCasualStore, ranked: useRankedStore, daily: useDailyStore }[
+          screen
+        ];
         onServerKey(store as unknown as RoundStore, e, action, el);
         return;
       }
@@ -51,7 +54,7 @@ export function useKeyboard() {
   }, []);
 }
 
-/** Casual y Ranked: las mismas teclas, pero las intenciones van al servidor. */
+/** Casual, Ranked y el reto: las mismas teclas, pero las intenciones van al servidor. */
 function onServerKey(
   store: RoundStore,
   e: KeyboardEvent,

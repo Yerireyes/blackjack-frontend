@@ -43,6 +43,9 @@ export function formatChips(n: number, signed = false): string {
   return `${n > 0 ? '+' : MINUS}${body}`;
 }
 
+/** Primera letra en mayúscula (la clase CSS `capitalize` lo hace con cada palabra). */
+export const upperFirst = (s: string) => s.charAt(0).toLocaleUpperCase('es') + s.slice(1);
+
 export const evTone = (ev: number) => (ev > 0.00005 ? 'pos' : ev < -0.00005 ? 'neg' : 'zero');
 
 export function formatMs(ms: number): string {

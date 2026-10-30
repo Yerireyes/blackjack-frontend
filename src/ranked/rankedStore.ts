@@ -14,6 +14,7 @@ import type {
   WalletView,
 } from '@/engine/contract';
 import { playApi } from '@/play/api';
+import { addReview, EMPTY_TALLY, type Tally } from '@/play/review';
 import { createRound, isNotFound, notify, type RoundState } from '@/play/round';
 import { useShoeStore } from '@/store/shoeStore';
 import { rankedApi } from './api';
@@ -48,26 +49,6 @@ export interface RankedState extends RoundState {
 
 const accountWallet = ({ balance, maxBet, refillAvailableAt }: RankedAccountView): WalletView =>
   refillAvailableAt ? { balance, maxBet, refillAvailableAt } : { balance, maxBet };
-
-export interface Tally {
-  decisions: number;
-  optimal: number;
-  /** EV perdido en fichas (evBest − evChosen por la apuesta de cada ronda). */
-  evLost: number;
-}
-
-const EMPTY_TALLY: Tally = { decisions: 0, optimal: 0, evLost: 0 };
-
-/** Suma la revisión de una ronda liquidada a la de la sesión. */
-export function addReview(t: Tally, round: RoundView): Tally {
-  const review = round.result?.review ?? [];
-  if (review.length === 0) return t;
-  return {
-    decisions: t.decisions + review.length,
-    optimal: t.optimal + review.filter((r) => r.chosen === r.best).length,
-    evLost: t.evLost + review.reduce((n, r) => n + (r.evBest - r.evChosen) * round.bet, 0),
-  };
-}
 
 // setTimeout no admite esperas de más de ~24,8 días; la recarga es como mucho a 24 h.
 const MAX_WAIT_MS = 2 ** 31 - 1;

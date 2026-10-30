@@ -1,6 +1,7 @@
 import { playSound, type Sound } from '@/lib/sound';
 import { useCasualStore } from '@/casual/casualStore';
 import type { RoundStore } from '@/play/round';
+import { useDailyStore } from '@/daily/dailyStore';
 import { useRankedStore } from '@/ranked/rankedStore';
 import { cardsOnTable, fullyShown, revealSteps } from '@/play/view';
 import { useChipsStore } from '@/store/chipsStore';
@@ -27,8 +28,8 @@ function outcomeSound(s: TableState): Sound | null {
   return net > 0 ? 'win' : net < 0 ? 'lose' : 'push';
 }
 
-/** Casual y Ranked: lo que se ve de la ronda del servidor (con la revelación paso a paso). */
-function startRoundSounds(store: RoundStore, screen: 'casual' | 'ranked') {
+/** Casual, Ranked y el reto: lo que se ve de la ronda del servidor (con la revelación paso a paso). */
+function startRoundSounds(store: RoundStore, screen: 'casual' | 'ranked' | 'daily') {
   store.subscribe((s, prev) => {
     // Desde el inicio también se carga la partida (para ofrecer continuarla): sin sonidos.
     const ui = useUiStore.getState();
@@ -74,6 +75,7 @@ const CHIP_FLIGHT = 0.36;
 export function startSoundSync() {
   startRoundSounds(useCasualStore as unknown as RoundStore, 'casual');
   startRoundSounds(useRankedStore as unknown as RoundStore, 'ranked');
+  startRoundSounds(useDailyStore as unknown as RoundStore, 'daily');
   useChipsStore.subscribe((s, prev) => {
     if (!useUiStore.getState().sound || s.stacks === prev.stacks) return;
     for (const bank of ['player', 'house'] as const) {

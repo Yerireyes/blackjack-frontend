@@ -4,6 +4,8 @@ import { useEffect, useRef } from 'react';
 import { AccountMenu } from '@/account/AccountMenu';
 import { CasualPanel } from '@/casual/CasualPanel';
 import { CasualTable } from '@/casual/CasualTable';
+import { DailyPanel } from '@/daily/DailyPanel';
+import { DailyTable } from '@/daily/DailyTable';
 import { ModeSwitch } from '@/components/ModeSwitch';
 import { ChipBalance } from '@/features/chips/ChipBalance';
 import { DealerView } from '@/features/dealer-mode/DealerView';
@@ -57,7 +59,13 @@ export function App() {
   );
 }
 
-const TITLE = { home: '', practice: 'Práctica', casual: 'Casual', ranked: 'Ranked' } as const;
+const TITLE = {
+  home: '',
+  practice: 'Práctica',
+  casual: 'Casual',
+  ranked: 'Ranked',
+  daily: 'Reto diario',
+} as const;
 
 /** La mesa de Práctica, Casual o Ranked, con su cabecera y su panel de análisis. */
 function TableScreen() {
@@ -122,20 +130,33 @@ function TableScreen() {
       </header>
 
       <main className="grid flex-1 lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_27.5rem]">
-        {practice ? <Table /> : screen === 'ranked' ? <RankedTable /> : <CasualTable />}
+        {practice ? (
+          <Table />
+        ) : screen === 'ranked' ? (
+          <RankedTable />
+        ) : screen === 'daily' ? (
+          <DailyTable />
+        ) : (
+          <CasualTable />
+        )}
         <aside
           aria-label={
             screen === 'casual'
               ? 'Análisis y partida Casual'
               : screen === 'ranked'
                 ? 'Temporada Ranked'
-                : mode === 'player'
-                  ? 'Análisis del jugador'
-                  : 'Análisis del dealer'
+                : screen === 'daily'
+                  ? 'Reto diario'
+                  : mode === 'player'
+                    ? 'Análisis del jugador'
+                    : 'Análisis del dealer'
           }
           className="border-t border-ink-800 bg-ink-900 px-4 py-6 sm:px-6 lg:overflow-y-auto lg:border-t-0 lg:border-l"
         >
-          {screen === 'ranked' ? (
+          {screen === 'daily' ? (
+            // Sin ayudas, como Ranked: el intento, la revisión y el ranking del día.
+            <DailyPanel />
+          ) : screen === 'ranked' ? (
             // Sin ayudas: ni EV ni recomendaciones, solo la temporada y la revisión.
             <RankedPanel />
           ) : !practice ? (

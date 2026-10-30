@@ -4,7 +4,7 @@ import { CloudOff, LogIn, Play, UserRound } from 'lucide-react';
 import { createContext, useContext, type ReactNode } from 'react';
 import { useAccountStore } from '@/account/accountStore';
 import { Hand } from '@/components/Hand';
-import type { Action } from '@/engine/contract';
+import type { Action, RoundKind } from '@/engine/contract';
 import { BetStack } from '@/features/chips/BetSpot';
 import { ChipButtons } from '@/features/chips/ChipTray';
 import { ACTION_KEY, ACTION_LABEL, ACTION_ORDER } from '@/features/player-mode/actions';
@@ -281,15 +281,19 @@ function BetControls({ testId, maxBet }: { testId: string; maxBet: number }) {
   );
 }
 
-const MODE_NAME = { casual: 'Casual', ranked: 'Ranked' } as const;
+const MODE_NAME: Record<RoundKind, { of: string; to: string }> = {
+  casual: { of: 'de Casual', to: 'a Casual' },
+  ranked: { of: 'de Ranked', to: 'a Ranked' },
+  daily: { of: 'del reto diario', to: 'al reto diario' },
+};
 
 /** La mano en juego es del otro modo: el servidor no deja repartir aquí hasta terminarla. */
-export function ElsewherePrompt({ kind }: { kind: 'casual' | 'ranked' }) {
+export function ElsewherePrompt({ kind }: { kind: RoundKind }) {
   const setScreen = useUiStore((s) => s.setScreen);
   return (
     <Centered>
       <h2 className="text-lg font-semibold text-text">
-        Tienes una mano de {MODE_NAME[kind]} a medias
+        Tienes una mano {MODE_NAME[kind].of} a medias
       </h2>
       <p className="text-sm">
         Termínala antes de jugar aquí: solo puede haber una mano en juego a la vez.
@@ -300,7 +304,7 @@ export function ElsewherePrompt({ kind }: { kind: 'casual' | 'ranked' }) {
         onClick={() => setScreen(kind)}
         data-testid="go-elsewhere"
       >
-        Ir a {MODE_NAME[kind]}
+        Ir {MODE_NAME[kind].to}
       </button>
     </Centered>
   );

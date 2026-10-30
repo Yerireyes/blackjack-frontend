@@ -1,6 +1,7 @@
 import { Coins, Landmark } from 'lucide-react';
 import { formatChips } from '@/lib/format';
 import { useCasualStore } from '@/casual/casualStore';
+import { useDailyStore } from '@/daily/dailyStore';
 import { useRankedStore } from '@/ranked/rankedStore';
 import { fullyShown } from '@/play/view';
 import { useChipsStore, type Bank } from '@/store/chipsStore';
@@ -11,6 +12,7 @@ export function ChipBalance() {
   const screen = useUiStore((s) => s.screen);
   if (screen === 'casual') return <CasualBalance />;
   if (screen === 'ranked') return <RankedBalance />;
+  if (screen === 'daily') return <DailyBalance />;
   return <PracticeBalance />;
 }
 
@@ -32,6 +34,16 @@ function RankedBalance() {
   );
   if (balance === null) return null;
   return <BalanceChip icon={Coins} name="Saldo de la temporada" balance={balance} last={last} />;
+}
+
+/** Reto diario: el saldo es del intento de hoy. */
+function DailyBalance() {
+  const balance = useDailyStore((s) => s.wallet?.balance ?? null);
+  const last = useDailyStore((s) =>
+    s.round?.result && fullyShown(s.round, s.shown) ? s.round.result.net : null,
+  );
+  if (balance === null) return null;
+  return <BalanceChip icon={Coins} name="Saldo del reto" balance={balance} last={last} />;
 }
 
 function PracticeBalance() {

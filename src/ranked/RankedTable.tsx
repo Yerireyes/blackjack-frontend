@@ -14,10 +14,9 @@ import {
   RoundProvider,
   SignInPrompt,
 } from '@/play/ServerTable';
-import { fullyShown } from '@/play/view';
+import { ReviewLine } from '@/play/ReviewView';
 import { formatWhen } from './format';
 import { useRankedStore } from './rankedStore';
-import { reviewSummary } from './review';
 
 /** Mesa de Ranked: como Casual, pero sin ayudas durante la mano y con revisión al terminar. */
 export function RankedTable() {
@@ -70,32 +69,9 @@ function RankedGame() {
       maxBet={maxBet}
       // Sin ayudas: nunca se marca una jugada recomendada.
       best={null}
-      after={<ReviewLine />}
+      after={<ReviewLine store={useRankedStore as unknown as RoundStore} testId="ranked" />}
       betBlocked={maxBet === 0 ? <RefillWait at={refillAt} /> : undefined}
     />
-  );
-}
-
-/** Bajo el resultado: cómo jugaste la mano (el detalle está en el panel). */
-function ReviewLine() {
-  const round = useRankedStore((s) => s.round);
-  const shown = useRankedStore((s) => s.shown);
-  if (!round) {
-    return (
-      <p className="max-w-md text-center text-sm text-felt-ink">
-        Sin ayudas durante la mano. Al terminar verás cada decisión comparada con la óptima.
-      </p>
-    );
-  }
-  if (round.phase !== 'settled' || !fullyShown(round, shown) || !round.result?.review) return null;
-  const s = reviewSummary(round.result.review, round.bet);
-  return (
-    <p
-      className={`max-w-md text-center text-sm ${s.decisions > 0 && s.optimal === s.decisions ? 'text-pos' : 'text-text'}`}
-      data-testid="ranked-review-line"
-    >
-      {s.text}
-    </p>
   );
 }
 

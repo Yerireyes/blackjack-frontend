@@ -1,12 +1,13 @@
 import { useUiStore, type Screen } from '@/store/uiStore';
 
-// Cada pantalla tiene su dirección (#/casual, #/ranked, #/practicar): recargar deja al
+// Cada pantalla tiene su dirección (#/casual, #/ranked, #/reto, #/practicar): recargar deja al
 // usuario donde estaba y el botón Atrás del navegador vuelve al inicio.
 const HASHES: Record<Screen, string> = {
   home: '',
   practice: '#/practicar',
   casual: '#/casual',
   ranked: '#/ranked',
+  daily: '#/reto',
 };
 /** Direcciones de versiones anteriores que siguen funcionando. */
 const ALIASES: Record<string, Screen> = { '#/jugar': 'casual' };
@@ -15,6 +16,7 @@ const TITLES: Record<Screen, string> = {
   practice: 'Práctica · Blackjack Guide',
   casual: 'Casual · Blackjack Guide',
   ranked: 'Ranked · Blackjack Guide',
+  daily: 'Reto diario · Blackjack Guide',
 };
 
 export function screenFromHash(hash: string): Screen {
