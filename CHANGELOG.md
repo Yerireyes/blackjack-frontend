@@ -7,19 +7,25 @@ versiones según [SemVer](https://semver.org/lang/es/) (en 0.x, una versión men
 
 ### Agregado
 
+- **Reto diario (fase 5):** el mismo zapato para todos cada día (UTC), 500 fichas y 30 manos,
+  un solo intento. Antes de empezar, las reglas y el aviso del intento único; durante, el
+  contador «mano N de 30», sin ayudas y con la revisión al terminar cada mano; al final, el
+  saldo final, la posición y cuánto falta para el próximo reto. Ranking de hoy y de ayer, y tus
+  retos. Si cambia el día con el intento a medias, avisa y ofrece el de hoy.
 - **Ranked (fase 4):** temporadas mensuales con reglas fijas de Las Vegas y sin ayudas durante
   la mano (ni EV ni recomendada; no se le pide nada al motor). Al terminar, la revisión de
   cada decisión contra la óptima con el EV perdido, y el acumulado de la sesión. Saldo y neto de
   la temporada, manos para clasificar (200), recarga a 100 con la hora en que estará
   disponible (la mesa se actualiza sola), ranking de la temporada actual y la anterior con
   medallas, y tus temporadas cerradas.
-- **Una mano a la vez:** si la mano en juego es del otro modo, la mesa lo avisa y lleva a
+- **Una mano a la vez:** si la mano en juego es de otro modo, la mesa lo avisa y lleva a
   terminarla allí.
-- **Pantalla de inicio:** elegir entre Casual, Ranked, Practicar y Ajustes. Casual muestra si
-  hay una partida en curso con su saldo y la continúa; Ranked, tu neto y tus manos de la
-  temporada; sin cuenta, abren el login. Debajo, el top 3 de Casual de la semana. Cada pantalla
-  tiene su dirección (`#/casual`, `#/ranked`, `#/practicar`): recargar deja al usuario donde
-  estaba y Atrás vuelve al inicio.
+- **Pantalla de inicio:** elegir entre Casual, Ranked, Reto diario, Practicar y Ajustes.
+  Casual muestra si hay una partida en curso con su saldo y la continúa; Ranked, tu neto y tus
+  manos de la temporada; el reto, si está por empezar, en juego o terminado; sin cuenta, abren
+  el login. Debajo, el top 3 de Casual de la semana. Cada pantalla tiene su dirección
+  (`#/casual`, `#/ranked`, `#/reto`, `#/practicar`): recargar deja al usuario donde estaba
+  y Atrás vuelve al inicio.
 - **Ajustes:** efectos de sonido, volumen (con una ficha de muestra), animaciones reducidas
   aunque el sistema no lo pida, y la lista de atajos de teclado. Se guardan en el navegador.
 - **Modo Casual (fase 3):** se entra desde el inicio. Partidas de 500 fichas contra el
@@ -36,7 +42,7 @@ versiones según [SemVer](https://semver.org/lang/es/) (en 0.x, una versión men
 ### Cambiado
 
 - La mecánica de la ronda contra el servidor (repartir, actuar, revelar, fichas) vive en
-  `src/play/` y la comparten Casual y Ranked.
+  `src/play/` y la comparten Casual, Ranked y el reto (también la revisión de decisiones).
 - La cabecera de la mesa vuelve al inicio con el botón de la izquierda y muestra dónde estás
   (Práctica, Casual o Ranked). El selector Práctica | Casual desaparece: se elige en el inicio.
 - Cabecera en móvil y en escritorio estrecho: las herramientas van en su propia fila y las
