@@ -2,6 +2,7 @@ import { Info, Trophy } from 'lucide-react';
 import { useAccountStore } from '@/account/accountStore';
 import { Segmented } from '@/components/Segmented';
 import type { DailyRow } from '@/engine/contract';
+import { PlayerTitle } from '@/progress/PlayerTitle';
 import { formatChips, formatPct, upperFirst } from '@/lib/format';
 import { ReviewDetail, Stat } from '@/play/ReviewView';
 import type { RoundStore } from '@/play/round';
@@ -147,6 +148,7 @@ function BoardRow({ row }: { row: DailyRow }) {
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate">
           {row.displayName}
+          <PlayerTitle id={row.title} />
           {row.isMe && <span className="text-mute"> (tú)</span>}
         </span>
         <span className="text-xs font-normal text-faint">

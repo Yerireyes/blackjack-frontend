@@ -7,6 +7,9 @@ versiones según [SemVer](https://semver.org/lang/es/) (en 0.x, una versión men
 
 ### Agregado
 
+- **Títulos en los rankings:** el título que cada jugador lleva puesto aparece tras su nombre
+  («Ana · Cabeza fría») en el ranking semanal de Casual, el de Ranked, el del reto diario y el
+  top 3 del inicio.
 - **Logros (fase 5):** al terminar de verse cada ronda, un aviso por cada logro nuevo que
   otorga el servidor (sin repetirlo si la respuesta llega dos veces), con el cosmético que
   desbloquea. Pantalla de logros (`#/logros`, desde el inicio o tu cuenta): los 10 con su
