@@ -7,6 +7,13 @@ versiones según [SemVer](https://semver.org/lang/es/) (en 0.x, una versión men
 
 ### Agregado
 
+- **Salas Casual multijugador:** mesas de 5 a 7 jugadores contra el dealer en tiempo real
+  (WebSocket). Lobby con las salas públicas, entrar con el código o el enlace
+  (`#/salas/CÓDIGO`) y crear sala con nombre, visibilidad, asientos, reglas (presets o las de
+  Práctica) y ayudas. En la mesa: sentarse, apostar con fichas, turnos de 20 s con temporizador,
+  revelación del dealer, recompra, reacciones, ranking de la sala y quién mira; el anfitrión
+  puede sacar a alguien. Con ayudas, el EV y la recomendada en tu turno; sin ayudas, nada del
+  motor. Reconecta sola si se corta la conexión.
 - **Títulos en los rankings:** el título que cada jugador lleva puesto aparece tras su nombre
   («Ana · Cabeza fría») en el ranking semanal de Casual, el de Ranked, el del reto diario y el
   top 3 del inicio.
