@@ -124,7 +124,8 @@ copiar el paquete nuevo) y luego los tests.
 | `src/casual/` | Casual: la partida (crear, retirarse), la mesa con las ayudas del motor, el ranking semanal y los récords. |
 | `src/ranked/` | Ranked: la cuenta de la temporada, la mesa sin ayudas, la revisión de cada decisión al terminar la mano, la recarga a 100, el ranking por temporada con medallas y tus temporadas. |
 | `src/daily/` | Reto diario: el intento de hoy (un solo intento, 30 manos, el mismo zapato para todos), la mesa sin ayudas con el contador de manos y la revisión, el resultado al terminar y el ranking del día. |
-| `src/app/` | Raíz de la interfaz: pantalla de inicio (Casual, Ranked, Reto diario, Practicar, Ajustes), mesa con su cabecera, ajustes del navegador (sonido, volumen, animaciones) y la dirección de cada pantalla (`#/casual`, `#/ranked`, `#/reto`, `#/practicar`). |
+| `src/progress/` | Logros y cosméticos: los avisos de logro nuevo al terminar cada ronda, la racha de decisiones óptimas junto a la revisión, la pantalla de logros y la apariencia de la mesa (paño, dorso, fichas y título), que se aplica en todos los modos. Los otorga y guarda el servidor. |
+| `src/app/` | Raíz de la interfaz: pantalla de inicio (Casual, Ranked, Reto diario, Practicar, Logros, Ajustes), mesa con su cabecera, ajustes del navegador (sonido, volumen, animaciones) y la dirección de cada pantalla (`#/casual`, `#/ranked`, `#/reto`, `#/practicar`, `#/logros`). |
 | `src/lib/sound.ts` | Efectos de sonido sintetizados con Web Audio (sin archivos). |
 | `src/components/` | Carta, mano, barra de probabilidades, controles segmentados, diálogo. |
 | `e2e/` | Specs de Playwright y fixtures generados por el motor. |
