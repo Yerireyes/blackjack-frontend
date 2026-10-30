@@ -5,6 +5,7 @@ import { App } from '@/app/App';
 import { startRouteSync } from '@/app/route';
 import { startSoundSync } from '@/app/sounds';
 import { startCasualSync } from '@/casual/casualSync';
+import { startDailySync } from '@/daily/dailySync';
 import { startEngineSync } from '@/engine/sync';
 import { startRankedSync } from '@/ranked/rankedSync';
 import './index.css';
@@ -16,6 +17,7 @@ startSoundSync();
 void useAccountStore.getState().init();
 startCasualSync();
 startRankedSync();
+startDailySync();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

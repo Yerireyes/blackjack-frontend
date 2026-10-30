@@ -1,13 +1,12 @@
-import { Check, Info, Medal as MedalIcon, Trophy, X } from 'lucide-react';
+import { Info, Medal as MedalIcon, Trophy } from 'lucide-react';
 import { useAccountStore } from '@/account/accountStore';
 import { Segmented } from '@/components/Segmented';
 import type { Medal, RankedRow } from '@/engine/contract';
-import { ACTION_LABEL } from '@/features/player-mode/actions';
-import { formatChips, formatPct } from '@/lib/format';
-import { fullyShown } from '@/play/view';
+import { formatChips, formatPct, upperFirst } from '@/lib/format';
+import { ReviewDetail, Stat } from '@/play/ReviewView';
+import type { RoundStore } from '@/play/round';
 import { endsIn, previousSeason, seasonName } from './format';
 import { useRankedStore } from './rankedStore';
-import { isOptimal, lostEv, reviewSummary } from './review';
 
 const TOP_SHOWN = 10;
 
@@ -16,7 +15,7 @@ export function RankedPanel() {
   return (
     <div className="flex flex-col gap-7">
       <SeasonSummary />
-      <ReviewDetail />
+      <ReviewDetail store={useRankedStore as unknown as RoundStore} testId="ranked" />
       <SeasonBoard />
       <Records />
       <HowItWorks />
@@ -96,83 +95,6 @@ function SeasonSummary() {
   );
 }
 
-/** Cada decisión de la última mano contra la óptima. Solo al terminar: nunca durante la mano. */
-function ReviewDetail() {
-  const round = useRankedStore((s) => s.round);
-  const shown = useRankedStore((s) => s.shown);
-  const ready = round?.phase === 'settled' && fullyShown(round, shown) && round.result?.review;
-
-  return (
-    <section aria-labelledby="review-title" className="flex flex-col gap-3">
-      <h2 id="review-title" className="section-title">
-        Revisión de la mano
-      </h2>
-      {!ready ? (
-        <p className="rounded-xl border border-dashed border-ink-700 px-4 py-3 text-sm text-mute">
-          {round?.phase === 'player'
-            ? 'Juega la mano: la revisión aparece cuando termina.'
-            : 'Al terminar cada mano verás aquí tus decisiones comparadas con la óptima.'}
-        </p>
-      ) : (
-        <ReviewList />
-      )}
-    </section>
-  );
-}
-
-function ReviewList() {
-  const round = useRankedStore((s) => s.round)!;
-  const review = round.result!.review!;
-  const many = round.player.hands.length > 1;
-  const summary = reviewSummary(review, round.bet);
-  if (review.length === 0) return <p className="text-sm text-mute">{summary.text}</p>;
-
-  return (
-    <ol
-      className="flex flex-col divide-y divide-ink-800 rounded-xl border border-ink-800"
-      data-testid="ranked-review"
-    >
-      {review.map((r, i) => {
-        const ok = isOptimal(r);
-        const approx = r.exact ? '' : '≈ ';
-        return (
-          <li key={i} className="flex items-start gap-3 px-3 py-2.5 text-sm">
-            <span
-              className={`mt-0.5 grid size-5 shrink-0 place-items-center rounded-full ${ok ? 'bg-pos/15 text-pos' : 'bg-neg/15 text-neg'}`}
-              aria-hidden
-            >
-              {ok ? <Check className="size-3.5" /> : <X className="size-3.5" />}
-            </span>
-            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-              <p>
-                {many && <span className="text-mute">Mano {r.handIndex + 1} · </span>}
-                <span className="font-semibold">{ACTION_LABEL[r.chosen]}</span>
-                {ok ? (
-                  <span className="text-mute"> · la óptima</span>
-                ) : (
-                  <span className="text-mute">
-                    {' '}
-                    · la óptima era <span className="text-text">{ACTION_LABEL[r.best]}</span>
-                  </span>
-                )}
-              </p>
-              {!ok && (
-                <p className="text-xs text-faint">
-                  EV {approx}
-                  {formatPct(r.evChosen)} frente a {approx}
-                  {formatPct(r.evBest)}: perdiste {approx}
-                  {formatPct(lostEv(r))} de la apuesta.
-                </p>
-              )}
-            </div>
-            <span className="sr-only">{ok ? 'Correcta' : 'Mejorable'}</span>
-          </li>
-        );
-      })}
-    </ol>
-  );
-}
-
 type SeasonPick = 'current' | 'previous';
 
 function SeasonBoard() {
@@ -207,7 +129,7 @@ function SeasonBoard() {
       </div>
       {board ? (
         <p className="-mt-1.5 text-xs text-faint">
-          {seasonName(board.season)} ·{' '}
+          {upperFirst(seasonName(board.season))} ·{' '}
           {board.closed
             ? 'cerrada: posiciones finales y medallas.'
             : `por ganancia neta; cuentan quienes tienen ${board.minHands} manos o más.`}
@@ -311,7 +233,7 @@ function Records() {
           <ul className="flex flex-col divide-y divide-ink-800 rounded-xl border border-ink-800">
             {records.seasons.map((s) => (
               <li key={s.season} className="flex items-center gap-3 px-3 py-2 text-sm">
-                <span className="min-w-0 flex-1 truncate capitalize">{seasonName(s.season)}</span>
+                <span className="min-w-0 flex-1 truncate">{upperFirst(seasonName(s.season))}</span>
                 {s.medal && <MedalBadge medal={s.medal} />}
                 <span className="text-mute tabular-nums">#{s.rank}</span>
                 <span
@@ -355,27 +277,5 @@ function HowItWorks() {
         <li>Sin ayudas durante la mano; al terminar, la revisión de cada decisión.</li>
       </ul>
     </details>
-  );
-}
-
-function Stat({
-  label,
-  value,
-  tone,
-  hint,
-}: {
-  label: string;
-  value: string;
-  tone?: string;
-  hint?: string;
-}) {
-  return (
-    <div className="flex flex-col gap-0.5 px-2 py-3">
-      <dt className="text-[11px] leading-tight text-faint">{label}</dt>
-      <dd className={`text-base font-semibold tabular-nums ${tone ?? ''}`}>
-        {value}
-        {hint && <span className="block text-[11px] font-normal text-faint">{hint}</span>}
-      </dd>
-    </div>
   );
 }
