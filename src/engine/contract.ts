@@ -10,6 +10,17 @@ export interface CardView {
 }
 
 /**
+ * Cosméticos. Solo cambian cómo se ve la mesa; nunca dan fichas ni ventaja. Los
+ * dibuja el front.
+ */
+export type CosmeticId = "feltGreen" | "feltBlue" | "feltRed" | "feltBlack" | "backClassic" | "backGold" | "backMidnight" | "chipsClassic" | "chipsNeon" | "chipsGold" | "titleRookie" | "titleCoolHead" | "titleByTheBook" | "titleMedalist";
+
+/**
+ * Dónde se usa un cosmético.
+ */
+export type CosmeticSlot = "felt" | "cardBack" | "chips" | "title";
+
+/**
  * El turno del dealer se resuelve dentro de la misma respuesta: no hay fase visible
  * para él.
  */
@@ -19,6 +30,19 @@ export type RoundPhase = "player" | "settled";
  * Figura de la carta, como la escribe el front: "A", "2" … "10", "J", "Q", "K".
  */
 export type Face = "A" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "J" | "Q" | "K";
+
+/**
+ * Lo que el usuario tiene puesto. `PUT /me/cosmetics` lo reemplaza entero.
+ */
+export interface EquippedCosmetics {
+    felt: CosmeticId;
+    cardBack: CosmeticId;
+    chips: CosmeticId;
+    /**
+     * Sin título: `null`.
+     */
+    title: CosmeticId | null;
+}
 
 /**
  * Lo único que el cliente ve de una ronda. Nunca incluye la oculta sin revelar ni
@@ -57,6 +81,12 @@ export interface RoundView {
 }
 
 /**
+ * Logros. Las condiciones están en «Front — Fase 5 Logros.md»; los textos los pone el
+ * front.
+ */
+export type AchievementId = "firstWin" | "blackjack" | "perfectSplit" | "optimal10" | "optimal50" | "sixToFiveSurvivor" | "doubleUp" | "rankedQualified" | "rankedMedal" | "dailyComplete";
+
+/**
  * Medalla de fin de temporada (solo con el mínimo de manos).
  */
 export type Medal = "gold" | "silver" | "bronze" | "top10";
@@ -85,6 +115,18 @@ export interface SeasonResult {
     net: number;
     hands: number;
     medal?: Medal;
+}
+
+/**
+ * Un cosmético del catálogo.
+ */
+export interface CosmeticItem {
+    id: CosmeticId;
+    slot: CosmeticSlot;
+    /**
+     * El logro que lo desbloquea; falta en los que vienen de serie.
+     */
+    unlockedBy?: AchievementId;
 }
 
 /**
@@ -118,6 +160,35 @@ export interface DailyLeaderboard {
      * La fila del usuario, si jugó ese día (aunque esté en `top`).
      */
     me?: DailyRow;
+}
+
+/**
+ * `GET /me/achievements`.
+ */
+export interface MyAchievements {
+    /**
+     * Los desbloqueados, del más antiguo al más reciente.
+     */
+    unlocked: UnlockedAchievement[];
+    /**
+     * Decisiones óptimas seguidas ahora mismo (Ranked y reto diario).
+     */
+    optimalStreak: number;
+    /**
+     * La mejor racha de decisiones óptimas.
+     */
+    bestOptimalStreak: number;
+}
+
+/**
+ * `GET /me/cosmetics` y `PUT /me/cosmetics`.
+ */
+export interface MyCosmetics {
+    /**
+     * Los que tiene (los de serie y los de sus logros), en el orden del catálogo.
+     */
+    owned: CosmeticId[];
+    equipped: EquippedCosmetics;
 }
 
 /**
@@ -532,6 +603,10 @@ export interface RoundResult {
      */
     refilled?: number;
     review?: ReviewItem[];
+    /**
+     * Logros desbloqueados con esta ronda (falta si no hubo ninguno).
+     */
+    unlocked?: AchievementId[];
 }
 
 export interface Rules {
@@ -549,6 +624,14 @@ export interface Rules {
      * La usa el front para rebarajar; el motor la ignora.
      */
     penetration: number;
+}
+
+export interface UnlockedAchievement {
+    id: AchievementId;
+    /**
+     * RFC 3339.
+     */
+    unlockedAt: string;
 }
 
 export interface WalletView {

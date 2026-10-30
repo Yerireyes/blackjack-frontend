@@ -7,6 +7,7 @@ import { startSoundSync } from '@/app/sounds';
 import { startCasualSync } from '@/casual/casualSync';
 import { startDailySync } from '@/daily/dailySync';
 import { startEngineSync } from '@/engine/sync';
+import { startProgressSync } from '@/progress/progressSync';
 import { startRankedSync } from '@/ranked/rankedSync';
 import './index.css';
 
@@ -18,6 +19,7 @@ void useAccountStore.getState().init();
 startCasualSync();
 startRankedSync();
 startDailySync();
+startProgressSync();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

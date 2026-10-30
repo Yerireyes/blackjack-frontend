@@ -68,8 +68,14 @@ function wanted(): Record<AnalysisKind, Built<{ version: number }> | null> {
   const { rules } = useRulesStore.getState();
   const t = useTableStore.getState();
   const ui = useUiStore.getState();
-  // Inicio: nada que analizar. Ranked y el reto: sin ayudas, nunca se le pide nada al motor.
-  if (ui.screen === 'home' || ui.screen === 'ranked' || ui.screen === 'daily')
+  // Inicio y logros: nada que analizar. Ranked y el reto: sin ayudas, nunca se le pide nada al
+  // motor.
+  if (
+    ui.screen === 'home' ||
+    ui.screen === 'progress' ||
+    ui.screen === 'ranked' ||
+    ui.screen === 'daily'
+  )
     return { hand: null, dealer: null, round: null };
   if (ui.screen === 'casual') {
     // Casual: la mano y el zapato salen de la última respuesta del servidor.

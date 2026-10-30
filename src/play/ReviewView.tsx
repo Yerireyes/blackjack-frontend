@@ -1,9 +1,10 @@
 // La revisión de decisiones de los modos sin ayudas (Ranked, reto diario). La calcula el
 // servidor y llega en `result.review` al liquidar: aquí solo se muestra, nunca antes.
-import { Check, X } from 'lucide-react';
+import { Check, Flame, X } from 'lucide-react';
 import type { ReviewItem } from '@/engine/contract';
 import { ACTION_LABEL } from '@/features/player-mode/actions';
 import { formatPct } from '@/lib/format';
+import { useProgressStore } from '@/progress/progressStore';
 import { isOptimal, lostEv, reviewSummary } from './review';
 import type { RoundStore } from './round';
 import { fullyShown } from './view';
@@ -45,9 +46,12 @@ export function ReviewDetail({ store, testId }: { store: RoundStore; testId: str
 
   return (
     <section aria-labelledby={`${testId}-review-title`} className="flex flex-col gap-3">
-      <h2 id={`${testId}-review-title`} className="section-title">
-        Revisión de la mano
-      </h2>
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 id={`${testId}-review-title`} className="section-title">
+          Revisión de la mano
+        </h2>
+        <Streak testId={testId} />
+      </div>
       {!round || !review ? (
         <p className="rounded-xl border border-dashed border-ink-700 px-4 py-3 text-sm text-mute">
           {round?.phase === 'player'
@@ -63,6 +67,24 @@ export function ReviewDetail({ store, testId }: { store: RoundStore; testId: str
         />
       )}
     </section>
+  );
+}
+
+/** Decisiones óptimas seguidas (las cuenta el servidor, sumando Ranked y el reto diario). */
+function Streak({ testId }: { testId: string }) {
+  const streak = useProgressStore((s) => s.achievements?.optimalStreak ?? null);
+  const best = useProgressStore((s) => s.achievements?.bestOptimalStreak ?? 0);
+  if (streak === null) return null;
+  return (
+    <p
+      className="flex items-center gap-1 text-xs text-mute"
+      title={`Decisiones óptimas seguidas en Ranked y el reto diario. Tu mejor racha: ${best}.`}
+      data-testid={`${testId}-streak`}
+    >
+      <Flame className={`size-3.5 ${streak > 0 ? 'text-warn' : 'text-faint'}`} aria-hidden />
+      Racha <span className="font-semibold text-text tabular-nums">{streak}</span>
+      <span className="text-faint">· mejor {best}</span>
+    </p>
   );
 }
 

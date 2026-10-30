@@ -26,7 +26,7 @@ export function useKeyboard() {
       const el = e.target as HTMLElement;
       const action = KEYS[e.key.toLowerCase()];
       const { screen } = useUiStore.getState();
-      if (screen === 'home') return;
+      if (screen === 'home' || screen === 'progress') return;
       if (screen === 'casual' || screen === 'ranked' || screen === 'daily') {
         const store = { casual: useCasualStore, ranked: useRankedStore, daily: useDailyStore }[
           screen

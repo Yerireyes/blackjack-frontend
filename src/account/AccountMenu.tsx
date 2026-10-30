@@ -1,6 +1,9 @@
-import { CheckCircle2, CloudOff, LogIn, LogOut, UserRound } from 'lucide-react';
+import { Award, CheckCircle2, CloudOff, LogIn, LogOut, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { Dialog } from '@/components/Dialog';
+import { titleName } from '@/progress/catalog';
+import { useProgressStore } from '@/progress/progressStore';
+import { useUiStore } from '@/store/uiStore';
 import { useAccountStore } from './accountStore';
 import { AuthDialog } from './AuthDialog';
 import { DisplayNameForm } from './DisplayNameForm';
@@ -73,6 +76,8 @@ function ProfileDialog() {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [confirmAll, setConfirmAll] = useState(false);
+  const title = useProgressStore((s) => titleName(s.cosmetics?.equipped.title ?? null));
+  const setScreen = useUiStore((s) => s.setScreen);
   if (!me) return null;
   const linked = me.providers.includes('google');
 
@@ -112,6 +117,33 @@ function ProfileDialog() {
           initial={me.displayName}
           submitLabel="Guardar nombre"
         />
+
+        <section aria-labelledby="progress-title" className="flex flex-col gap-2">
+          <h3 id="progress-title" className="section-title">
+            Logros y tu mesa
+          </h3>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm text-mute">
+              {title ? (
+                <>
+                  Título: <span className="font-semibold text-warn">{title}</span>
+                </>
+              ) : (
+                'Paño, dorso, fichas y título que desbloqueas con logros.'
+              )}
+            </p>
+            <button
+              type="button"
+              className="btn"
+              onClick={() => {
+                openDialog(null);
+                setScreen('progress');
+              }}
+            >
+              <Award className="size-4" aria-hidden /> Ver logros
+            </button>
+          </div>
+        </section>
 
         {/* Vincular y desvincular piden la contraseña: sin ella, Google es su único acceso. */}
         {(linked || (google && me.hasPassword)) && (

@@ -7,6 +7,15 @@ versiones según [SemVer](https://semver.org/lang/es/) (en 0.x, una versión men
 
 ### Agregado
 
+- **Logros (fase 5):** al terminar de verse cada ronda, un aviso por cada logro nuevo que
+  otorga el servidor (sin repetirlo si la respuesta llega dos veces), con el cosmético que
+  desbloquea. Pantalla de logros (`#/logros`, desde el inicio o tu cuenta): los 10 con su
+  fecha o bloqueados, y la racha de decisiones óptimas (también junto a la revisión en Ranked
+  y el reto).
+- **Cosméticos (fase 5):** paño (verde, azul, rojo, negro), dorso (clásico, dorado,
+  medianoche), fichas (clásicas, neón, doradas) y título, desbloqueados por logros. Se eligen
+  en la pantalla de logros con una vista previa, se guardan en tu cuenta y se ven en todos los
+  modos, también en Práctica. Solo apariencia; sin sesión, lo de serie.
 - **Reto diario (fase 5):** el mismo zapato para todos cada día (UTC), 500 fichas y 30 manos,
   un solo intento. Antes de empezar, las reglas y el aviso del intento único; durante, el
   contador «mano N de 30», sin ayudas y con la revisión al terminar cada mano; al final, el

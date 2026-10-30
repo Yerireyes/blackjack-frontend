@@ -13,6 +13,8 @@ import { PlayerView } from '@/features/player-mode/PlayerView';
 import { RulesPanel } from '@/features/settings/RulesPanel';
 import { ShoeHud } from '@/features/shoe-tracker/ShoeHud';
 import { Table } from '@/features/table/Table';
+import { AchievementToasts } from '@/progress/AchievementToasts';
+import { ProgressScreen } from '@/progress/ProgressScreen';
 import { RankedPanel } from '@/ranked/RankedPanel';
 import { RankedTable } from '@/ranked/RankedTable';
 import { useUiStore } from '@/store/uiStore';
@@ -46,6 +48,10 @@ export function App() {
           <motion.div key="home" {...fade}>
             <Home />
           </motion.div>
+        ) : screen === 'progress' ? (
+          <motion.div key="progress" {...fade}>
+            <ProgressScreen />
+          </motion.div>
         ) : (
           <motion.div key="table" {...fade}>
             <TableScreen />
@@ -55,6 +61,7 @@ export function App() {
       <SettingsDialog />
       <Announcer />
       <Notice />
+      <AchievementToasts />
     </MotionConfig>
   );
 }
@@ -65,6 +72,7 @@ const TITLE = {
   casual: 'Casual',
   ranked: 'Ranked',
   daily: 'Reto diario',
+  progress: 'Logros',
 } as const;
 
 /** La mesa de Práctica, Casual o Ranked, con su cabecera y su panel de análisis. */
