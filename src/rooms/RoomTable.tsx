@@ -169,7 +169,7 @@ function Seats({ room }: { room: RoomState }) {
   const mid = (n - 1) / 2;
   return (
     <ol
-      className="grid w-full grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-[repeat(var(--seats),minmax(0,1fr))] lg:gap-3"
+      className="grid w-full grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-[repeat(var(--seats),minmax(0,1fr))] lg:gap-3 lg:pb-10"
       style={{ ['--seats' as string]: n }}
       data-testid="room-seats"
     >
