@@ -47,6 +47,8 @@ export interface ProgressState {
   loadCatalog(): Promise<void>;
   /** Una ronda liquidada y ya vista: avisa de sus logros nuevos y refresca la racha. */
   settled(round: RoundView): void;
+  /** Logros que no llegan en una ronda (ganar un torneo): se avisan y se recarga todo. */
+  unlockedElsewhere(ids: string[]): void;
   equip(slot: CosmeticSlot, id: CosmeticId | null): Promise<void>;
   dismiss(key: number): void;
 }
@@ -70,6 +72,17 @@ export const useProgressStore = create<ProgressState>()((set, get) => {
 
   const remember = (a: MyAchievements) => {
     for (const u of a.unlocked) if (isKnownAchievement(u.id)) announced.add(u.id);
+  };
+
+  /** Un aviso por logro conocido que todavía no se anunció. */
+  const announce = (unlocked: readonly string[]) => {
+    const fresh = unlocked.filter(
+      (id): id is AchievementId => isKnownAchievement(id) && !announced.has(id),
+    );
+    for (const id of fresh) announced.add(id);
+    if (fresh.length > 0) {
+      set({ toasts: [...get().toasts, ...fresh.map((id) => ({ key: ++toastKey, id }))] });
+    }
   };
 
   const refreshAchievements = async () => {
@@ -134,19 +147,20 @@ export const useProgressStore = create<ProgressState>()((set, get) => {
     settled(round) {
       if (!signedIn()) return;
       const unlocked = round.result?.unlocked ?? [];
-      const fresh = unlocked.filter((id) => isKnownAchievement(id) && !announced.has(id));
-      for (const id of fresh) announced.add(id);
-      if (fresh.length > 0) {
-        set({
-          toasts: [...get().toasts, ...fresh.map((id) => ({ key: ++toastKey, id }))],
-        });
-      }
+      announce(unlocked);
       // La racha solo cuenta decisiones revisadas (Ranked y el reto diario).
       if (unlocked.length > 0 || round.kind === 'ranked' || round.kind === 'daily') {
         void refreshAchievements();
       }
       // Un logro nuevo puede traer cosméticos nuevos.
       if (unlocked.length > 0) void refreshCosmetics();
+    },
+
+    unlockedElsewhere(ids) {
+      if (!signedIn()) return;
+      announce(ids);
+      void refreshAchievements();
+      void refreshCosmetics();
     },
 
     async equip(slot, id) {

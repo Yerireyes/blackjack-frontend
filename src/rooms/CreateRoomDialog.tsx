@@ -23,6 +23,8 @@ export function CreateRoomDialog({ open, onClose }: { open: boolean; onClose(): 
   const [seats, setSeats] = useState<SeatsPick>('7');
   const [rules, setRules] = useState<RulesPick>('vegas');
   const [aids, setAids] = useState(true);
+  const [tournament, setTournament] = useState(false);
+  const [hands, setHands] = useState(10);
   const [error, setError] = useState<string | null>(null);
   const value = (name ?? name0).slice(0, 30);
   const nameError =
@@ -39,6 +41,7 @@ export function CreateRoomDialog({ open, onClose }: { open: boolean; onClose(): 
       visibility,
       seats: Number(seats),
       aids,
+      ...(tournament ? { tournament: { hands } } : {}),
       ...(rules === 'practice' ? { rules: practiceRules } : { preset: rules }),
     };
     setError(null);
@@ -162,6 +165,42 @@ export function CreateRoomDialog({ open, onClose }: { open: boolean; onClose(): 
             </span>
           </span>
         </label>
+
+        <div className="flex flex-col gap-3 rounded-xl border border-ink-700 px-3.5 py-3">
+          <label className="flex cursor-pointer items-start gap-3 has-focus-visible:outline-2 has-focus-visible:outline-paper">
+            <input
+              type="checkbox"
+              className="mt-1 accent-(--color-paper)"
+              checked={tournament}
+              onChange={(e) => setTournament(e.target.checked)}
+              data-testid="room-tournament"
+            />
+            <span className="flex flex-col">
+              <span className="text-sm font-medium">Torneo</span>
+              <span className="text-xs text-mute">
+                Todos empiezan con 500 fichas de torneo, sin recompras. Lo inicias tú cuando haya 2
+                o más sentados; gana la pila más alta al terminar las manos.
+              </span>
+            </span>
+          </label>
+          {tournament && (
+            <label className="flex items-center gap-3 pl-7 text-sm">
+              Manos
+              <select
+                className="select"
+                value={hands}
+                onChange={(e) => setHands(Number(e.target.value))}
+                data-testid="room-tournament-hands"
+              >
+                {[5, 10, 15, 20, 25, 30].map((n) => (
+                  <option key={n} value={n} className="bg-ink-900">
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+        </div>
 
         <FormError text={error} />
       </form>

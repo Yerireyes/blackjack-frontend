@@ -9,6 +9,7 @@ import { useUiStore } from '@/store/uiStore';
 import { CODE_LENGTH, normalizeCode } from './api';
 import { CreateRoomDialog } from './CreateRoomDialog';
 import { useRoomsStore } from './roomsStore';
+import { TournamentBadge } from './Tournament';
 
 /** Lobby: las salas públicas, entrar con un código y crear una sala. */
 export function RoomsLobby() {
@@ -150,6 +151,11 @@ function RoomCard({ room, signedIn }: { room: RoomInfo; signedIn: boolean }) {
         <div className="min-w-0">
           <p className="truncate font-semibold">{room.name}</p>
           <p className="truncate text-xs text-mute">de {room.host}</p>
+          {room.tournament && (
+            <span className="mt-1.5 inline-flex">
+              <TournamentBadge t={room.tournament} />
+            </span>
+          )}
         </div>
         {room.aids ? (
           <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-pos/40 bg-pos/10 px-2 py-0.5 text-[11px] font-medium text-pos">

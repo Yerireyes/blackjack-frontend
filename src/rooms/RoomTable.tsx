@@ -26,6 +26,7 @@ import { seconds, useCountdown } from './countdown';
 import { PlayerName, TimerBar } from './parts';
 import { REACTIONS, reactionOf } from './reactions';
 import { maxBetOf, myInsuranceOf, mySeatOf, myTurnOf, useRoomsStore } from './roomsStore';
+import { Podium, TournamentBadge, TournamentStart } from './Tournament';
 import { dealerModel, resultShownOf, seatHands } from './view';
 
 const TURN_MS = 20_000;
@@ -104,7 +105,9 @@ function Table({ room }: { room: RoomState }) {
       />
       <Seats room={room} />
       <div className="flex w-full flex-col items-center gap-3 lg:mt-auto">
+        <Podium room={room} />
         <PhaseLine room={room} />
+        <TournamentStart room={room} />
         <MyControls room={room} />
         <Reactions />
       </div>
@@ -131,6 +134,11 @@ function RoomHeader({ room }: { room: RoomState }) {
         <h2 className="truncate text-base font-semibold">{room.info.name}</h2>
         <p className="text-xs text-felt-ink">
           {room.info.visibility === 'private' ? 'Privada' : 'Pública'} · anfitrión {room.info.host}
+          {room.info.tournament && (
+            <span className="ml-2 align-middle">
+              <TournamentBadge t={room.info.tournament} />
+            </span>
+          )}
         </p>
       </div>
       <div className="flex items-center gap-2">
@@ -196,7 +204,7 @@ function Seat({ room, seat }: { room: RoomState; seat: RoomSeat }) {
     return (
       <div className="flex min-h-16 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-felt-line/70 p-2 text-center sm:min-h-36">
         <span className="text-xs text-felt-ink">Asiento {seat.seat}</span>
-        {!seated && (
+        {!seated && room.tournament?.status !== 'running' && (
           <button
             type="button"
             className="btn h-9 min-h-0 px-3 text-[13px]"
@@ -343,7 +351,13 @@ function PhaseLine({ room }: { room: RoomState }) {
   const secs = ms === null ? null : seconds(ms);
 
   let text: ReactNode;
-  if (room.phase === 'waiting') text = 'Esperando jugadores: siéntate para empezar.';
+  const t = room.tournament;
+  if (room.phase === 'waiting')
+    text = t
+      ? t.status === 'finished'
+        ? 'Terminó el torneo.'
+        : `Torneo de ${t.hands} manos: siéntate y espera a que empiece.`
+      : 'Esperando jugadores: siéntate para empezar.';
   else if (room.phase === 'betting')
     text = `Apuestas abiertas${secs !== null ? ` · ${secs} s` : ''}`;
   else if (room.phase === 'playing' && room.round?.phase === 'insurance')
@@ -368,6 +382,14 @@ function PhaseLine({ room }: { room: RoomState }) {
 
   return (
     <div className="flex w-full max-w-md flex-col items-center gap-1.5" aria-live="polite">
+      {t?.status === 'running' && (
+        <p
+          className="text-xs font-semibold tracking-wide text-felt-ink uppercase"
+          data-testid="tournament-progress"
+        >
+          Torneo · {t.played} de {t.hands} manos jugadas
+        </p>
+      )}
       <p className="text-center text-sm text-felt-ink" data-testid="room-phase">
         {text}
       </p>
@@ -399,6 +421,9 @@ function MyControls({ room }: { room: RoomState }) {
 
   const inRound = room.round?.seats.find((s) => s.seat === seat.seat) ?? null;
   const handInPlay = room.phase === 'playing' && !!inRound && !inRound.done;
+  const running = room.tournament?.status === 'running';
+  const out =
+    running && room.tournament!.standings.some((s) => s.player.id === seat.player?.id && s.out);
   const broke = seat.stack < MIN_BET && !handInPlay;
   const mine = resultShownOf(room, shown) ? inRound?.net : undefined;
 
@@ -424,7 +449,11 @@ function MyControls({ room }: { room: RoomState }) {
         </p>
       ) : myTurn ? (
         <Actions room={room} />
-      ) : broke ? (
+      ) : out || (broke && running) ? (
+        <p className="text-center text-sm text-felt-ink" data-testid="tournament-out">
+          Quedaste eliminado del torneo. Sigue mirando hasta el final.
+        </p>
+      ) : broke && !room.tournament ? (
         <div className="flex flex-col items-center gap-2 text-center">
           <p className="text-sm text-felt-ink">Te quedaste sin fichas para la apuesta mínima.</p>
           <button

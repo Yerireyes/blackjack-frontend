@@ -7,6 +7,7 @@ import { presetRules } from '@/domain/rules';
 import type { RoomState, ServerMessage, TableRoundView } from '@/engine/contract';
 import { buildCasualHandRequest } from '@/engine/requests';
 import { newChip } from '@/store/chipsStore';
+import { useProgressStore } from '@/progress/progressStore';
 import { useTableStore } from '@/store/tableStore';
 import { useUiStore } from '@/store/uiStore';
 import { json, notFound, stubFetch } from '@/tests/server';
@@ -322,6 +323,48 @@ describe('seguro en la sala', () => {
     const pending = myDecisionAsRound(state({ round: insuranceRound() }), 1);
     expect(pending?.phase).toBe('insurance');
     expect(myDecisionAsRound(state({ round: insuranceRound(false) }), 1)).toBeNull();
+  });
+});
+
+// ---------- torneos ----------
+
+describe('torneo en la sala', () => {
+  const tournament = (status: 'waiting' | 'running' | 'finished', winner = false) => ({
+    status,
+    hands: 10,
+    played: status === 'waiting' ? 0 : 10,
+    standings: [
+      { rank: 1, player: { id: 'p-ana', displayName: 'Ana' }, stack: 900, out: false },
+      { rank: 2, player: { id: 'p-beto', displayName: 'Beto' }, stack: 0, out: true },
+    ],
+    ...(winner ? { winner: { id: 'p-ana', displayName: 'Ana' } } : {}),
+  });
+
+  it('el anfitrión lo inicia por el WebSocket', () => {
+    enter(state({ phase: 'waiting', round: undefined, tournament: tournament('waiting') }));
+    rs().startTournament();
+    expect(last().sent).toEqual([{ type: 'startTournament' }]);
+  });
+
+  it('si gano, avisa el logro de campeón y recarga logros y cosméticos', async () => {
+    const calls = stubFetch({
+      'GET /me/achievements': () =>
+        json(200, {
+          unlocked: [{ id: 'tournamentWin', unlockedAt: 'x' }],
+          optimalStreak: 0,
+          bestOptimalStreak: 0,
+        }),
+      'GET /me/cosmetics': () => json(200, { owned: [], equipped: {} }),
+    });
+    useProgressStore.getState().reset();
+    enter(state({ tournament: tournament('running') }));
+    last().receive({
+      type: 'state',
+      room: state({ phase: 'waiting', round: undefined, tournament: tournament('finished', true) }),
+    });
+    expect(useTableStore.getState().notice?.text).toBe('¡Ganaste el torneo!');
+    expect(useProgressStore.getState().toasts.map((x) => x.id)).toEqual(['tournamentWin']);
+    await vi.waitFor(() => expect(calls.map((c) => c.key)).toContain('GET /me/cosmetics'));
   });
 });
 
