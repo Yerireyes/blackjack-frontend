@@ -18,6 +18,7 @@ const MESSAGES: Record<string, string> = {
   unauthorized: 'Inicia sesión para vincular Google.',
   reauth_required: 'Confirma tu contraseña para vincular Google.',
   google_disabled: 'El acceso con Google no está disponible.',
+  account_banned: 'Tu cuenta está suspendida.',
 };
 const GENERIC = 'No se pudo completar el acceso con Google. Inténtalo de nuevo.';
 

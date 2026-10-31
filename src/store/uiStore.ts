@@ -10,7 +10,7 @@ export type Source = 'simulation' | 'manual';
  * los cosméticos de la mesa. Salas: mesas multijugador en tiempo real (lobby o una sala).
  */
 export type Screen =
-  'home' | 'practice' | 'casual' | 'ranked' | 'daily' | 'progress' | 'rooms' | 'stats';
+  'home' | 'practice' | 'casual' | 'ranked' | 'daily' | 'progress' | 'rooms' | 'stats' | 'admin';
 /** Animaciones: las del sistema operativo o siempre reducidas. */
 export type Motion = 'system' | 'reduced';
 

@@ -7,6 +7,7 @@ import type { FriendView, RoomPlayer } from '@/engine/contract';
 import { PlayerTitle } from '@/progress/PlayerTitle';
 import { useUiStore } from '@/store/uiStore';
 import { badgeOf, useFriendsStore } from './friendsStore';
+import { ReportButton } from '@/moderation/Report';
 
 /** Botón de amigos de la cabecera, con un globo por solicitudes e invitaciones. */
 export function FriendsButton() {
@@ -312,6 +313,7 @@ function Friend({ f }: { f: FriendView }) {
           </>
         ) : (
           <>
+            <ReportButton name={f.user.displayName} />
             {f.room && (
               <button
                 type="button"

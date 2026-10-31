@@ -10,6 +10,7 @@ import { useUiStore } from '@/store/uiStore';
 import { PlayerName } from './parts';
 import { useRoomsStore } from './roomsStore';
 import { Standings } from './Tournament';
+import { ReportButton } from '@/moderation/Report';
 
 /** Panel lateral: ayudas (si las hay), la mesa, el ranking de la sala y quién está. */
 export function RoomPanel() {
@@ -147,6 +148,7 @@ function Person({
         <PlayerName player={p} me={mine} />
       </span>
       <span className="text-xs text-faint">{role}</span>
+      {!mine && <ReportButton name={p.displayName} />}
       {host &&
         !mine &&
         (confirm ? (

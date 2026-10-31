@@ -13,6 +13,7 @@ const HASHES: Record<Screen, string> = {
   progress: '#/logros',
   rooms: '#/salas',
   stats: '#/estadisticas',
+  admin: '#/admin',
 };
 /** Direcciones de versiones anteriores que siguen funcionando. */
 const ALIASES: Record<string, Screen> = { '#/jugar': 'casual' };
@@ -25,6 +26,7 @@ const TITLES: Record<Screen, string> = {
   progress: 'Logros · Blackjack Guide',
   rooms: 'Salas · Blackjack Guide',
   stats: 'Tu juego · Blackjack Guide',
+  admin: 'Administración · Blackjack Guide',
 };
 
 export interface Route {

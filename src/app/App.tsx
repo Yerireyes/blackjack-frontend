@@ -29,6 +29,8 @@ import { Notice } from './Notice';
 import { SettingsButton, SettingsDialog } from './SettingsDialog';
 import { SoundToggle } from './SoundToggle';
 import { useKeyboard } from './useKeyboard';
+import { AdminScreen } from '@/moderation/AdminScreen';
+import { ReportDialog } from '@/moderation/Report';
 
 const fade = {
   initial: { opacity: 0 },
@@ -53,6 +55,10 @@ export function App() {
           <motion.div key="home" {...fade}>
             <Home />
           </motion.div>
+        ) : screen === 'admin' ? (
+          <motion.div key="admin" {...fade}>
+            <AdminScreen />
+          </motion.div>
         ) : screen === 'stats' ? (
           <motion.div key="stats" {...fade}>
             <StatsScreen />
@@ -70,6 +76,7 @@ export function App() {
       <SettingsDialog />
       <Announcer />
       <Notice />
+      <ReportDialog />
       <AchievementToasts />
     </MotionConfig>
   );
@@ -84,6 +91,7 @@ const TITLE = {
   progress: 'Logros',
   rooms: 'Salas',
   stats: 'Tu juego',
+  admin: 'Administración',
 } as const;
 
 /** La mesa de Práctica, Casual o Ranked, con su cabecera y su panel de análisis. */

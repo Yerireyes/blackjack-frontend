@@ -9,6 +9,7 @@ import type { RoundStore } from '@/play/round';
 import { useDailyStore } from './dailyStore';
 import type { BoardScope } from './api';
 import { dayName, previousDay } from './format';
+import { ReportButton } from '@/moderation/Report';
 
 const TOP_SHOWN = 10;
 
@@ -176,6 +177,7 @@ function BoardRow({ row }: { row: DailyRow }) {
           {row.hands} manos{!row.finished && ' · en juego (posición que tendría)'}
         </span>
       </span>
+      {!row.isMe && <ReportButton name={row.displayName} />}
       <span className="tabular-nums">{formatChips(row.balance)}</span>
     </li>
   );

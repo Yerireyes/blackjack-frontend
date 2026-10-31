@@ -76,6 +76,7 @@ function wanted(): Record<AnalysisKind, Built<{ version: number }> | null> {
     ui.screen === 'home' ||
     ui.screen === 'progress' ||
     ui.screen === 'stats' ||
+    ui.screen === 'admin' ||
     ui.screen === 'ranked' ||
     ui.screen === 'daily'
   )
