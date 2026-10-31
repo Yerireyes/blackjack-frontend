@@ -3,6 +3,8 @@ import { formatChips } from '@/lib/format';
 import { useCasualStore } from '@/casual/casualStore';
 import { useDailyStore } from '@/daily/dailyStore';
 import { useRankedStore } from '@/ranked/rankedStore';
+import { mySeatOf, useRoomsStore } from '@/rooms/roomsStore';
+import { resultShownOf } from '@/rooms/view';
 import { fullyShown } from '@/play/view';
 import { useChipsStore, type Bank } from '@/store/chipsStore';
 import { useUiStore } from '@/store/uiStore';
@@ -13,7 +15,20 @@ export function ChipBalance() {
   if (screen === 'casual') return <CasualBalance />;
   if (screen === 'ranked') return <RankedBalance />;
   if (screen === 'daily') return <DailyBalance />;
+  if (screen === 'rooms') return <RoomBalance />;
   return <PracticeBalance />;
+}
+
+/** Salas: mi pila en la sala (solo sentado) y el neto de la última ronda liquidada. */
+function RoomBalance() {
+  const stack = useRoomsStore((s) => mySeatOf(s)?.stack ?? null);
+  const last = useRoomsStore((s) => {
+    const seat = mySeatOf(s);
+    if (!seat || !s.room || !resultShownOf(s.room, s.shown)) return null;
+    return s.room.round?.seats.find((x) => x.seat === seat.seat)?.net ?? null;
+  });
+  if (stack === null) return null;
+  return <BalanceChip icon={Coins} name="Tu pila en la sala" balance={stack} last={last} />;
 }
 
 /** Casual: el saldo es de la partida y lo trae cada respuesta del servidor. */

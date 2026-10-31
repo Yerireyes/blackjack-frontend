@@ -2,6 +2,8 @@
 // correspondan al modo actual y los manda al motor. También mueve a los bots
 // (que juegan la acción de mayor EV del motor) y el autojuego del dealer.
 import { useCasualStore } from '@/casual/casualStore';
+import { mySeatOf, useRoomsStore } from '@/rooms/roomsStore';
+import { myTurnAsRound } from '@/rooms/view';
 import { useAnalysisStore, type AnalysisKind } from '@/store/analysisStore';
 import { useRulesStore } from '@/store/rulesStore';
 import { useShoeStore } from '@/store/shoeStore';
@@ -77,6 +79,25 @@ function wanted(): Record<AnalysisKind, Built<{ version: number }> | null> {
     ui.screen === 'daily'
   )
     return { hand: null, dealer: null, round: null };
+  if (ui.screen === 'rooms') {
+    // Salas: solo si el anfitrión activó las ayudas (el estado trae `shoeCounts`) y en mi turno.
+    const s = useRoomsStore.getState();
+    if (!s.room?.info.aids) return { hand: null, dealer: null, round: null };
+    const seat = mySeatOf(s);
+    const turn = seat ? myTurnAsRound(s.room, seat.seat) : null;
+    return {
+      hand: turn
+        ? buildCasualHandRequest(version, s.room.info.rules, turn)
+        : {
+            ok: false,
+            reason: seat
+              ? 'El EV de cada acción aparece cuando te toca decidir.'
+              : 'Siéntate para ver el EV de tus decisiones.',
+          },
+      dealer: null,
+      round: null,
+    };
+  }
   if (ui.screen === 'casual') {
     // Casual: la mano y el zapato salen de la última respuesta del servidor.
     const c = useCasualStore.getState();
