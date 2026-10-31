@@ -75,6 +75,7 @@ function wanted(): Record<AnalysisKind, Built<{ version: number }> | null> {
   if (
     ui.screen === 'home' ||
     ui.screen === 'progress' ||
+    ui.screen === 'stats' ||
     ui.screen === 'ranked' ||
     ui.screen === 'daily'
   )

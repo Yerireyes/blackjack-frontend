@@ -88,7 +88,7 @@ function Streak({ testId }: { testId: string }) {
   );
 }
 
-function ReviewList({
+export function ReviewList({
   review,
   bet,
   many,

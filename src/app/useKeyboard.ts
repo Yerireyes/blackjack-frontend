@@ -27,7 +27,7 @@ export function useKeyboard() {
       const el = e.target as HTMLElement;
       const action = KEYS[e.key.toLowerCase()];
       const { screen } = useUiStore.getState();
-      if (screen === 'home' || screen === 'progress') return;
+      if (screen === 'home' || screen === 'progress' || screen === 'stats') return;
       if (screen === 'rooms') {
         onRoomKey(e, action, el);
         return;

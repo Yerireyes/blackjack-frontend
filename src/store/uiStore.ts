@@ -9,7 +9,8 @@ export type Source = 'simulation' | 'manual';
  * diario: contra el servidor, con cuenta (Ranked y el reto, sin ayudas). Logros: los logros y
  * los cosméticos de la mesa. Salas: mesas multijugador en tiempo real (lobby o una sala).
  */
-export type Screen = 'home' | 'practice' | 'casual' | 'ranked' | 'daily' | 'progress' | 'rooms';
+export type Screen =
+  'home' | 'practice' | 'casual' | 'ranked' | 'daily' | 'progress' | 'rooms' | 'stats';
 /** Animaciones: las del sistema operativo o siempre reducidas. */
 export type Motion = 'system' | 'reduced';
 

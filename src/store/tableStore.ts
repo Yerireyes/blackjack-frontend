@@ -6,6 +6,7 @@ import { useChipsStore } from './chipsStore';
 import { currentRules } from './rulesStore';
 import { ShoeError, useShoeStore } from './shoeStore';
 import { useUiStore } from './uiStore';
+import { useTrainingStore } from '@/stats/trainingStore';
 
 export type Outcome = 'blackjack' | 'win' | 'push' | 'lose' | 'bust' | 'surrender';
 export type Phase = 'idle' | 'bots' | 'player' | 'dealer' | 'settled';
@@ -315,7 +316,10 @@ export const useTableStore = create<TableState>()((set, get) => {
       const { phase } = get();
       if (!isSim() || (phase !== 'idle' && phase !== 'settled')) return;
       const rules = currentRules();
-      const { botSeats: bots, mode } = useUiStore.getState();
+      const { botSeats, mode } = useUiStore.getState();
+      // Entrenamiento dirigido: la mano cae en uno de tus puntos débiles, sin otros asientos.
+      const drill = mode === 'player' ? useTrainingStore.getState().next() : null;
+      const bots = drill ? 0 : botSeats;
 
       const bank = mode === 'dealer' ? 'house' : 'player';
       const start = useChipsStore.getState().startRound(bank);
@@ -335,7 +339,13 @@ export const useTableStore = create<TableState>()((set, get) => {
       const seats = bots + 1;
       const need = MIN_ENGINE_SHOE_VALUE + 31 * seats * 2 + 26;
       const s = shoe();
-      if (s.dealtFraction() >= rules.penetration || countsValue(s.toCounts()) < need) {
+      const missing =
+        drill &&
+        [...drill.player, drill.up].some(
+          (f, _i, all) =>
+            s.remaining.filter((c) => c.face === f).length < all.filter((g) => g === f).length,
+        );
+      if (missing || s.dealtFraction() >= rules.penetration || countsValue(s.toCounts()) < need) {
         s.newShoe(rules.decks);
         get().notify('Se alcanzó la penetración: zapato nuevo barajado.');
       }
@@ -351,9 +361,16 @@ export const useTableStore = create<TableState>()((set, get) => {
 
       mutate((d) => {
         const order = [...d.others, d.player];
-        for (const seat of order) seat.hands[0]!.cards.push(draw());
-        d.dealer.up = draw();
-        for (const seat of order) seat.hands[0]!.cards.push(draw());
+        if (drill) {
+          const hand = d.player.hands[0]!;
+          hand.cards.push(shoe().markSeen(drill.player[0]));
+          d.dealer.up = shoe().markSeen(drill.up);
+          hand.cards.push(shoe().markSeen(drill.player[1]));
+        } else {
+          for (const seat of order) seat.hands[0]!.cards.push(draw());
+          d.dealer.up = draw();
+          for (const seat of order) seat.hands[0]!.cards.push(draw());
+        }
         d.dealer.hole = draw(true);
 
         // Naturales: la mano queda terminada; se liquida al final.

@@ -19,6 +19,8 @@ import { RankedPanel } from '@/ranked/RankedPanel';
 import { RoomPanel } from '@/rooms/RoomPanel';
 import { RoomsLobby } from '@/rooms/RoomsLobby';
 import { RoomTable } from '@/rooms/RoomTable';
+import { StatsScreen } from '@/stats/StatsScreen';
+import { TrainingPanel } from '@/stats/TrainingPanel';
 import { RankedTable } from '@/ranked/RankedTable';
 import { useUiStore } from '@/store/uiStore';
 import { Announcer } from './Announcer';
@@ -51,6 +53,10 @@ export function App() {
           <motion.div key="home" {...fade}>
             <Home />
           </motion.div>
+        ) : screen === 'stats' ? (
+          <motion.div key="stats" {...fade}>
+            <StatsScreen />
+          </motion.div>
         ) : screen === 'progress' ? (
           <motion.div key="progress" {...fade}>
             <ProgressScreen />
@@ -77,6 +83,7 @@ const TITLE = {
   daily: 'Reto diario',
   progress: 'Logros',
   rooms: 'Salas',
+  stats: 'Tu juego',
 } as const;
 
 /** La mesa de Práctica, Casual o Ranked, con su cabecera y su panel de análisis. */
@@ -189,7 +196,10 @@ function TableScreen() {
               <CasualPanel />
             </div>
           ) : mode === 'player' ? (
-            <PlayerView />
+            <div className="flex flex-col gap-6">
+              <TrainingPanel />
+              <PlayerView />
+            </div>
           ) : (
             <DealerView />
           )}

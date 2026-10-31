@@ -10,6 +10,7 @@ import { startEngineSync } from '@/engine/sync';
 import { startProgressSync } from '@/progress/progressSync';
 import { startRankedSync } from '@/ranked/rankedSync';
 import { startRoomsSync } from '@/rooms/roomsSync';
+import { startStatsSync } from '@/stats/statsSync';
 import './index.css';
 
 // Primero la pantalla (de la dirección): de ella dependen la sincronización y Casual.
@@ -22,6 +23,7 @@ startRankedSync();
 startDailySync();
 startProgressSync();
 startRoomsSync();
+startStatsSync();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

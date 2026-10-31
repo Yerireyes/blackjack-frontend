@@ -2,6 +2,7 @@ import {
   ArrowRight,
   Award,
   CalendarDays,
+  ChartNoAxesColumn,
   GraduationCap,
   Settings,
   Spade,
@@ -46,6 +47,7 @@ export function Home() {
     }
   }, []);
   const openSettings = useUiStore((s) => s.setSettingsOpen);
+  const setScreen = useUiStore((s) => s.setScreen);
 
   return (
     <div className="felt home-felt relative flex min-h-dvh flex-col">
@@ -104,6 +106,16 @@ export function Home() {
         <motion.div {...rise(7)} className="mt-5 flex flex-col items-center gap-6">
           <div className="flex flex-wrap justify-center gap-x-2">
             <ProgressLink />
+            <button
+              type="button"
+              className="btn h-11 gap-2 border-transparent bg-transparent text-felt-ink"
+              onClick={() => setScreen('stats')}
+              data-testid="home-stats"
+            >
+              <ChartNoAxesColumn className="size-4" aria-hidden />
+              Tu juego
+              <span className="hidden text-felt-ink/70 sm:inline">· historial y estadísticas</span>
+            </button>
             <button
               type="button"
               className="btn h-11 gap-2 border-transparent bg-transparent text-felt-ink"
