@@ -284,7 +284,9 @@ function DailyChoice() {
   const openDialog = useAccountStore((s) => s.openDialog);
   const status = useDailyStore((s) => s.status);
   const attempt = useDailyStore((s) => s.attempt);
-  const rank = useDailyStore((s) => (s.boardDay === null ? (s.board?.me?.rank ?? null) : null));
+  const rank = useDailyStore((s) =>
+    s.boardDay === null && s.boardScope === 'all' ? (s.board?.me?.rank ?? null) : null,
+  );
   const midHand = useCasualStore((s) => s.elsewhere === 'daily');
   const setScreen = useUiStore((s) => s.setScreen);
 

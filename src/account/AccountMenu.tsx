@@ -1,6 +1,7 @@
 import { Award, CheckCircle2, CloudOff, LogIn, LogOut, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { Dialog } from '@/components/Dialog';
+import { FriendsButton } from '@/friends/FriendsDialog';
 import { titleName } from '@/progress/catalog';
 import { useProgressStore } from '@/progress/progressStore';
 import { useUiStore } from '@/store/uiStore';
@@ -20,6 +21,7 @@ export function AccountMenu() {
 
   return (
     <>
+      <FriendsButton />
       {status === 'loading' ? (
         <span className="h-9 w-9 shrink-0 animate-pulse rounded-lg bg-ink-800" aria-hidden />
       ) : status === 'unavailable' ? (

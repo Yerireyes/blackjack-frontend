@@ -2,6 +2,7 @@ import { Crown, DoorOpen, Eye, Info, Trophy, UserX } from 'lucide-react';
 import { useState } from 'react';
 import type { RoomPlayer, RoomState } from '@/engine/contract';
 import { PRESETS } from '@/domain/rules';
+import { InviteFriends } from '@/friends/InviteFriends';
 import { PlayerView } from '@/features/player-mode/PlayerView';
 import { rulesSummary } from '@/features/settings/rulesSummary';
 import { formatChips } from '@/lib/format';
@@ -28,7 +29,18 @@ export function RoomPanel() {
       <Leaderboard room={room} />
       <People room={room} />
       <TableInfo room={room} />
-      <LeaveRoom />
+      <div className="flex flex-wrap gap-2">
+        <InviteFriends
+          code={room.info.code}
+          inRoom={
+            new Set([
+              ...room.spectators.map((p) => p.id),
+              ...room.seats.flatMap((x) => (x.player ? [x.player.id] : [])),
+            ])
+          }
+        />
+        <LeaveRoom />
+      </div>
     </div>
   );
 }

@@ -18,7 +18,7 @@ import { addReview, EMPTY_TALLY, type Tally } from '@/play/review';
 import { createRound, inHand, isNotFound, notify, type RoundState } from '@/play/round';
 import { newChip } from '@/store/chipsStore';
 import { useShoeStore } from '@/store/shoeStore';
-import { dailyApi } from './api';
+import { dailyApi, type BoardScope } from './api';
 import { msToNextDay } from './format';
 
 /**
@@ -41,6 +41,8 @@ export interface DailyState extends RoundState {
   board: DailyLeaderboard | null;
   /** Día que se mira en el ranking (`AAAA-MM-DD`); null = hoy. */
   boardDay: string | null;
+  /** Todos o solo tus amigos (`?scope=friends`). */
+  boardScope: BoardScope;
   /** Hoy según el servidor (`AAAA-MM-DD`, UTC): el día del ranking sin `day`. */
   today: string | null;
   records: MyRecords | null;
@@ -49,6 +51,7 @@ export interface DailyState extends RoundState {
   reset(): void;
   start(): Promise<void>;
   loadBoard(day?: string | null): Promise<void>;
+  setBoardScope(scope: BoardScope): Promise<void>;
 }
 
 const attemptWallet = (a: DailyAttemptView): WalletView => ({
@@ -173,6 +176,7 @@ export const useDailyStore = create<DailyState>()((set, get) => {
     elsewhere: null,
     board: null,
     boardDay: null,
+    boardScope: 'all',
     today: null,
     records: null,
     tally: EMPTY_TALLY,
@@ -240,14 +244,22 @@ export const useDailyStore = create<DailyState>()((set, get) => {
 
     async loadBoard(day = null) {
       set({ boardDay: day });
+      // Amigos solo con sesión (sin ella el servidor responde 401).
+      const scope = useAccountStore.getState().status === 'signedIn' ? get().boardScope : 'all';
+      const current = () => get().boardDay === day && get().boardScope === scope;
       try {
-        const board = await dailyApi.leaderboard(day ?? undefined);
-        // Si mientras tanto se eligió otro día, esta respuesta ya no sirve.
+        const board = await dailyApi.leaderboard(day ?? undefined, scope);
         if (day === null) set({ today: board.day });
-        if (get().boardDay === day) set({ board });
+        // Si mientras tanto se eligió otro día u otro alcance, esta respuesta ya no sirve.
+        if (current()) set({ board });
       } catch {
-        if (get().boardDay === day) set({ board: null });
+        if (current()) set({ board: null });
       }
+    },
+
+    async setBoardScope(boardScope) {
+      set({ boardScope });
+      await get().loadBoard(get().boardDay);
     },
   };
 });
