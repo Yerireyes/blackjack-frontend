@@ -6,7 +6,7 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 // En desarrollo y en vista previa la API va por el mismo origen que el front. En producción
-// lo resuelve el reverse proxy: front y API se sirven bajo el mismo dominio. `ws` deja pasar
+// la propia API sirve dist/ (imagen Docker del backend en Render). `ws` deja pasar
 // el WebSocket de las salas (/api/v1/rooms/{code}/ws).
 const apiProxy = { '/api': { target: 'http://127.0.0.1:8080', ws: true } };
 // Enlaces temporales de Cloudflare Tunnel (cloudflared tunnel --url …) para jugar con amigos.

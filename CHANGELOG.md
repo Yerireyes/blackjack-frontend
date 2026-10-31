@@ -7,6 +7,10 @@ versiones según [SemVer](https://semver.org/lang/es/) (en 0.x, una versión men
 
 ### Agregado
 
+- **Despliegue:** CI en GitHub Actions (typecheck, lint, tests y build en Linux con Node 24) y,
+  con cada push a `main` que pasa, el aviso al backend para que construya la imagen y la
+  despliegue en Render. El front se sirve desde la API, en el mismo origen.
+
 - **Historial y estadísticas:** pantalla «Tu juego» (`#/estadisticas`) con tus números por modo,
   el % de decisiones óptimas (Ranked y el reto) por tipo de mano y tus puntos débiles, y el
   historial de rondas con el detalle de cada mano y su revisión.

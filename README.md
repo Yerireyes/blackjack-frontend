@@ -90,8 +90,7 @@ propio servidor de vista previa, en el 4173.
 Siempre con URLs relativas (`/api/v1/...`) y `credentials: 'same-origin'`: front y API
 comparten origen, y la sesión es una cookie httpOnly que el front nunca lee. En desarrollo y en
 vista previa lo resuelve el proxy de `vite.config.ts` (`/api` → `127.0.0.1:8080`); en
-producción, el reverse proxy que sirve `dist/` y reenvía `/api` (ejemplos en el README del
-backend).
+producción, la propia API sirve `dist/` (ver [Despliegue](#despliegue)).
 
 ## Comandos
 
@@ -109,6 +108,35 @@ npm run format         # Prettier
 
 Tras recompilar el motor: `npm run contract && npm run e2e:fixtures && npm install` (para
 copiar el paquete nuevo) y luego los tests.
+
+## Despliegue
+
+El front no se despliega solo: va dentro de la imagen Docker del backend, que se publica en
+**Render** (servicio web gratuito) con la base en **Neon**. La imagen compila el motor WASM,
+este repo (rama `main`) y la API; la API sirve `dist/` (`index.html` para cualquier ruta que no
+sea un archivo y `/assets/` con caché de un año). Los pasos para crear el servicio y la base
+están en el README del backend, «Despliegue en la nube».
+
+Front y API quedan en el **mismo origen**, así que la cookie de sesión, el WebSocket de las
+salas (`wss://` sobre `location.host`) y la vuelta de Google funcionan igual que con el proxy de
+Vite. Por eso no se usa Vercel ni Netlify: con el front en otro dominio la cookie sería de
+terceros (los navegadores la bloquean) y sus proxies no reenvían WebSockets.
+
+Lo que este repo tiene que cumplir para que la imagen compile:
+
+- `npm ci && npm run build` en Linux con Node 24, con el motor en `../Backend/engine-wasm/pkg`.
+  El lockfile ya trae los binarios nativos de Linux (rolldown, Tailwind, lightningcss).
+- Pedidos a la API siempre relativos (`/api/v1/...`): ni el host de la API en el código ni
+  variables `VITE_*`.
+- Los archivos con hash en `/assets/`, como los deja Vite.
+- Ninguna ruta de la SPA empieza con `/api/` (las rutas son con hash: `#/salas`, `#/reto`…).
+
+**Cómo sale una versión:** cada push a `main` corre el CI (`.github/workflows/ci.yml`:
+typecheck, lint, tests y build en Linux) y, si pasa, le pide al backend que despliegue
+(`repository_dispatch` `frontend-updated`; el workflow *Despliegue* del backend construye la
+imagen y avisa a Render). Para eso hace falta el secreto `BACKEND_REPO_TOKEN` en este repo: un
+token fine-grained sobre `blackjack-backend` con *Contents: read and write*. Sin él, el
+despliegue se lanza a mano en el backend: *Actions → Despliegue → Run workflow*.
 
 ## Estructura
 
