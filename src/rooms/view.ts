@@ -55,20 +55,23 @@ export const resultShownOf = (room: RoomState, shown: number) =>
   room.phase === 'results' && !!room.round && shown >= revealStepsOf(room.round);
 
 /**
- * Mi mano en turno con la forma de una RoundView, para pedirle al motor el EV con las mismas
- * funciones que Casual. Solo con ayudas (`shoeCounts`) y si decide mi asiento.
+ * Mi decisión con la forma de una RoundView, para pedirle al motor el EV con las mismas
+ * funciones que Casual: mi turno o, con As visible, mi seguro pendiente. Solo con ayudas
+ * (`shoeCounts`).
  */
-export function myTurnAsRound(room: RoomState, mySeat: number): RoundView | null {
+export function myDecisionAsRound(room: RoomState, mySeat: number): RoundView | null {
   const r = room.round;
-  if (!r || room.phase !== 'playing' || r.turn !== mySeat || !room.shoeCounts) return null;
+  if (!r || room.phase !== 'playing' || !room.shoeCounts) return null;
   const seat = r.seats.find((s) => s.seat === mySeat);
   if (!seat) return null;
+  const insurance = r.phase === 'insurance';
+  if (insurance ? seat.insured !== undefined : r.turn !== mySeat) return null;
   return {
     id: 'room',
     kind: 'casual',
     contextId: room.info.code,
     bet: seat.bet,
-    phase: 'player',
+    phase: insurance ? 'insurance' : 'player',
     player: { hands: seat.hands, active: seat.active },
     dealer: r.dealer,
     allowed: r.allowed,

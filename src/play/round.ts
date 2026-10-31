@@ -31,6 +31,8 @@ export interface RoundState {
   stack: Chip[];
   deal(): Promise<void>;
   act(action: Action): Promise<void>;
+  /** En la fase `insurance`: tomar o rechazar el seguro (o el dinero par). */
+  insure(take: boolean): Promise<void>;
   addChip(value: ChipValue): number | null;
   removeChip(): void;
   clearStack(): void;
@@ -68,9 +70,12 @@ export async function withIdempotency<T>(call: (key: string) => Promise<T>): Pro
 
 export const isNotFound = (e: unknown) => e instanceof ApiRequestError && e.status === 404;
 
+/** La ronda sigue abierta: falta decidir el seguro o jugar la mano. */
+export const inHand = (r: RoundView | null | undefined) => !!r && r.phase !== 'settled';
+
 /** La ronda está en juego o animándose: la apuesta no se toca y no se reparte otra. */
 export const roundLocked = (s: Pick<RoundState, 'round' | 'busy' | 'revealing'>) =>
-  s.busy || s.revealing || s.round?.phase === 'player';
+  s.busy || s.revealing || inHand(s.round);
 
 interface Config {
   kind: RoundKind;
@@ -161,7 +166,7 @@ export function createRound(
     deal: () =>
       intent(async () => {
         const s = get();
-        if (!cfg.canDeal() || s.revealing || s.round?.phase === 'player') return;
+        if (!cfg.canDeal() || s.revealing || inHand(s.round)) return;
         fitStack();
         const bet = stackTotal(get().stack);
         if (bet < MIN_BET) {
@@ -185,6 +190,14 @@ export function createRound(
         const r = get().round;
         if (!r || r.phase !== 'player' || !r.allowed[action]) return;
         const round = await withIdempotency((key) => playApi.act(r.id, action, key));
+        applyRound(round, true);
+      }),
+
+    insure: (take) =>
+      intent(async () => {
+        const r = get().round;
+        if (!r || r.phase !== 'insurance' || (take && !r.allowed.insurance)) return;
+        const round = await withIdempotency((key) => playApi.insurance(r.id, take, key));
         applyRound(round, true);
       }),
 

@@ -49,7 +49,7 @@ function startRoundSounds(store: RoundStore, screen: 'casual' | 'ranked' | 'dail
       playSound('card', at);
       at += CARD_GAP;
     }
-    const holeNow = r.phase === 'player' ? false : s.shown >= 1 && r.dealer.hole !== null;
+    const holeNow = r.phase !== 'settled' ? false : s.shown >= 1 && r.dealer.hole !== null;
     const holeBefore =
       same &&
       prev.round!.phase === 'settled' &&

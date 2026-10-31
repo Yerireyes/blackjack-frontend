@@ -76,6 +76,8 @@ export interface RoomsState {
   leaveSeat(): void;
   bet(): void;
   act(action: Action): void;
+  /** Con As visible: todos deciden el seguro a la vez. */
+  insure(take: boolean): void;
   rebuy(): void;
   react(reaction: Reaction): void;
   kick(playerId: string): void;
@@ -105,6 +107,19 @@ export const myTurnOf = (s: Pick<RoomsState, 'room' | 'me'>) => {
   return !!seat && s.room?.phase === 'playing' && s.room.round?.turn === seat.seat;
 };
 
+/**
+ * Mi seguro en la ronda: `none` si no se ofrece o no juego, `pending` si falta decidirlo,
+ * `taken`/`declined` una vez decidido.
+ */
+export const myInsuranceOf = (s: Pick<RoomsState, 'room' | 'me'>) => {
+  const seat = mySeatOf(s);
+  const r = s.room?.round;
+  const mine = seat && r ? r.seats.find((x) => x.seat === seat.seat) : undefined;
+  if (!mine || !r) return 'none';
+  if (mine.insured === undefined) return r.phase === 'insurance' ? 'pending' : 'none';
+  return mine.insured ? 'taken' : 'declined';
+};
+
 const notify = (text: string, tone: 'info' | 'error' = 'info') =>
   useTableStore.getState().notify(text, tone);
 
@@ -122,6 +137,7 @@ const ERROR_TEXT: Record<string, string | null> = {
   not_your_turn: null,
   action_not_allowed: null,
   rebuy_not_needed: null,
+  not_in_round: null,
   rate_limited: null,
   not_host: null,
 };
@@ -390,6 +406,11 @@ export const useRoomsStore = create<RoomsState>()((set, get) => {
       const s = get();
       if (!myTurnOf(s) || !s.room?.round?.allowed[action]) return;
       send({ type: 'action', action });
+    },
+
+    insure(take) {
+      if (myInsuranceOf(get()) !== 'pending') return;
+      send({ type: 'insurance', take });
     },
 
     rebuy: () => send({ type: 'rebuy' }),

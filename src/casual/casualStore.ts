@@ -13,7 +13,14 @@ import type {
   WeeklyLeaderboard,
 } from '@/engine/contract';
 import { playApi } from '@/play/api';
-import { createRound, isNotFound, notify, roundLocked, type RoundState } from '@/play/round';
+import {
+  createRound,
+  inHand,
+  isNotFound,
+  notify,
+  roundLocked,
+  type RoundState,
+} from '@/play/round';
 import { newChip } from '@/store/chipsStore';
 import { useShoeStore } from '@/store/shoeStore';
 import { casualApi } from './api';
@@ -206,7 +213,7 @@ export const useCasualStore = create<CasualState>()((set, get) => {
       intent(async () => {
         const { run, round, revealing } = get();
         // Dentro de la intención `busy` ya está activo: solo cuenta la ronda en juego.
-        if (!run || revealing || round?.phase === 'player') return;
+        if (!run || revealing || inHand(round)) return;
         const ended = await casualApi.retire(run.id);
         set({ ended, run: null, round: null, status: 'noRun', shown: 0 });
         useShoeStore.getState().bump();

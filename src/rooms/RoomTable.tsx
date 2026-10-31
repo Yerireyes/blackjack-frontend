@@ -16,6 +16,8 @@ import {
   NamePrompt,
   SignInPrompt,
 } from '@/play/ServerTable';
+import { InsuranceAsk } from '@/play/Insurance';
+import { isNatural } from '@/play/view';
 import { isCurrent, useAnalysisStore } from '@/store/analysisStore';
 import { MIN_BET, stackTotal } from '@/store/chipsStore';
 import { useShoeStore } from '@/store/shoeStore';
@@ -23,7 +25,7 @@ import { useUiStore } from '@/store/uiStore';
 import { seconds, useCountdown } from './countdown';
 import { PlayerName, TimerBar } from './parts';
 import { REACTIONS, reactionOf } from './reactions';
-import { maxBetOf, mySeatOf, myTurnOf, useRoomsStore } from './roomsStore';
+import { maxBetOf, myInsuranceOf, mySeatOf, myTurnOf, useRoomsStore } from './roomsStore';
 import { dealerModel, resultShownOf, seatHands } from './view';
 
 const TURN_MS = 20_000;
@@ -234,7 +236,15 @@ function Seat({ room, seat }: { room: RoomState; seat: RoomSeat }) {
         Pila {formatChips(seat.stack)}
         {room.phase === 'betting' && seat.bet ? ` · apostó ${formatChips(seat.bet)}` : ''}
       </p>
-      {inRound && <SeatRound s={inRound} roundNo={roundNo} resultShown={resultShown} turn={turn} />}
+      {inRound && (
+        <SeatRound
+          s={inRound}
+          roundNo={roundNo}
+          resultShown={resultShown}
+          turn={turn}
+          insuring={room.round?.phase === 'insurance'}
+        />
+      )}
       {turn && ms !== null && (
         <span className="mt-auto w-full px-1">
           <TimerBar ms={ms} total={TURN_MS} urgent={ms < 5000} />
@@ -249,16 +259,22 @@ function SeatRound({
   roundNo,
   resultShown,
   turn,
+  insuring,
 }: {
   s: SeatRoundView;
   roundNo: number;
   resultShown: boolean;
   turn: boolean;
+  insuring: boolean;
 }) {
   const hands = seatHands(s, roundNo, resultShown);
   return (
     <>
-      <span className="text-[11px] text-felt-ink">Apuesta {formatChips(s.bet)}</span>
+      <span className="text-[11px] text-felt-ink">
+        Apuesta {formatChips(s.bet)}
+        {s.insured && <span className="font-semibold text-text"> · seguro</span>}
+        {insuring && s.insured === undefined && <span> · decidiendo seguro…</span>}
+      </span>
       <div className="flex max-w-full flex-wrap items-end justify-center gap-1">
         {hands.map((h, i) => (
           <Hand
@@ -330,6 +346,8 @@ function PhaseLine({ room }: { room: RoomState }) {
   if (room.phase === 'waiting') text = 'Esperando jugadores: siéntate para empezar.';
   else if (room.phase === 'betting')
     text = `Apuestas abiertas${secs !== null ? ` · ${secs} s` : ''}`;
+  else if (room.phase === 'playing' && room.round?.phase === 'insurance')
+    text = `El dealer muestra un As: seguro para todos${secs !== null ? ` · ${secs} s` : ''}`;
   else if (room.phase === 'playing')
     text = myTurn ? (
       <span className="font-semibold text-text">Te toca{secs !== null ? ` · ${secs} s` : ''}</span>
@@ -353,7 +371,9 @@ function PhaseLine({ room }: { room: RoomState }) {
       <p className="text-center text-sm text-felt-ink" data-testid="room-phase">
         {text}
       </p>
-      {room.phase === 'betting' && ms !== null && <TimerBar ms={ms} total={BET_MS} />}
+      {(room.phase === 'betting' || room.round?.phase === 'insurance') && ms !== null && (
+        <TimerBar ms={ms} total={BET_MS} />
+      )}
     </div>
   );
 }
@@ -364,6 +384,7 @@ function MyControls({ room }: { room: RoomState }) {
   const rebuy = useRoomsStore((s) => s.rebuy);
   const leaveSeat = useRoomsStore((s) => s.leaveSeat);
   const myTurn = useRoomsStore(myTurnOf);
+  const insurance = useRoomsStore(myInsuranceOf);
   const shown = useRoomsStore((s) => s.shown);
 
   if (!seat) {
@@ -395,7 +416,13 @@ function MyControls({ room }: { room: RoomState }) {
               : 'Empate: recuperas tu apuesta.'}
         </p>
       )}
-      {myTurn ? (
+      {insurance === 'pending' && inRound ? (
+        <RoomInsurance room={room} stack={seat.stack} bet={inRound.bet} />
+      ) : room.round?.phase === 'insurance' && insurance !== 'none' ? (
+        <p className="text-sm text-felt-ink" data-testid="room-insurance-done">
+          {insurance === 'taken' ? 'Tomaste el seguro.' : 'Sin seguro.'} Esperando al resto…
+        </p>
+      ) : myTurn ? (
         <Actions room={room} />
       ) : broke ? (
         <div className="flex flex-col items-center gap-2 text-center">
@@ -462,6 +489,38 @@ function BetControls() {
         <kbd className="kbd hidden sm:inline">Enter</kbd>
       </button>
     </div>
+  );
+}
+
+/** El seguro de mi asiento: todos deciden a la vez; con ayudas, el consejo del motor. */
+function RoomInsurance({ room, stack, bet }: { room: RoomState; stack: number; bet: number }) {
+  const insure = useRoomsStore((s) => s.insure);
+  const hand = useRoomsStore((s) => {
+    const seat = mySeatOf(s);
+    return s.room?.round?.seats.find((x) => x.seat === seat?.seat)?.hands[0] ?? null;
+  });
+  const slot = useAnalysisStore((s) => s.hand);
+  const version = useShoeStore((s) => s.version);
+  const ev =
+    room.info.aids && slot.result && isCurrent(slot, version)
+      ? (slot.result.insuranceEv ?? null)
+      : null;
+  return (
+    <InsuranceAsk
+      natural={
+        !!hand &&
+        isNatural(
+          hand.cards.map((c) => ({ face: c.rank })),
+          hand.fromSplit,
+        )
+      }
+      cost={bet / 2}
+      // La pila incluye la apuesta: para el seguro hace falta 1,5 veces la apuesta.
+      canTake={stack >= bet * 1.5}
+      ev={ev}
+      onDecide={insure}
+      testId="room"
+    />
   );
 }
 

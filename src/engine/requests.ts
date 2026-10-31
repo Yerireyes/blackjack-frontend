@@ -173,7 +173,8 @@ export function buildCasualHandRequest(
   rules: Rules,
   round: RoundView,
 ): Built<AnalyzeHandRequest> {
-  if (round.phase !== 'player') return { ok: false, reason: 'La ronda terminó.' };
+  // En la fase del seguro también: el análisis trae `insuranceEv` (con As visible).
+  if (round.phase === 'settled') return { ok: false, reason: 'La ronda terminó.' };
   if (!round.shoeCounts) {
     return { ok: false, reason: 'El servidor no envió la composición del zapato.' };
   }

@@ -15,7 +15,7 @@ import type {
 } from '@/engine/contract';
 import { playApi } from '@/play/api';
 import { addReview, EMPTY_TALLY, type Tally } from '@/play/review';
-import { createRound, isNotFound, notify, type RoundState } from '@/play/round';
+import { createRound, inHand, isNotFound, notify, type RoundState } from '@/play/round';
 import { newChip } from '@/store/chipsStore';
 import { useShoeStore } from '@/store/shoeStore';
 import { dailyApi } from './api';
@@ -67,7 +67,7 @@ export const useDailyStore = create<DailyState>()((set, get) => {
     if (dayTimer) clearTimeout(dayTimer);
     dayTimer = setTimeout(() => {
       dayTimer = null;
-      if (get().round?.phase === 'player' || get().revealing) scheduleDayChange();
+      if (inHand(get().round) || get().revealing) scheduleDayChange();
       else void get().enter();
     }, msToNextDay() + 2000);
   };

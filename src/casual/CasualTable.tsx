@@ -121,6 +121,13 @@ function CasualGame() {
   const maxBet = useCasualStore((s) => casualWallet(s)?.maxBet ?? 0);
   const slot = useAnalysisStore((s) => s.hand);
   const version = useShoeStore((s) => s.version);
-  const best = slot.result && isCurrent(slot, version) ? slot.result.best : null;
-  return <Game testId="casual" maxBet={maxBet} best={best} />;
+  const current = slot.result && isCurrent(slot, version) ? slot.result : null;
+  return (
+    <Game
+      testId="casual"
+      maxBet={maxBet}
+      best={current?.best ?? null}
+      insuranceEv={current?.insuranceEv ?? null}
+    />
+  );
 }

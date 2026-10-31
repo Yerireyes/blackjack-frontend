@@ -16,6 +16,7 @@ import { useAccountStore } from '@/account/accountStore';
 import { useCasualStore } from '@/casual/casualStore';
 import { PlayingCard } from '@/components/PlayingCard';
 import { useDailyStore } from '@/daily/dailyStore';
+import { inHand } from '@/play/round';
 import { nextDayIn } from '@/daily/format';
 import { ACHIEVEMENT_IDS, isKnownAchievement } from '@/progress/catalog';
 import { PlayerTitle } from '@/progress/PlayerTitle';
@@ -150,7 +151,7 @@ function CasualChoice() {
   const status = useCasualStore((s) => s.status);
   const balance = useCasualStore((s) => s.round?.wallet.balance ?? s.run?.balance ?? null);
   const hands = useCasualStore((s) => s.run?.hands ?? 0);
-  const midHand = useCasualStore((s) => s.round?.phase === 'player');
+  const midHand = useCasualStore((s) => inHand(s.round));
   const setScreen = useUiStore((s) => s.setScreen);
 
   let badge: ReactNode = null;

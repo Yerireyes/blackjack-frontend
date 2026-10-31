@@ -2,6 +2,7 @@ import { dealerChecksHole } from '@/domain/rules';
 import { toRankIndex, FACE_NAME } from '@/domain/cards';
 import { AnalysisFrame } from '@/features/analysis/AnalysisFrame';
 import { useAnalysis } from '@/features/analysis/useAnalysis';
+import { formatEv } from '@/lib/format';
 import { DealerOutcomeChart } from '@/features/dealer-mode/DealerOutcomeChart';
 import { useCasualStore } from '@/casual/casualStore';
 import { mySeatOf, useRoomsStore } from '@/rooms/roomsStore';
@@ -27,6 +28,11 @@ export function PlayerView() {
   const casualActive = useCasualStore((s) => s.round?.player.active ?? 0);
   // En Salas, las de mi asiento en la ronda de la mesa.
   const rooms = useUiStore((s) => s.screen === 'rooms');
+  // Con As visible, antes del peek: todavía se decide el seguro.
+  const casualInsurance = useCasualStore((s) => s.round?.phase === 'insurance');
+  const roomInsurance = useRoomsStore((s) => s.room?.round?.phase === 'insurance');
+  const insurancePhase = (casual && casualInsurance) || (rooms && roomInsurance);
+  const practice = useUiStore((s) => s.screen === 'practice');
   const roomUp = useRoomsStore((s) => s.room?.round?.dealer.up.rank ?? null);
   const roomRules = useRoomsStore((s) => s.room?.info.rules ?? null);
   const roomSeat = useRoomsStore((s) => {
@@ -56,6 +62,24 @@ export function PlayerView() {
         )}
       </AnalysisFrame>
 
+      {result?.insuranceEv !== undefined && (
+        <AnalysisFrame title="Seguro" slot={slot} stale={stale} testId="insurance-frame">
+          <p className="flex items-baseline justify-between gap-3 text-sm">
+            <span className={result.insuranceEv > 0 ? 'font-semibold text-pos' : 'font-semibold'}>
+              {result.insuranceEv > 0 ? 'Conviene asegurar' : 'No conviene asegurar'}
+            </span>
+            <span className={`tabular-nums ${result.insuranceEv > 0 ? 'text-pos' : 'text-neg'}`}>
+              {formatEv(result.insuranceEv)}
+            </span>
+          </p>
+          <p className="mt-1.5 text-xs leading-relaxed text-faint">
+            EV por ficha puesta en el seguro (paga 2 a 1 si el dealer tiene blackjack). Solo
+            conviene con el zapato cargado de dieces.
+            {practice && ' En Práctica no se cobra: es la referencia.'}
+          </p>
+        </AnalysisFrame>
+      )}
+
       {result && (
         <AnalysisFrame title="Riesgo al pedir" slot={slot} stale={stale} testId="bust-frame">
           <HitBustMeter p={result.pBustOnHit} label="de pasarte con una carta más" />
@@ -72,7 +96,9 @@ export function PlayerView() {
           <DealerOutcomeChart dist={result.dealer} />
           {peek && (
             <p className="mt-2 text-xs text-faint">
-              Ya revisó su carta oculta: la distribución supone que no tiene blackjack.
+              {insurancePhase
+                ? 'Revisa su carta oculta después del seguro: la distribución (y el EV de cada acción) suponen que no tiene blackjack.'
+                : 'Ya revisó su carta oculta: la distribución supone que no tiene blackjack.'}
             </p>
           )}
         </AnalysisFrame>

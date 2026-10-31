@@ -11,8 +11,15 @@ import { useTableStore } from '@/store/tableStore';
 import { useUiStore } from '@/store/uiStore';
 import { json, notFound, stubFetch } from '@/tests/server';
 import { normalizeCode } from './api';
-import { maxBetOf, mySeatOf, myTurnOf, REVEAL_STEP_MS, useRoomsStore } from './roomsStore';
-import { dealerModel, myTurnAsRound, revealStepsOf } from './view';
+import {
+  maxBetOf,
+  myInsuranceOf,
+  mySeatOf,
+  myTurnOf,
+  REVEAL_STEP_MS,
+  useRoomsStore,
+} from './roomsStore';
+import { dealerModel, myDecisionAsRound, revealStepsOf } from './view';
 
 // ---------- WebSocket simulado ----------
 
@@ -284,18 +291,51 @@ describe('sala en tiempo real', () => {
   });
 });
 
+// ---------- seguro ----------
+
+describe('seguro en la sala', () => {
+  const insuranceRound = (insured?: boolean) =>
+    round({
+      phase: 'insurance',
+      turn: undefined,
+      dealer: { up: c('A', 'H'), hole: null, hits: [] },
+      seats: round().seats.map((s) =>
+        s.seat === 1 && insured !== undefined ? { ...s, insured } : s,
+      ),
+    });
+
+  it('todos deciden a la vez: solo se manda si mi seguro está pendiente', () => {
+    enter(state({ round: insuranceRound() }));
+    expect(myInsuranceOf(rs())).toBe('pending');
+    expect(myTurnOf(rs())).toBe(false);
+    rs().insure(true);
+    expect(last().sent).toEqual([{ type: 'insurance', take: true }]);
+
+    last().receive({ type: 'state', room: state({ round: insuranceRound(true) }) });
+    expect(myInsuranceOf(rs())).toBe('taken');
+    rs().insure(false);
+    expect(last().sent).toHaveLength(1);
+  });
+
+  it('con ayudas, el motor recibe mi mano mientras el seguro está pendiente', () => {
+    const pending = myDecisionAsRound(state({ round: insuranceRound() }), 1);
+    expect(pending?.phase).toBe('insurance');
+    expect(myDecisionAsRound(state({ round: insuranceRound(false) }), 1)).toBeNull();
+  });
+});
+
 // ---------- ayudas ----------
 
 describe('ayudas en la sala', () => {
   it('con ayudas, en mi turno, el motor recibe mi mano y el zapato de la sala', () => {
-    const turn = myTurnAsRound(state(), 1)!;
+    const turn = myDecisionAsRound(state(), 1)!;
     const built = buildCasualHandRequest(1, info.rules, turn);
     expect(built.ok && built.req.hand).toEqual([9, 4]);
     expect(built.ok && built.req.shoe[9]).toBe(92);
   });
 
   it('sin `shoeCounts` (sala sin ayudas) o fuera de mi turno, nada', () => {
-    expect(myTurnAsRound(state({ shoeCounts: undefined }), 1)).toBeNull();
-    expect(myTurnAsRound(state(), 3)).toBeNull();
+    expect(myDecisionAsRound(state({ shoeCounts: undefined }), 1)).toBeNull();
+    expect(myDecisionAsRound(state(), 3)).toBeNull();
   });
 });
