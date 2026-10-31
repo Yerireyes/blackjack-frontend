@@ -64,6 +64,7 @@ const me: Me = {
   hasPassword: true,
   providers: [],
   createdAt: '2026-10-27T12:00:00Z',
+  isAdmin: false,
 };
 
 const info = {

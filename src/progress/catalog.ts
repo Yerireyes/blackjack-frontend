@@ -3,6 +3,7 @@
 import {
   Brain,
   CalendarCheck,
+  Crown,
   Coins,
   Medal,
   Scale,
@@ -69,6 +70,11 @@ export const ACHIEVEMENTS: Record<AchievementId, AchievementInfo> = {
     description: 'Termina una temporada ranked con medalla.',
     icon: Medal,
   },
+  tournamentWin: {
+    name: 'Campeón',
+    description: 'Gana un torneo en una sala.',
+    icon: Crown,
+  },
 };
 
 export const ACHIEVEMENT_IDS = Object.keys(ACHIEVEMENTS) as AchievementId[];
@@ -98,6 +104,7 @@ export const COSMETICS: Record<CosmeticId, { name: string; slot: CosmeticSlot }>
   titleCoolHead: { name: 'Cabeza fría', slot: 'title' },
   titleByTheBook: { name: 'De libro', slot: 'title' },
   titleMedalist: { name: 'Medallista', slot: 'title' },
+  titleChampion: { name: 'Campeón', slot: 'title' },
 };
 
 export const isKnownCosmetic = (id: string): id is CosmeticId => id in COSMETICS;
