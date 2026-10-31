@@ -7,6 +7,24 @@ versiones según [SemVer](https://semver.org/lang/es/) (en 0.x, una versión men
 
 ### Agregado
 
+- **Historial y estadísticas:** pantalla «Tu juego» (`#/estadisticas`) con tus números por modo,
+  el % de decisiones óptimas (Ranked y el reto) por tipo de mano y tus puntos débiles, y el
+  historial de rondas con el detalle de cada mano y su revisión.
+- **Entrenamiento dirigido:** en Práctica, «Practicar mis puntos débiles» reparte manos de las
+  situaciones que más EV te costaron y dice si tu decisión fue la óptima.
+- **Amigos:** agregar por nombre, ver quién está conectado y en qué sala, invitar a salas
+  (también privadas) y comparar el reto diario solo entre amigos.
+- **Torneos en sala:** salas de 5 a 30 manos con 500 fichas de torneo y sin recompras; el
+  anfitrión lo inicia, se ve la clasificación y el podio, y el ganador recibe el título
+  «Campeón».
+- **Moderación:** reportar a un jugador desde los rankings, los amigos o una sala; aviso de
+  cuenta suspendida al entrar; panel de administración para revisar reportes, cambiar nombres
+  y suspender cuentas.
+- **Seguro y dinero par:** con un As visible, Casual, Ranked, el reto diario y las salas
+  preguntan «¿Seguro?» (o «¿Dinero par?» con blackjack propio) antes del peek; solo «No» si
+  no alcanzan las fichas. En las salas deciden todos a la vez, con temporizador. Al liquidar,
+  el neto del seguro aparte. Con ayudas (Práctica, Casual y salas con ayudas), el EV del
+  seguro según el motor y la opción recomendada; nunca en Ranked ni en el reto.
 - **Salas Casual multijugador:** mesas de 5 a 7 jugadores contra el dealer en tiempo real
   (WebSocket). Lobby con las salas públicas, entrar con el código o el enlace
   (`#/salas/CÓDIGO`) y crear sala con nombre, visibilidad, asientos, reglas (presets o las de

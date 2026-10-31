@@ -25,7 +25,23 @@ export interface CardView {
  * Cosméticos. Solo cambian cómo se ve la mesa; nunca dan fichas ni ventaja. Los
  * dibuja el front.
  */
-export type CosmeticId = "feltGreen" | "feltBlue" | "feltRed" | "feltBlack" | "backClassic" | "backGold" | "backMidnight" | "chipsClassic" | "chipsNeon" | "chipsGold" | "titleRookie" | "titleCoolHead" | "titleByTheBook" | "titleMedalist";
+export type CosmeticId = "feltGreen" | "feltBlue" | "feltRed" | "feltBlack" | "backClassic" | "backGold" | "backMidnight" | "chipsClassic" | "chipsNeon" | "chipsGold" | "titleRookie" | "titleCoolHead" | "titleByTheBook" | "titleMedalist" | "titleChampion";
+
+/**
+ * Decisiones en una situación.
+ */
+export interface SpotStats {
+    spot: DecisionSpot;
+    decisions: number;
+    /**
+     * Las que fueron la óptima.
+     */
+    optimal: number;
+    /**
+     * EV perdido en total, en unidades de la apuesta (Σ evBest − evChosen).
+     */
+    evLost: number;
+}
 
 /**
  * Dónde se usa un cosmético.
@@ -33,10 +49,27 @@ export type CosmeticId = "feltGreen" | "feltBlue" | "feltRed" | "feltBlack" | "b
 export type CosmeticSlot = "felt" | "cardBack" | "chips" | "title";
 
 /**
+ * El torneo de la sala.
+ */
+export interface TournamentView {
+    status: TournamentStatus;
+    hands: number;
+    /**
+     * Manos jugadas (cada cierre de apuestas cuenta, aunque alguien no apueste).
+     */
+    played: number;
+    /**
+     * Por pila, de mayor a menor (vacío antes del primer torneo).
+     */
+    standings: TournamentStanding[];
+    winner?: RoomPlayer;
+}
+
+/**
  * El turno del dealer se resuelve dentro de la misma respuesta: no hay fase visible
  * para él.
  */
-export type RoundPhase = "player" | "settled";
+export type RoundPhase = "insurance" | "player" | "settled";
 
 /**
  * Figura de la carta, como la escribe el front: "A", "2" … "10", "J", "Q", "K".
@@ -63,6 +96,24 @@ export interface TableRoundView {
      */
     allowed: AllowedActions;
     peekBlackjack: boolean;
+}
+
+/**
+ * Las decisiones revisadas (Ranked y reto diario; Casual no se revisa).
+ */
+export interface DecisionStats {
+    decisions: number;
+    optimal: number;
+    evLost: number;
+    /**
+     * Duras, suaves y pares, en ese orden (solo las que tienen decisiones).
+     */
+    byKind: KindStats[];
+    /**
+     * Hasta 10 situaciones donde más EV se perdió (con al menos un error): lo que el
+     * entrenamiento dirigido debería repetir.
+     */
+    weakSpots: SpotStats[];
 }
 
 /**
@@ -98,6 +149,10 @@ export interface RoundView {
      * El dealer tenía blackjack al revisar la oculta: la ronda terminó en el reparto.
      */
     peekBlackjack: boolean;
+    /**
+     * Seguro: `true`/`false` una vez decidido; falta si no se ofreció o está pendiente.
+     */
+    insured?: boolean;
     wallet: WalletView;
     /**
      * Solo casual: composición restante por rango (0 = As … 9 = diez), con la
@@ -118,7 +173,7 @@ export interface RoundView {
  * Logros. Las condiciones están en «Front — Fase 5 Logros.md»; los textos los pone el
  * front.
  */
-export type AchievementId = "firstWin" | "blackjack" | "perfectSplit" | "optimal10" | "optimal50" | "sixToFiveSurvivor" | "doubleUp" | "rankedQualified" | "rankedMedal" | "dailyComplete";
+export type AchievementId = "firstWin" | "blackjack" | "perfectSplit" | "optimal10" | "optimal50" | "sixToFiveSurvivor" | "doubleUp" | "rankedQualified" | "rankedMedal" | "dailyComplete" | "tournamentWin";
 
 /**
  * Medalla de fin de temporada (solo con el mínimo de manos).
@@ -128,7 +183,7 @@ export type Medal = "gold" | "silver" | "bronze" | "top10";
 /**
  * Mensajes del cliente por el WebSocket de la sala.
  */
-export type ClientMessage = { type: "sit"; seat: number } | { type: "leaveSeat" } | { type: "bet"; amount: number } | { type: "action"; action: Action } | { type: "rebuy" } | { type: "react"; reaction: Reaction } | { type: "kick"; playerId: string };
+export type ClientMessage = { type: "sit"; seat: number } | { type: "leaveSeat" } | { type: "bet"; amount: number } | { type: "action"; action: Action } | { type: "rebuy" } | { type: "insurance"; take: boolean } | { type: "react"; reaction: Reaction } | { type: "kick"; playerId: string } | { type: "startTournament" };
 
 /**
  * Mensajes del servidor por el WebSocket de la sala.
@@ -180,6 +235,30 @@ export interface SeasonResult {
 }
 
 /**
+ * Resultados de un modo.
+ */
+export interface ModeStats {
+    kind: RoundKind;
+    rounds: number;
+    /**
+     * Neto total en fichas.
+     */
+    net: number;
+    /**
+     * Rondas con neto positivo, cero y negativo.
+     */
+    wins: number;
+    pushes: number;
+    losses: number;
+    blackjacks: number;
+    /**
+     * Mejor y peor neto de una ronda.
+     */
+    bestWin: number;
+    worstLoss: number;
+}
+
+/**
  * Todo lo que se ve de la sala. Llega en cada cambio: reemplazar el estado local.
  */
 export interface RoomState {
@@ -204,7 +283,30 @@ export interface RoomState {
      * Fracción del zapato ya repartida.
      */
     penetration: number;
+    /**
+     * Ranking interno (vacío en las salas de torneo: ahí manda `tournament`).
+     */
     leaderboard: RoomLeaderboardRow[];
+    tournament?: TournamentView;
+}
+
+/**
+ * Un amigo, con si está conectado y en qué sala pública juega.
+ */
+export interface FriendView {
+    /**
+     * `id` es el del usuario (sirve para invitar o quitar).
+     */
+    user: RoomPlayer;
+    /**
+     * Usó la app en los últimos 10 minutos o está en una sala.
+     */
+    online: boolean;
+    /**
+     * La sala pública en la que está, si hay (las privadas solo por invitación).
+     */
+    room?: RoomInfo;
+    since: string;
 }
 
 /**
@@ -226,7 +328,11 @@ export interface SeatRoundView {
      */
     done: boolean;
     /**
-     * Neto del asiento en fichas (solo liquidada).
+     * Seguro: `true`/`false` una vez decidido; falta si no se ofreció o está pendiente.
+     */
+    insured?: boolean;
+    /**
+     * Neto del asiento en fichas, seguro incluido (solo liquidada).
      */
     net?: number;
 }
@@ -241,6 +347,44 @@ export interface CosmeticItem {
      * El logro que lo desbloquea; falta en los que vienen de serie.
      */
     unlockedBy?: AchievementId;
+}
+
+/**
+ * Una invitación a una sala que sigue abierta (vencen a los 30 minutos).
+ */
+export interface RoomInvitation {
+    id: string;
+    from: RoomPlayer;
+    room: RoomInfo;
+    at: string;
+}
+
+/**
+ * Una ronda liquidada (Casual, Ranked o reto diario). Las de las salas viven en memoria
+ * y no quedan en el historial.
+ */
+export interface HistoryItem {
+    id: string;
+    kind: RoundKind;
+    contextId: string;
+    bet: number;
+    /**
+     * Neto en fichas, seguro incluido.
+     */
+    net: number;
+    settledAt: string;
+    player: PlayerView;
+    /**
+     * Con la oculta y las cartas que pidió el dealer.
+     */
+    dealer: DealerView;
+    peekBlackjack: boolean;
+    insured?: boolean;
+    insuranceNet?: number;
+    /**
+     * Ranked y reto diario: la revisión de cada decisión.
+     */
+    review?: ReviewItem[];
 }
 
 /**
@@ -273,7 +417,28 @@ export interface RoomInfo {
     rules: Rules;
     preset?: Preset;
     aids: boolean;
+    tournament?: TournamentSettings;
     createdAt: string;
+}
+
+/**
+ * Una situación de juego, para agrupar las decisiones: tipo de mano, total y carta
+ * visible del dealer. Es lo que el entrenamiento dirigido repite.
+ */
+export interface DecisionSpot {
+    kind: SpotKind;
+    /**
+     * Total de la mano (un As cuenta 11 si no se pasa).
+     */
+    total: number;
+    /**
+     * En un par: el rango de las cartas (0 = As … 9 = diez).
+     */
+    pair?: number;
+    /**
+     * Carta visible del dealer, como rango del motor (0 = As … 9 = diez).
+     */
+    dealerUp: number;
 }
 
 /**
@@ -310,6 +475,25 @@ export interface DailyLeaderboard {
 }
 
 /**
+ * `GET /friends`.
+ */
+export interface FriendsView {
+    /**
+     * Conectados primero; después por nombre.
+     */
+    friends: FriendView[];
+    /**
+     * Solicitudes que recibió.
+     */
+    incoming: FriendRequestView[];
+    /**
+     * Solicitudes que mandó y siguen pendientes.
+     */
+    outgoing: FriendRequestView[];
+    invitations: RoomInvitation[];
+}
+
+/**
  * `GET /me/achievements`.
  */
 export interface MyAchievements {
@@ -339,12 +523,37 @@ export interface MyCosmetics {
 }
 
 /**
+ * `GET /me/history`.
+ */
+export interface HistoryPage {
+    /**
+     * De la más reciente a la más antigua.
+     */
+    items: HistoryItem[];
+    /**
+     * Para la página siguiente: `?before=<esto>`. Falta si no hay más.
+     */
+    nextBefore?: string;
+}
+
+/**
  * `GET /me/records`.
  */
 export interface MyRecords {
     casual: CasualRecords;
     ranked: RankedRecords;
     daily: DailyRecords;
+}
+
+/**
+ * `GET /me/stats`.
+ */
+export interface MyStats {
+    /**
+     * Solo los modos en los que jugó.
+     */
+    modes: ModeStats[];
+    decisions: DecisionStats;
 }
 
 /**
@@ -449,10 +658,25 @@ export interface DailyAttemptView {
 }
 
 /**
+ * `POST /friends/requests`: por nombre visible (sin distinguir mayúsculas).
+ */
+export interface FriendRequest {
+    displayName: string;
+}
+
+/**
  * `POST /play/rounds/{id}/actions`.
  */
 export interface RoundActionRequest {
     action: Action;
+    idempotencyKey: string;
+}
+
+/**
+ * `POST /play/rounds/{id}/insurance`: tomar (`take: true`) o rechazar el seguro.
+ */
+export interface InsuranceRequest {
+    take: boolean;
     idempotencyKey: string;
 }
 
@@ -474,6 +698,13 @@ export interface NewRoundRequest {
 }
 
 /**
+ * `POST /rooms/{code}/invite`.
+ */
+export interface InviteRequest {
+    userId: string;
+}
+
+/**
  * `POST /rooms`. Las reglas: un preset o personalizadas (exactamente uno).
  */
 export interface CreateRoomRequest {
@@ -492,6 +723,10 @@ export interface CreateRoomRequest {
      * Con ayudas, el estado trae `shoeCounts` para calcular EV en el navegador.
      */
     aids: boolean;
+    /**
+     * Sala de torneo: solo se juegan torneos de N manos que inicia el anfitrión.
+     */
+    tournament?: TournamentSettings;
 }
 
 export interface ActionResult {
@@ -509,6 +744,11 @@ export interface AllowedActions {
     double: boolean;
     split: boolean;
     surrender: boolean;
+    /**
+     * En la fase `insurance`: las fichas alcanzan para el seguro (media apuesta).
+     * Rechazarlo siempre se puede en esa fase.
+     */
+    insurance?: boolean;
 }
 
 export interface AnalyzeDealerRequest {
@@ -565,6 +805,12 @@ export interface AnalyzeHandResponse {
     best: Action;
     pBustOnHit: number;
     dealer: DealerDistribution;
+    /**
+     * Solo con un As visible: EV del seguro por ficha puesta en el seguro (paga 2:1),
+     * `3p − 1` con `p` = probabilidad de que la oculta valga 10. Positivo solo con
+     * muchos dieces en el zapato. Tomar el seguro con blackjack es el «dinero par».
+     */
+    insuranceEv?: number;
     /**
      * Lo mide el binding (WASM/HTTP); el motor no usa reloj y lo deja en 0.
      */
@@ -688,6 +934,11 @@ export interface DealerView {
     hits: CardView[];
 }
 
+export interface FriendRequestView {
+    user: RoomPlayer;
+    at: string;
+}
+
 export interface HandView {
     cards: CardView[];
     doubled: boolean;
@@ -701,6 +952,13 @@ export interface HandView {
      * Neto de esta mano en fichas (solo liquidada).
      */
     net?: number;
+}
+
+export interface KindStats {
+    kind: SpotKind;
+    decisions: number;
+    optimal: number;
+    evLost: number;
 }
 
 export interface LeaderboardRow {
@@ -771,6 +1029,10 @@ export interface ReviewItem {
     evChosen: number;
     evBest: number;
     exact: boolean;
+    /**
+     * La situación de la decisión (falta en las rondas anteriores a guardarla).
+     */
+    spot?: DecisionSpot;
 }
 
 export interface RoomSeat {
@@ -807,6 +1069,10 @@ export interface RoundResult {
     refilled?: number;
     review?: ReviewItem[];
     /**
+     * Neto del seguro en fichas, ya sumado a `net` (si se tomó).
+     */
+    insuranceNet?: number;
+    /**
      * Logros desbloqueados con esta ronda (falta si no hubo ninguno).
      */
     unlocked?: AchievementId[];
@@ -827,6 +1093,26 @@ export interface Rules {
      * La usa el front para rebarajar; el motor la ignora.
      */
     penetration: number;
+}
+
+export interface TournamentSettings {
+    /**
+     * Manos del torneo (5–30).
+     */
+    hands: number;
+}
+
+export interface TournamentStanding {
+    /**
+     * Desde 1; empates comparten posición.
+     */
+    rank: number;
+    player: RoomPlayer;
+    stack: number;
+    /**
+     * Sin fichas para la apuesta mínima o se levantó: ya no juega.
+     */
+    out: boolean;
 }
 
 export interface UnlockedAchievement {
@@ -867,6 +1153,10 @@ export type RoomVisibility = "public" | "private";
 
 export type RoundKind = "casual" | "ranked" | "daily";
 
+export type SpotKind = "hard" | "soft" | "pair";
+
 export type Suit = "S" | "H" | "D" | "C";
 
 export type Surrender = "none" | "late";
+
+export type TournamentStatus = "waiting" | "running" | "finished";

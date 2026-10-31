@@ -7,9 +7,11 @@ import { startSoundSync } from '@/app/sounds';
 import { startCasualSync } from '@/casual/casualSync';
 import { startDailySync } from '@/daily/dailySync';
 import { startEngineSync } from '@/engine/sync';
+import { startFriendsSync } from '@/friends/friendsSync';
 import { startProgressSync } from '@/progress/progressSync';
 import { startRankedSync } from '@/ranked/rankedSync';
 import { startRoomsSync } from '@/rooms/roomsSync';
+import { startStatsSync } from '@/stats/statsSync';
 import './index.css';
 
 // Primero la pantalla (de la dirección): de ella dependen la sincronización y Casual.
@@ -22,6 +24,8 @@ startRankedSync();
 startDailySync();
 startProgressSync();
 startRoomsSync();
+startStatsSync();
+startFriendsSync();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

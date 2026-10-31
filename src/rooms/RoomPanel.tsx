@@ -2,12 +2,15 @@ import { Crown, DoorOpen, Eye, Info, Trophy, UserX } from 'lucide-react';
 import { useState } from 'react';
 import type { RoomPlayer, RoomState } from '@/engine/contract';
 import { PRESETS } from '@/domain/rules';
+import { InviteFriends } from '@/friends/InviteFriends';
 import { PlayerView } from '@/features/player-mode/PlayerView';
 import { rulesSummary } from '@/features/settings/rulesSummary';
 import { formatChips } from '@/lib/format';
 import { useUiStore } from '@/store/uiStore';
 import { PlayerName } from './parts';
 import { useRoomsStore } from './roomsStore';
+import { Standings } from './Tournament';
+import { ReportButton } from '@/moderation/Report';
 
 /** Panel lateral: ayudas (si las hay), la mesa, el ranking de la sala y quién está. */
 export function RoomPanel() {
@@ -25,10 +28,21 @@ export function RoomPanel() {
           jugar sin EV ni recomendaciones, como en Ranked.
         </p>
       )}
-      <Leaderboard room={room} />
+      {room.tournament ? <Standings room={room} /> : <Leaderboard room={room} />}
       <People room={room} />
       <TableInfo room={room} />
-      <LeaveRoom />
+      <div className="flex flex-wrap gap-2">
+        <InviteFriends
+          code={room.info.code}
+          inRoom={
+            new Set([
+              ...room.spectators.map((p) => p.id),
+              ...room.seats.flatMap((x) => (x.player ? [x.player.id] : [])),
+            ])
+          }
+        />
+        <LeaveRoom />
+      </div>
     </div>
   );
 }
@@ -134,6 +148,7 @@ function Person({
         <PlayerName player={p} me={mine} />
       </span>
       <span className="text-xs text-faint">{role}</span>
+      {!mine && <ReportButton name={p.displayName} />}
       {host &&
         !mine &&
         (confirm ? (
@@ -185,7 +200,11 @@ function TableInfo({ room }: { room: RoomState }) {
           {room.info.seats} asientos · {room.info.aids ? 'con ayudas' : 'sin ayudas'} · zapato
           repartido {Math.round(room.penetration * 100)} %
         </li>
-        <li>Pila propia de 500 fichas; con menos de 10 puedes recomprar.</li>
+        <li>
+          {room.info.tournament
+            ? `Torneo de ${room.info.tournament.hands} manos: 500 fichas de torneo, sin recompras.`
+            : 'Pila propia de 500 fichas; con menos de 10 puedes recomprar.'}
+        </li>
         <li>20 s por decisión: al vencer, el servidor se planta por ti.</li>
         <li>Si no apuestas en 3 rondas seguidas, pasas a mirar.</li>
       </ul>

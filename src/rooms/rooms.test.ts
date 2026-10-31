@@ -7,12 +7,20 @@ import { presetRules } from '@/domain/rules';
 import type { RoomState, ServerMessage, TableRoundView } from '@/engine/contract';
 import { buildCasualHandRequest } from '@/engine/requests';
 import { newChip } from '@/store/chipsStore';
+import { useProgressStore } from '@/progress/progressStore';
 import { useTableStore } from '@/store/tableStore';
 import { useUiStore } from '@/store/uiStore';
 import { json, notFound, stubFetch } from '@/tests/server';
 import { normalizeCode } from './api';
-import { maxBetOf, mySeatOf, myTurnOf, REVEAL_STEP_MS, useRoomsStore } from './roomsStore';
-import { dealerModel, myTurnAsRound, revealStepsOf } from './view';
+import {
+  maxBetOf,
+  myInsuranceOf,
+  mySeatOf,
+  myTurnOf,
+  REVEAL_STEP_MS,
+  useRoomsStore,
+} from './roomsStore';
+import { dealerModel, myDecisionAsRound, revealStepsOf } from './view';
 
 // ---------- WebSocket simulado ----------
 
@@ -57,6 +65,7 @@ const me: Me = {
   hasPassword: true,
   providers: [],
   createdAt: '2026-10-27T12:00:00Z',
+  isAdmin: false,
 };
 
 const info = {
@@ -284,18 +293,93 @@ describe('sala en tiempo real', () => {
   });
 });
 
+// ---------- seguro ----------
+
+describe('seguro en la sala', () => {
+  const insuranceRound = (insured?: boolean) =>
+    round({
+      phase: 'insurance',
+      turn: undefined,
+      dealer: { up: c('A', 'H'), hole: null, hits: [] },
+      seats: round().seats.map((s) =>
+        s.seat === 1 && insured !== undefined ? { ...s, insured } : s,
+      ),
+    });
+
+  it('todos deciden a la vez: solo se manda si mi seguro está pendiente', () => {
+    enter(state({ round: insuranceRound() }));
+    expect(myInsuranceOf(rs())).toBe('pending');
+    expect(myTurnOf(rs())).toBe(false);
+    rs().insure(true);
+    expect(last().sent).toEqual([{ type: 'insurance', take: true }]);
+
+    last().receive({ type: 'state', room: state({ round: insuranceRound(true) }) });
+    expect(myInsuranceOf(rs())).toBe('taken');
+    rs().insure(false);
+    expect(last().sent).toHaveLength(1);
+  });
+
+  it('con ayudas, el motor recibe mi mano mientras el seguro está pendiente', () => {
+    const pending = myDecisionAsRound(state({ round: insuranceRound() }), 1);
+    expect(pending?.phase).toBe('insurance');
+    expect(myDecisionAsRound(state({ round: insuranceRound(false) }), 1)).toBeNull();
+  });
+});
+
+// ---------- torneos ----------
+
+describe('torneo en la sala', () => {
+  const tournament = (status: 'waiting' | 'running' | 'finished', winner = false) => ({
+    status,
+    hands: 10,
+    played: status === 'waiting' ? 0 : 10,
+    standings: [
+      { rank: 1, player: { id: 'p-ana', displayName: 'Ana' }, stack: 900, out: false },
+      { rank: 2, player: { id: 'p-beto', displayName: 'Beto' }, stack: 0, out: true },
+    ],
+    ...(winner ? { winner: { id: 'p-ana', displayName: 'Ana' } } : {}),
+  });
+
+  it('el anfitrión lo inicia por el WebSocket', () => {
+    enter(state({ phase: 'waiting', round: undefined, tournament: tournament('waiting') }));
+    rs().startTournament();
+    expect(last().sent).toEqual([{ type: 'startTournament' }]);
+  });
+
+  it('si gano, avisa el logro de campeón y recarga logros y cosméticos', async () => {
+    const calls = stubFetch({
+      'GET /me/achievements': () =>
+        json(200, {
+          unlocked: [{ id: 'tournamentWin', unlockedAt: 'x' }],
+          optimalStreak: 0,
+          bestOptimalStreak: 0,
+        }),
+      'GET /me/cosmetics': () => json(200, { owned: [], equipped: {} }),
+    });
+    useProgressStore.getState().reset();
+    enter(state({ tournament: tournament('running') }));
+    last().receive({
+      type: 'state',
+      room: state({ phase: 'waiting', round: undefined, tournament: tournament('finished', true) }),
+    });
+    expect(useTableStore.getState().notice?.text).toBe('¡Ganaste el torneo!');
+    expect(useProgressStore.getState().toasts.map((x) => x.id)).toEqual(['tournamentWin']);
+    await vi.waitFor(() => expect(calls.map((c) => c.key)).toContain('GET /me/cosmetics'));
+  });
+});
+
 // ---------- ayudas ----------
 
 describe('ayudas en la sala', () => {
   it('con ayudas, en mi turno, el motor recibe mi mano y el zapato de la sala', () => {
-    const turn = myTurnAsRound(state(), 1)!;
+    const turn = myDecisionAsRound(state(), 1)!;
     const built = buildCasualHandRequest(1, info.rules, turn);
     expect(built.ok && built.req.hand).toEqual([9, 4]);
     expect(built.ok && built.req.shoe[9]).toBe(92);
   });
 
   it('sin `shoeCounts` (sala sin ayudas) o fuera de mi turno, nada', () => {
-    expect(myTurnAsRound(state({ shoeCounts: undefined }), 1)).toBeNull();
-    expect(myTurnAsRound(state(), 3)).toBeNull();
+    expect(myDecisionAsRound(state({ shoeCounts: undefined }), 1)).toBeNull();
+    expect(myDecisionAsRound(state(), 3)).toBeNull();
   });
 });

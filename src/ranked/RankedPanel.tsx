@@ -8,6 +8,7 @@ import { ReviewDetail, Stat } from '@/play/ReviewView';
 import type { RoundStore } from '@/play/round';
 import { endsIn, previousSeason, seasonName } from './format';
 import { useRankedStore } from './rankedStore';
+import { ReportButton } from '@/moderation/Report';
 
 const TOP_SHOWN = 10;
 
@@ -202,6 +203,7 @@ function BoardRow({ row }: { row: RankedRow }) {
           {row.hands} manos{row.provisional && ' · provisional'}
         </span>
       </span>
+      {!row.isMe && <ReportButton name={row.displayName} />}
       {row.medal && <MedalBadge medal={row.medal} />}
       <span className={`tabular-nums ${row.net > 0 ? 'text-pos' : row.net < 0 ? 'text-neg' : ''}`}>
         {formatChips(row.net, true)}

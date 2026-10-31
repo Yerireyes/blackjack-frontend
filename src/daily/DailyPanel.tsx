@@ -7,7 +7,9 @@ import { formatChips, formatPct, upperFirst } from '@/lib/format';
 import { ReviewDetail, Stat } from '@/play/ReviewView';
 import type { RoundStore } from '@/play/round';
 import { useDailyStore } from './dailyStore';
+import type { BoardScope } from './api';
 import { dayName, previousDay } from './format';
+import { ReportButton } from '@/moderation/Report';
 
 const TOP_SHOWN = 10;
 
@@ -80,6 +82,10 @@ function DayBoard() {
   const boardDay = useDailyStore((s) => s.boardDay);
   const today = useDailyStore((s) => s.today);
   const loadBoard = useDailyStore((s) => s.loadBoard);
+  const scope = useDailyStore((s) => s.boardScope);
+  const setScope = useDailyStore((s) => s.setBoardScope);
+  const signedIn = useAccountStore((s) => s.status === 'signedIn');
+  const friends = signedIn && scope === 'friends';
   const pick: DayPick = boardDay === null ? 'today' : 'yesterday';
   const options = [
     { value: 'today', label: 'Hoy' },
@@ -105,17 +111,33 @@ function DayBoard() {
           </div>
         )}
       </div>
+      {signedIn && (
+        <div className="w-48">
+          <Segmented<BoardScope>
+            label="Quiénes"
+            value={scope}
+            options={[
+              { value: 'all', label: 'Todos' },
+              { value: 'friends', label: 'Amigos' },
+            ]}
+            onChange={(v) => void setScope(v)}
+          />
+        </div>
+      )}
       {board && (
         <p className="-mt-1.5 text-xs text-faint">
-          {upperFirst(dayName(board.day))} · por saldo final; solo los retos terminados.
+          {upperFirst(dayName(board.day))} · por saldo final; solo los retos terminados
+          {friends ? ', entre tú y tus amigos' : ''}.
         </p>
       )}
       {board &&
         (top.length === 0 && !me ? (
           <p className="text-sm text-mute">
-            {boardDay === null
-              ? 'Todavía nadie terminó el reto de hoy.'
-              : 'Nadie terminó el reto ese día.'}
+            {friends
+              ? 'Ninguno de tus amigos terminó el reto ese día. Invítalos desde el botón de amigos.'
+              : boardDay === null
+                ? 'Todavía nadie terminó el reto de hoy.'
+                : 'Nadie terminó el reto ese día.'}
           </p>
         ) : (
           <ol className="flex flex-col divide-y divide-ink-800 rounded-xl border border-ink-800">
@@ -155,6 +177,7 @@ function BoardRow({ row }: { row: DailyRow }) {
           {row.hands} manos{!row.finished && ' · en juego (posición que tendría)'}
         </span>
       </span>
+      {!row.isMe && <ReportButton name={row.displayName} />}
       <span className="tabular-nums">{formatChips(row.balance)}</span>
     </li>
   );

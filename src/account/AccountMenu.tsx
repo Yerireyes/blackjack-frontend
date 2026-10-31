@@ -1,6 +1,7 @@
-import { Award, CheckCircle2, CloudOff, LogIn, LogOut, UserRound } from 'lucide-react';
+import { Award, CheckCircle2, CloudOff, LogIn, LogOut, ShieldAlert, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { Dialog } from '@/components/Dialog';
+import { FriendsButton } from '@/friends/FriendsDialog';
 import { titleName } from '@/progress/catalog';
 import { useProgressStore } from '@/progress/progressStore';
 import { useUiStore } from '@/store/uiStore';
@@ -20,6 +21,7 @@ export function AccountMenu() {
 
   return (
     <>
+      <FriendsButton />
       {status === 'loading' ? (
         <span className="h-9 w-9 shrink-0 animate-pulse rounded-lg bg-ink-800" aria-hidden />
       ) : status === 'unavailable' ? (
@@ -144,6 +146,28 @@ function ProfileDialog() {
             </button>
           </div>
         </section>
+
+        {me.isAdmin && (
+          <section aria-labelledby="admin-title" className="flex flex-col gap-2">
+            <h3 id="admin-title" className="section-title">
+              Administración
+            </h3>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm text-mute">Reportes, usuarios y suspensiones.</p>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => {
+                  openDialog(null);
+                  setScreen('admin');
+                }}
+                data-testid="admin-link"
+              >
+                <ShieldAlert className="size-4" aria-hidden /> Abrir panel
+              </button>
+            </div>
+          </section>
+        )}
 
         {/* Vincular y desvincular piden la contraseña: sin ella, Google es su único acceso. */}
         {(linked || (google && me.hasPassword)) && (

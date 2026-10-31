@@ -19,6 +19,8 @@ import { RankedPanel } from '@/ranked/RankedPanel';
 import { RoomPanel } from '@/rooms/RoomPanel';
 import { RoomsLobby } from '@/rooms/RoomsLobby';
 import { RoomTable } from '@/rooms/RoomTable';
+import { StatsScreen } from '@/stats/StatsScreen';
+import { TrainingPanel } from '@/stats/TrainingPanel';
 import { RankedTable } from '@/ranked/RankedTable';
 import { useUiStore } from '@/store/uiStore';
 import { Announcer } from './Announcer';
@@ -27,6 +29,8 @@ import { Notice } from './Notice';
 import { SettingsButton, SettingsDialog } from './SettingsDialog';
 import { SoundToggle } from './SoundToggle';
 import { useKeyboard } from './useKeyboard';
+import { AdminScreen } from '@/moderation/AdminScreen';
+import { ReportDialog } from '@/moderation/Report';
 
 const fade = {
   initial: { opacity: 0 },
@@ -51,6 +55,14 @@ export function App() {
           <motion.div key="home" {...fade}>
             <Home />
           </motion.div>
+        ) : screen === 'admin' ? (
+          <motion.div key="admin" {...fade}>
+            <AdminScreen />
+          </motion.div>
+        ) : screen === 'stats' ? (
+          <motion.div key="stats" {...fade}>
+            <StatsScreen />
+          </motion.div>
         ) : screen === 'progress' ? (
           <motion.div key="progress" {...fade}>
             <ProgressScreen />
@@ -64,6 +76,7 @@ export function App() {
       <SettingsDialog />
       <Announcer />
       <Notice />
+      <ReportDialog />
       <AchievementToasts />
     </MotionConfig>
   );
@@ -77,6 +90,8 @@ const TITLE = {
   daily: 'Reto diario',
   progress: 'Logros',
   rooms: 'Salas',
+  stats: 'Tu juego',
+  admin: 'Administración',
 } as const;
 
 /** La mesa de Práctica, Casual o Ranked, con su cabecera y su panel de análisis. */
@@ -189,7 +204,10 @@ function TableScreen() {
               <CasualPanel />
             </div>
           ) : mode === 'player' ? (
-            <PlayerView />
+            <div className="flex flex-col gap-6">
+              <TrainingPanel />
+              <PlayerView />
+            </div>
           ) : (
             <DealerView />
           )}

@@ -3,7 +3,7 @@
 // (que juegan la acción de mayor EV del motor) y el autojuego del dealer.
 import { useCasualStore } from '@/casual/casualStore';
 import { mySeatOf, useRoomsStore } from '@/rooms/roomsStore';
-import { myTurnAsRound } from '@/rooms/view';
+import { myDecisionAsRound } from '@/rooms/view';
 import { useAnalysisStore, type AnalysisKind } from '@/store/analysisStore';
 import { useRulesStore } from '@/store/rulesStore';
 import { useShoeStore } from '@/store/shoeStore';
@@ -75,6 +75,8 @@ function wanted(): Record<AnalysisKind, Built<{ version: number }> | null> {
   if (
     ui.screen === 'home' ||
     ui.screen === 'progress' ||
+    ui.screen === 'stats' ||
+    ui.screen === 'admin' ||
     ui.screen === 'ranked' ||
     ui.screen === 'daily'
   )
@@ -84,7 +86,7 @@ function wanted(): Record<AnalysisKind, Built<{ version: number }> | null> {
     const s = useRoomsStore.getState();
     if (!s.room?.info.aids) return { hand: null, dealer: null, round: null };
     const seat = mySeatOf(s);
-    const turn = seat ? myTurnAsRound(s.room, seat.seat) : null;
+    const turn = seat ? myDecisionAsRound(s.room, seat.seat) : null;
     return {
       hand: turn
         ? buildCasualHandRequest(version, s.room.info.rules, turn)

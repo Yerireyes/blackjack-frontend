@@ -1,5 +1,5 @@
 // De RoundView (lo que manda el servidor) a lo que dibuja la mesa. Funciones puras.
-import type { Card } from '@/domain/cards';
+import { handValue, type Card } from '@/domain/cards';
 import type { CardView, HandOutcome, RoundView } from '@/engine/contract';
 
 /**
@@ -72,3 +72,7 @@ export function cardsOnTable(r: RoundView, shown: number) {
   const m = tableModel(r, shown);
   return m.dealer.length + m.hands.reduce((n, h) => n + h.cards.length, 0);
 }
+
+/** Blackjack natural (dos cartas que suman 21, sin dividir): el seguro se llama «dinero par». */
+export const isNatural = (cards: Pick<Card, 'face'>[], fromSplit: boolean) =>
+  !fromSplit && cards.length === 2 && handValue(cards, false).total === 21;

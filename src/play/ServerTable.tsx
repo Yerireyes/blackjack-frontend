@@ -11,8 +11,9 @@ import { ACTION_KEY, ACTION_LABEL, ACTION_ORDER } from '@/features/player-mode/a
 import { formatChips } from '@/lib/format';
 import { MIN_BET, stackTotal } from '@/store/chipsStore';
 import { useUiStore } from '@/store/uiStore';
+import { InsuranceAsk } from './Insurance';
 import { roundLocked, type RoundState, type RoundStore } from './round';
-import { tableModel } from './view';
+import { isNatural, tableModel } from './view';
 
 const RoundContext = createContext<RoundStore | null>(null);
 
@@ -100,6 +101,8 @@ interface GameProps {
   maxBet: number;
   /** La jugada recomendada por el motor (Casual) o null (Ranked: sin ayudas). */
   best?: Action | null;
+  /** EV del seguro según el motor (Casual, con As visible) o null (sin ayudas). */
+  insuranceEv?: number | null;
   /** Debajo del resultado de la ronda (la revisión en Ranked, la recarga…). */
   after?: ReactNode;
   /** En lugar de las fichas y Repartir, cuando no se puede apostar (sin saldo en Ranked). */
@@ -107,7 +110,14 @@ interface GameProps {
 }
 
 /** La mesa con la última ronda, la apuesta y las acciones. */
-export function Game({ testId, maxBet, best = null, after, betBlocked }: GameProps) {
+export function Game({
+  testId,
+  maxBet,
+  best = null,
+  insuranceEv = null,
+  after,
+  betBlocked,
+}: GameProps) {
   const round = useRound((s) => s.round);
   const shown = useRound((s) => s.shown);
   const stack = useRound((s) => s.stack);
@@ -155,7 +165,9 @@ export function Game({ testId, maxBet, best = null, after, betBlocked }: GamePro
       <div className="flex w-full flex-col items-center gap-3">
         <RoundLine testId={testId} />
         {after}
-        {inPlay ? (
+        {round?.phase === 'insurance' ? (
+          <Insurance testId={testId} ev={insuranceEv} />
+        ) : inPlay ? (
           <Actions best={best} />
         ) : (
           (betBlocked ?? <BetControls testId={testId} maxBet={maxBet} />)
@@ -186,6 +198,8 @@ function RoundLine({ testId }: { testId: string }) {
           ? `Pierdes ${formatChips(-net)} fichas.`
           : 'Empate: recuperas tu apuesta.';
   const refilled = done ? round.result!.refilled : undefined;
+  const insuranceNet = done ? round.result!.insuranceNet : undefined;
+  const insured = round?.insured === true && !done;
 
   return (
     <div className="flex min-h-5 flex-col items-center gap-1 text-center" aria-live="polite">
@@ -198,6 +212,19 @@ function RoundLine({ testId }: { testId: string }) {
           {result}
         </p>
       )}
+      {insured && (
+        <p className="text-xs text-felt-ink" data-testid={`${testId}-insured`}>
+          Seguro tomado: {formatChips(round!.bet / 2)} fichas.
+        </p>
+      )}
+      {insuranceNet !== undefined && (
+        <p
+          className={`text-xs font-medium ${insuranceNet > 0 ? 'text-pos' : 'text-mute'}`}
+          data-testid={`${testId}-insurance-net`}
+        >
+          Seguro: {formatChips(insuranceNet, true)} (ya incluido en el resultado).
+        </p>
+      )}
       {refilled ? (
         <p className="text-sm text-warn" data-testid={`${testId}-refilled`}>
           Se recargó tu saldo a {formatChips(done ? round.wallet.balance : 0)} (+
@@ -205,6 +232,32 @@ function RoundLine({ testId }: { testId: string }) {
         </p>
       ) : null}
     </div>
+  );
+}
+
+/** Con As visible, antes del peek: la pregunta del seguro (o del dinero par). */
+function Insurance({ testId, ev }: { testId: string; ev: number | null }) {
+  const round = useRound((s) => s.round);
+  const busy = useRound((s) => s.busy);
+  const insure = useRound((s) => s.insure);
+  if (!round) return null;
+  const hand = round.player.hands[0];
+  return (
+    <InsuranceAsk
+      natural={
+        !!hand &&
+        isNatural(
+          hand.cards.map((c) => ({ face: c.rank })),
+          hand.fromSplit,
+        )
+      }
+      cost={round.bet / 2}
+      canTake={!!round.allowed.insurance}
+      ev={ev}
+      busy={busy}
+      onDecide={(take) => void insure(take)}
+      testId={testId}
+    />
   );
 }
 

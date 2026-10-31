@@ -54,7 +54,7 @@ export function ReviewDetail({ store, testId }: { store: RoundStore; testId: str
       </div>
       {!round || !review ? (
         <p className="rounded-xl border border-dashed border-ink-700 px-4 py-3 text-sm text-mute">
-          {round?.phase === 'player'
+          {round && round.phase !== 'settled'
             ? 'Juega la mano: la revisión aparece cuando termina.'
             : 'Al terminar cada mano verás aquí tus decisiones comparadas con la óptima.'}
         </p>
@@ -88,7 +88,7 @@ function Streak({ testId }: { testId: string }) {
   );
 }
 
-function ReviewList({
+export function ReviewList({
   review,
   bet,
   many,

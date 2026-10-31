@@ -2,6 +2,7 @@ import {
   ArrowRight,
   Award,
   CalendarDays,
+  ChartNoAxesColumn,
   GraduationCap,
   Settings,
   Spade,
@@ -16,6 +17,7 @@ import { useAccountStore } from '@/account/accountStore';
 import { useCasualStore } from '@/casual/casualStore';
 import { PlayingCard } from '@/components/PlayingCard';
 import { useDailyStore } from '@/daily/dailyStore';
+import { inHand } from '@/play/round';
 import { nextDayIn } from '@/daily/format';
 import { ACHIEVEMENT_IDS, isKnownAchievement } from '@/progress/catalog';
 import { PlayerTitle } from '@/progress/PlayerTitle';
@@ -45,6 +47,7 @@ export function Home() {
     }
   }, []);
   const openSettings = useUiStore((s) => s.setSettingsOpen);
+  const setScreen = useUiStore((s) => s.setScreen);
 
   return (
     <div className="felt home-felt relative flex min-h-dvh flex-col">
@@ -106,6 +109,16 @@ export function Home() {
             <button
               type="button"
               className="btn h-11 gap-2 border-transparent bg-transparent text-felt-ink"
+              onClick={() => setScreen('stats')}
+              data-testid="home-stats"
+            >
+              <ChartNoAxesColumn className="size-4" aria-hidden />
+              Tu juego
+              <span className="hidden text-felt-ink/70 sm:inline">· historial y estadísticas</span>
+            </button>
+            <button
+              type="button"
+              className="btn h-11 gap-2 border-transparent bg-transparent text-felt-ink"
               onClick={() => openSettings(true)}
             >
               <Settings className="size-4" aria-hidden />
@@ -150,7 +163,7 @@ function CasualChoice() {
   const status = useCasualStore((s) => s.status);
   const balance = useCasualStore((s) => s.round?.wallet.balance ?? s.run?.balance ?? null);
   const hands = useCasualStore((s) => s.run?.hands ?? 0);
-  const midHand = useCasualStore((s) => s.round?.phase === 'player');
+  const midHand = useCasualStore((s) => inHand(s.round));
   const setScreen = useUiStore((s) => s.setScreen);
 
   let badge: ReactNode = null;
@@ -271,7 +284,9 @@ function DailyChoice() {
   const openDialog = useAccountStore((s) => s.openDialog);
   const status = useDailyStore((s) => s.status);
   const attempt = useDailyStore((s) => s.attempt);
-  const rank = useDailyStore((s) => (s.boardDay === null ? (s.board?.me?.rank ?? null) : null));
+  const rank = useDailyStore((s) =>
+    s.boardDay === null && s.boardScope === 'all' ? (s.board?.me?.rank ?? null) : null,
+  );
   const midHand = useCasualStore((s) => s.elsewhere === 'daily');
   const setScreen = useUiStore((s) => s.setScreen);
 

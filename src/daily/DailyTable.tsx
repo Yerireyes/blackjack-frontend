@@ -151,7 +151,9 @@ function useNextDay() {
 function useResult() {
   const balance = useDailyStore((s) => s.attempt?.balance ?? 0);
   const hands = useDailyStore((s) => s.attempt?.hands ?? 0);
-  const rank = useDailyStore((s) => (s.boardDay === null ? (s.board?.me?.rank ?? null) : null));
+  const rank = useDailyStore((s) =>
+    s.boardDay === null && s.boardScope === 'all' ? (s.board?.me?.rank ?? null) : null,
+  );
   return { balance, hands, rank };
 }
 

@@ -25,6 +25,7 @@ import {
   type Chip,
   type ChipValue,
 } from '@/store/chipsStore';
+import { useProgressStore } from '@/progress/progressStore';
 import { useShoeStore } from '@/store/shoeStore';
 import { useTableStore } from '@/store/tableStore';
 import { useUiStore } from '@/store/uiStore';
@@ -76,9 +77,13 @@ export interface RoomsState {
   leaveSeat(): void;
   bet(): void;
   act(action: Action): void;
+  /** Con As visible: todos deciden el seguro a la vez. */
+  insure(take: boolean): void;
   rebuy(): void;
   react(reaction: Reaction): void;
   kick(playerId: string): void;
+  /** Solo el anfitrión de una sala de torneo, con 2 o más sentados. */
+  startTournament(): void;
   addChip(value: ChipValue): number | null;
   removeChip(): void;
   clearStack(): void;
@@ -105,6 +110,19 @@ export const myTurnOf = (s: Pick<RoomsState, 'room' | 'me'>) => {
   return !!seat && s.room?.phase === 'playing' && s.room.round?.turn === seat.seat;
 };
 
+/**
+ * Mi seguro en la ronda: `none` si no se ofrece o no juego, `pending` si falta decidirlo,
+ * `taken`/`declined` una vez decidido.
+ */
+export const myInsuranceOf = (s: Pick<RoomsState, 'room' | 'me'>) => {
+  const seat = mySeatOf(s);
+  const r = s.room?.round;
+  const mine = seat && r ? r.seats.find((x) => x.seat === seat.seat) : undefined;
+  if (!mine || !r) return 'none';
+  if (mine.insured === undefined) return r.phase === 'insurance' ? 'pending' : 'none';
+  return mine.insured ? 'taken' : 'declined';
+};
+
 const notify = (text: string, tone: 'info' | 'error' = 'info') =>
   useTableStore.getState().notify(text, tone);
 
@@ -122,6 +140,11 @@ const ERROR_TEXT: Record<string, string | null> = {
   not_your_turn: null,
   action_not_allowed: null,
   rebuy_not_needed: null,
+  not_in_round: null,
+  tournament_running: 'El torneo ya empezó: espera al siguiente.',
+  tournament_no_rebuy: 'En un torneo no se recompra.',
+  not_enough_players: 'Hacen falta al menos 2 jugadores sentados.',
+  not_a_tournament: null,
   rate_limited: null,
   not_host: null,
 };
@@ -203,6 +226,14 @@ export const useRoomsStore = create<RoomsState>()((set, get) => {
       if (justSat && stack.length === 0 && max >= MIN_BET) stack.push(newChip(10));
       while (stack.length > 0 && stackTotal(stack) > max) stack.pop();
       if (stack.length !== get().stack.length || justSat) set({ stack });
+    }
+    // Terminó un torneo: si lo gané, llega el logro de campeón (no viene en una ronda).
+    const t = room.tournament;
+    if (t?.status === 'finished' && prev?.tournament?.status === 'running') {
+      if (t.winner && t.winner.id === get().me) {
+        notify('¡Ganaste el torneo!');
+        useProgressStore.getState().unlockedElsewhere(['tournamentWin']);
+      }
     }
     // Cambió la mesa: el análisis (con ayudas) se recalcula.
     useShoeStore.getState().bump();
@@ -392,6 +423,11 @@ export const useRoomsStore = create<RoomsState>()((set, get) => {
       send({ type: 'action', action });
     },
 
+    insure(take) {
+      if (myInsuranceOf(get()) !== 'pending') return;
+      send({ type: 'insurance', take });
+    },
+
     rebuy: () => send({ type: 'rebuy' }),
 
     react(reaction) {
@@ -403,6 +439,7 @@ export const useRoomsStore = create<RoomsState>()((set, get) => {
     },
 
     kick: (playerId) => send({ type: 'kick', playerId }),
+    startTournament: () => send({ type: 'startTournament' }),
 
     addChip(value) {
       const s = get();

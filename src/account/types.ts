@@ -14,6 +14,8 @@ export interface Me {
   providers: string[];
   /** RFC 3339. */
   createdAt: string;
+  /** Administrador (moderación): ve el panel de reportes y usuarios. */
+  isAdmin: boolean;
 }
 
 export interface Providers {

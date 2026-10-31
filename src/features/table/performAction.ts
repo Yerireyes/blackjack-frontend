@@ -1,5 +1,6 @@
 import { isCurrent, useAnalysisStore } from '@/store/analysisStore';
 import { useRulesStore } from '@/store/rulesStore';
+import { useTrainingStore } from '@/stats/trainingStore';
 import { useSessionStore } from '@/store/sessionStore';
 import { useShoeStore } from '@/store/shoeStore';
 import { playerActions, useTableStore, type PlayerAction } from '@/store/tableStore';
@@ -24,6 +25,7 @@ export function performAction(action: PlayerAction) {
     isCurrent(slot, useShoeStore.getState().version)
   ) {
     useSessionStore.getState().record(action, slot.result);
+    useTrainingStore.getState().record(action, slot.result);
   }
   t.act(action);
 }

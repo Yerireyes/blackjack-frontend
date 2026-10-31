@@ -3,6 +3,7 @@ import { ApiRequestError } from '@/api/http';
 /** Mensaje para mostrar de un error de la API (ya viene en español desde el servidor). */
 export function errorText(e: unknown): string {
   if (!(e instanceof ApiRequestError)) return 'Algo salió mal. Inténtalo de nuevo.';
+  if (e.code === 'account_banned') return 'Tu cuenta está suspendida.';
   if (e.code === 'rate_limited' && e.retryAfter) {
     return `${e.message} Espera ${e.retryAfter} s y vuelve a intentarlo.`;
   }

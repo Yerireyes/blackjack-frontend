@@ -7,6 +7,7 @@ import { formatChips, formatPct } from '@/lib/format';
 import { PlayerTitle } from '@/progress/PlayerTitle';
 import { useAccountStore } from '@/account/accountStore';
 import { casualLocked, useCasualStore } from './casualStore';
+import { ReportButton } from '@/moderation/Report';
 
 const TOP_SHOWN = 10;
 const weekDate = new Intl.DateTimeFormat('es-ES', {
@@ -162,6 +163,7 @@ function BoardRow({
         <PlayerTitle id={title} />
         {isMe && <span className="text-mute"> (tú)</span>}
       </span>
+      {!isMe && <ReportButton name={displayName} />}
       <span className="tabular-nums">{formatChips(value)}</span>
     </li>
   );

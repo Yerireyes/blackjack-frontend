@@ -8,5 +8,8 @@ export const playApi = {
   deal: (body: NewRoundRequest) => request<RoundView>('POST', '/play/rounds', body),
   act: (roundId: string, action: Action, idempotencyKey: string) =>
     request<RoundView>('POST', `/play/rounds/${roundId}/actions`, { action, idempotencyKey }),
+  /** Con un As visible, antes del peek: tomar (`take`) o rechazar el seguro. */
+  insurance: (roundId: string, take: boolean, idempotencyKey: string) =>
+    request<RoundView>('POST', `/play/rounds/${roundId}/insurance`, { take, idempotencyKey }),
   records: () => request<MyRecords>('GET', '/me/records'),
 };
