@@ -1,0 +1,89 @@
+# Lo mismo que se verifica a mano antes de cada PR (typecheck, lint, tests y el build de
+# producción) y, con cada push a main que pasa, el aviso al backend para que despliegue: la
+# imagen de Render compila este repo (rama main) junto con la API.
+#
+# Secreto opcional (Settings → Secrets and variables → Actions):
+# - BACKEND_REPO_TOKEN: token fine-grained sobre Yerireyes/blackjack-backend con Contents:
+#   read and write. Sirve para clonarlo si es privado y para pedir el despliegue
+#   (repository_dispatch frontend-updated). Sin él, el CI corre igual (si el backend es
+#   público) y el despliegue se pide a mano: backend → Actions → Despliegue → Run workflow.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Typecheck, lint, tests y build
+    runs-on: ubuntu-latest
+    steps:
+      # Los dos repos lado a lado, como en desarrollo: el motor se enlaza desde
+      # ../Backend/engine-wasm/pkg.
+      - uses: actions/checkout@v4
+        with:
+          path: Frontend
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/blackjack-backend
+          ref: main
+          path: Backend
+          token: ${{ secrets.BACKEND_REPO_TOKEN || github.token }}
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: Backend
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-pack
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: Frontend/package-lock.json
+      - name: Motor WASM
+        working-directory: Backend
+        run: node scripts/build-wasm.mjs
+      - name: Dependencias
+        working-directory: Frontend
+        run: npm ci --no-audit --no-fund
+      - name: Typecheck
+        working-directory: Frontend
+        run: npm run typecheck
+      - name: Lint
+        working-directory: Frontend
+        run: npm run lint
+      - name: Tests
+        working-directory: Frontend
+        run: npm test
+      - name: Build de producción
+        working-directory: Frontend
+        run: npm run build
+
+  deploy:
+    name: Pedir el despliegue al backend
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      BACKEND_REPO_TOKEN: ${{ secrets.BACKEND_REPO_TOKEN }}
+    steps:
+      - name: repository_dispatch frontend-updated
+        if: env.BACKEND_REPO_TOKEN != ''
+        run: |
+          curl -fsS -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $BACKEND_REPO_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository_owner }}/blackjack-backend/dispatches" \
+            -d '{"event_type":"frontend-updated","client_payload":{"sha":"${{ github.sha }}"}}'
+          echo "Pedido el despliegue de ${{ github.sha }} (backend → Actions → Despliegue)."
+      - name: Sin token, despliegue a mano
+        if: env.BACKEND_REPO_TOKEN == ''
+        run: echo "::notice::Sin BACKEND_REPO_TOKEN no se avisa al backend; despliega desde backend → Actions → Despliegue → Run workflow."
