@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAccountStore } from '@/account/accountStore';
 import type { Me } from '@/account/types';
 import { hashOf, routeFromHash } from '@/app/route';
+import { startSoundSync } from '@/app/sounds';
+import { playSound } from '@/lib/sound';
 import { presetRules } from '@/domain/rules';
 import type { RoomState, ServerMessage, TableRoundView } from '@/engine/contract';
 import { buildCasualHandRequest } from '@/engine/requests';
@@ -21,6 +23,9 @@ import {
   useRoomsStore,
 } from './roomsStore';
 import { dealerModel, myDecisionAsRound, revealStepsOf } from './view';
+
+vi.mock('@/lib/sound', () => ({ playSound: vi.fn(), setVolume: vi.fn() }));
+let stopSounds: (() => void) | undefined;
 
 // ---------- WebSocket simulado ----------
 
@@ -381,5 +386,89 @@ describe('ayudas en la sala', () => {
   it('sin `shoeCounts` (sala sin ayudas) o fuera de mi turno, nada', () => {
     expect(myDecisionAsRound(state({ shoeCounts: undefined }), 1)).toBeNull();
     expect(myDecisionAsRound(state(), 3)).toBeNull();
+  });
+});
+
+describe('sonidos de la sala', () => {
+  const played = () => vi.mocked(playSound).mock.calls.map(([s]) => s);
+  const settled = (outcome: 'win' | 'blackjack', net: number) =>
+    round({
+      phase: 'settled',
+      turn: undefined,
+      dealer: { up: c('K', 'H'), hole: c('5'), hits: [c('2')] },
+      seats: round().seats.map((s) => ({
+        ...s,
+        done: true,
+        net: s.seat === 1 ? net : -20,
+        hands: s.hands.map((h) => ({ ...h, outcome: s.seat === 1 ? outcome : 'lose' })),
+      })),
+    });
+
+  beforeEach(() => {
+    stopSounds ??= startSoundSync();
+    useUiStore.setState({ sound: true });
+    vi.mocked(playSound).mockClear();
+  });
+
+  it('la foto al entrar no suena; después, cada carta nueva, la oculta y mi resultado', () => {
+    vi.useFakeTimers();
+    enter();
+    expect(played()).toEqual([]);
+
+    // Beto pide: una carta en otro asiento.
+    const hit = round();
+    hit.seats[1]!.hands[0]!.cards.push(c('2'));
+    last().receive({ type: 'state', room: state({ round: hit }) });
+    expect(played()).toEqual(['card']);
+
+    // Liquidada: la oculta, la carta del dealer y mi resultado al terminar la revelación.
+    vi.mocked(playSound).mockClear();
+    last().receive({ type: 'state', room: state({ phase: 'results', round: settled('win', 50) }) });
+    expect(played()).toEqual([]);
+    vi.advanceTimersByTime(REVEAL_STEP_MS * 3);
+    expect(played()).toEqual(['flip', 'card', 'win']);
+  });
+
+  it('mirando no suena ningún resultado', () => {
+    vi.useFakeTimers();
+    rs().join('K7Q2XP');
+    last().open();
+    last().receive({ type: 'welcome', playerId: 'p-mirón' });
+    last().receive({ type: 'state', room: state() });
+    last().receive({
+      type: 'state',
+      room: state({ phase: 'results', round: settled('blackjack', 75) }),
+    });
+    vi.advanceTimersByTime(REVEAL_STEP_MS * 3);
+    expect(played()).toEqual(['flip', 'card']);
+  });
+
+  it('suena mi apuesta, no la de los demás', () => {
+    const betting = (mine?: number, beto?: number) =>
+      state({
+        phase: 'betting',
+        round: undefined,
+        seats: state().seats.map((s) =>
+          s.seat === 1 ? { ...s, bet: mine } : s.seat === 3 ? { ...s, bet: beto } : s,
+        ),
+      });
+    enter(betting());
+    last().receive({ type: 'state', room: betting(undefined, 30) });
+    expect(played()).toEqual([]);
+    last().receive({ type: 'state', room: betting(10, 30) });
+    expect(played()).toEqual(['chip']);
+  });
+
+  it('al reconectar, la foto nueva tampoco suena', () => {
+    vi.useFakeTimers();
+    enter();
+    last().drop();
+    vi.advanceTimersByTime(1000);
+    last().open();
+    const hit = round();
+    hit.seats[0]!.hands[0]!.cards.push(c('2'));
+    hit.seats[1]!.hands[0]!.cards.push(c('A'));
+    last().receive({ type: 'state', room: state({ round: hit }) });
+    expect(played()).toEqual([]);
   });
 });

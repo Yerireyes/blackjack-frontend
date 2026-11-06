@@ -184,10 +184,12 @@ export const useRoomsStore = create<RoomsState>()((set, get) => {
     if (useUiStore.getState().screen === 'rooms') useUiStore.getState().openRoom(null);
   };
 
-  /** Anima la revelación del dealer al pasar a `results`: la oculta y cada carta pedida. */
+  /**
+   * Anima la revelación del dealer al pasar a `results`: la oculta y cada carta pedida.
+   * `shown` ya volvió a 0 junto con el `state` (los sonidos comparan los dos a la vez).
+   */
   const startReveal = (steps: number) => {
     if (revealTimer) clearTimeout(revealTimer);
-    set({ shown: 0 });
     if (steps === 0) return;
     const step = () => {
       const shown = get().shown + 1;
@@ -202,30 +204,35 @@ export const useRoomsStore = create<RoomsState>()((set, get) => {
     // Ronda nueva: hay ronda y antes no la había (o se estaba apostando).
     const newRound =
       !!room.round && (!prev?.round || prev.phase === 'betting' || prev.phase === 'waiting');
+    const results = room.phase === 'results' && !!room.round;
+    const steps = room.round ? revealStepsOf(room.round) : 0;
+    const reveal = results && !!prev && prev.phase !== 'results';
+    // Las fichas de la próxima apuesta nunca pasan de lo que permite la pila (solo sentado:
+    // mirando no hay pila). Al sentarse, si no hay fichas puestas, empieza con una de 10.
+    // Van en el mismo cambio que la mesa: recortarlas no suena como retirar fichas.
+    const me = get().me;
+    let stack = get().stack;
+    if (mySeatOf({ room, me })) {
+      const max = maxBetOf({ room, me });
+      const next = stack.slice();
+      const justSat = !prev || !mySeatOf({ room: prev, me });
+      if (justSat && next.length === 0 && max >= MIN_BET) next.push(newChip(10));
+      while (next.length > 0 && stackTotal(next) > max) next.pop();
+      if (next.length !== stack.length || justSat) stack = next;
+    }
     set({
       room,
+      stack,
       receivedAt: performance.now(),
       roundNo: get().roundNo + (newRound ? 1 : 0),
-    });
-    if (room.phase === 'results' && room.round) {
-      const steps = revealStepsOf(room.round);
       // Al entrar con la ronda ya liquidada no hay nada que animar.
-      if (!prev) set({ shown: steps });
-      else if (prev.phase !== 'results') startReveal(steps);
+      ...(results && !prev ? { shown: steps } : reveal ? { shown: 0 } : {}),
+    });
+    if (results) {
+      if (reveal) startReveal(steps);
     } else if (revealTimer) {
       clearTimeout(revealTimer);
       revealTimer = null;
-    }
-    // Las fichas de la próxima apuesta nunca pasan de lo que permite la pila (solo sentado:
-    // mirando no hay pila). Al sentarse, si no hay fichas puestas, empieza con una de 10.
-    const seat = mySeatOf(get());
-    if (seat) {
-      const max = maxBetOf(get());
-      const stack = get().stack.slice();
-      const justSat = !prev || !mySeatOf({ room: prev, me: get().me });
-      if (justSat && stack.length === 0 && max >= MIN_BET) stack.push(newChip(10));
-      while (stack.length > 0 && stackTotal(stack) > max) stack.pop();
-      if (stack.length !== get().stack.length || justSat) set({ stack });
     }
     // Terminó un torneo: si lo gané, llega el logro de campeón (no viene en una ronda).
     const t = room.tournament;

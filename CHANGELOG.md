@@ -95,6 +95,9 @@ versiones según [SemVer](https://semver.org/lang/es/) (en 0.x, una versión men
 
 ### Corregido
 
+- En las salas no sonaba nada. Ahora suenan las cartas nuevas de cualquier asiento y del
+  dealer, la oculta al voltearse, tus fichas y tu apuesta, y tu resultado al terminar la
+  revelación. La foto de la mesa al entrar o al reconectar no suena.
 - `npm run dev` no servía el WASM del motor (403: el paquete se enlaza desde el backend, fuera
   de la carpeta del front) y no había análisis en Práctica ni en Casual.
 
